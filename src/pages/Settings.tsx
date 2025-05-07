@@ -20,8 +20,7 @@ const Settings = () => {
     e.preventDefault();
     
     if (!webhookUrl) {
-      toast({
-        title: "Erreur",
+      toast("Erreur", {
         description: "Veuillez saisir l'URL du webhook n8n",
         variant: "destructive",
       });
@@ -48,14 +47,12 @@ const Settings = () => {
 
       // Comme nous utilisons no-cors, nous ne recevrons pas de statut de réponse
       // Nous affichons donc un message informatif
-      toast({
-        title: "Requête envoyée",
+      toast("Requête envoyée", {
         description: "La requête a été envoyée à n8n. Veuillez vérifier l'historique de votre workflow pour confirmer son déclenchement.",
       });
     } catch (error) {
       console.error("Erreur lors du déclenchement du webhook:", error);
-      toast({
-        title: "Erreur",
+      toast("Erreur", {
         description: "Échec du déclenchement du webhook n8n. Veuillez vérifier l'URL et réessayer.",
         variant: "destructive",
       });
@@ -66,8 +63,7 @@ const Settings = () => {
 
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Paramètres enregistrés",
+    toast("Paramètres enregistrés", {
       description: "Vos paramètres ont été enregistrés avec succès.",
     });
   };
