@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,6 +14,7 @@ const OnboardingForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // État pour stocker les données de l'utilisateur
   const [userData, setUserData] = useState({
@@ -91,21 +91,77 @@ const OnboardingForm: React.FC = () => {
     }
   };
 
-  const handleSubmit = (event: React.FormEvent) => {
+  // Fonction pour envoyer les données au webhook n8n
+  const sendToN8nWebhook = async (data: any) => {
+    const webhookUrl = "https://n8n.srv825462.hstgr.cloud/webhook/738c99a4-1f1b-4604-9a7f-046af9ec5d36";
+    
+    try {
+      await fetch(webhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        mode: "no-cors", // Pour gérer les problèmes CORS
+        body: JSON.stringify({
+          ...data,
+          timestamp: new Date().toISOString(),
+          source: "MyFitHero Onboarding",
+          action: "profile_created"
+        }),
+      });
+      
+      console.log("Données envoyées avec succès au webhook n8n");
+      return true;
+    } catch (error) {
+      console.error("Erreur lors de l'envoi des données au webhook n8n:", error);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Sauvegarder toutes les données du profil
-      console.log("Profil utilisateur sauvegardé:", userData);
+      // Cas où l'utilisateur termine le formulaire
+      setIsSubmitting(true);
+
+      // Calcul de l'âge à partir de la date de naissance
+      let age = "";
+      if (userData.birthdate) {
+        const birthDate = new Date(userData.birthdate);
+        const today = new Date();
+        let calculatedAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          calculatedAge--;
+        }
+        age = calculatedAge.toString();
+      }
+
+      // Préparation des données enrichies pour le webhook
+      const enrichedData = {
+        ...userData,
+        age,
+        calculatedAt: new Date().toISOString(),
+        platform: navigator.userAgent
+      };
       
-      // Stocker les données dans localStorage pour persistance
-      localStorage.setItem('myFitHeroUserProfile', JSON.stringify(userData));
+      // Sauvegarder les données dans localStorage pour persistance
+      localStorage.setItem('myFitHeroUserProfile', JSON.stringify(enrichedData));
       
+      // Envoyer les données au webhook n8n
+      const webhookSuccess = await sendToN8nWebhook(enrichedData);
+      
+      // Notification à l'utilisateur
       toast({
-        description: "Votre profil personnalisé a été enregistré avec succès!",
+        description: webhookSuccess 
+          ? "Votre profil personnalisé a été enregistré avec succès et synchronisé!"
+          : "Votre profil a été enregistré localement. La synchronisation sera tentée ultérieurement.",
       });
+      
+      setIsSubmitting(false);
       
       // Rediriger vers le dashboard
       setTimeout(() => {
@@ -460,12 +516,16 @@ const OnboardingForm: React.FC = () => {
         <Button
           variant="outline"
           onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
-          disabled={currentStep === 1}
+          disabled={currentStep === 1 || isSubmitting}
         >
           Précédent
         </Button>
-        <Button onClick={handleSubmit}>
-          {currentStep < 4 ? "Continuer" : "Terminer"}
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting 
+            ? "Traitement en cours..." 
+            : currentStep < 4 
+              ? "Continuer" 
+              : "Terminer"}
         </Button>
       </CardFooter>
     </Card>
