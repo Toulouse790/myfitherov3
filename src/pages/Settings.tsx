@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,8 +20,7 @@ const Settings = () => {
     
     if (!webhookUrl) {
       toast("Erreur", {
-        description: "Veuillez saisir l'URL du webhook n8n",
-        variant: "destructive",
+        description: "Veuillez saisir l'URL du webhook n8n"
       });
       return;
     }
@@ -48,13 +46,12 @@ const Settings = () => {
       // Comme nous utilisons no-cors, nous ne recevrons pas de statut de réponse
       // Nous affichons donc un message informatif
       toast("Requête envoyée", {
-        description: "La requête a été envoyée à n8n. Veuillez vérifier l'historique de votre workflow pour confirmer son déclenchement.",
+        description: "La requête a été envoyée à n8n. Veuillez vérifier l'historique de votre workflow pour confirmer son déclenchement."
       });
     } catch (error) {
       console.error("Erreur lors du déclenchement du webhook:", error);
       toast("Erreur", {
-        description: "Échec du déclenchement du webhook n8n. Veuillez vérifier l'URL et réessayer.",
-        variant: "destructive",
+        description: "Échec du déclenchement du webhook n8n. Veuillez vérifier l'URL et réessayer."
       });
     } finally {
       setIsLoading(false);
@@ -64,7 +61,7 @@ const Settings = () => {
   const handleSaveSettings = (e: React.FormEvent) => {
     e.preventDefault();
     toast("Paramètres enregistrés", {
-      description: "Vos paramètres ont été enregistrés avec succès.",
+      description: "Vos paramètres ont été enregistrés avec succès."
     });
   };
 
