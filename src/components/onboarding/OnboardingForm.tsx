@@ -9,21 +9,108 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const OnboardingForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  // État pour stocker les données de l'utilisateur
+  const [userData, setUserData] = useState({
+    // Étape 1 : Informations personnelles
+    firstName: "",
+    lastName: "",
+    email: "",
+    birthdate: "",
+    gender: "male",
+    // Étape 2 : Mensurations et niveau
+    height: "",
+    weight: "",
+    experienceLevel: "intermediate",
+    frequency: "3-4",
+    // Étape 3 : Objectifs
+    mainGoal: "strength",
+    sports: [] as string[],
+    // Étape 4 : Préférences et contraintes
+    availableDays: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
+    equipment: {
+      home: true,
+      gym: true
+    },
+    dietaryRestrictions: [] as string[],
+    notifications: true
+  });
+
+  // Gérer les changements de valeur pour tous les champs
+  const handleInputChange = (field: string, value: any) => {
+    setUserData((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Gérer les changements pour les tableaux (comme les sports)
+  const handleArrayChange = (field: string, item: string, checked: boolean) => {
+    if (checked) {
+      setUserData((prev) => ({
+        ...prev,
+        [field]: [...prev[field as keyof typeof prev] as string[], item]
+      }));
+    } else {
+      setUserData((prev) => ({
+        ...prev,
+        [field]: (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
+      }));
+    }
+  };
+
+  // Gérer les changements pour les objets imbriqués (comme l'équipement)
+  const handleNestedChange = (field: string, key: string, value: boolean) => {
+    setUserData((prev) => ({
+      ...prev,
+      [field]: {
+        ...prev[field as keyof typeof prev] as Record<string, boolean>,
+        [key]: value
+      }
+    }));
+  };
+
+  // Fonction pour gérer la disponibilité des jours
+  const handleDayChange = (day: string, checked: boolean) => {
+    if (checked) {
+      setUserData(prev => ({
+        ...prev,
+        availableDays: [...prev.availableDays, day]
+      }));
+    } else {
+      setUserData(prev => ({
+        ...prev,
+        availableDays: prev.availableDays.filter(d => d !== day)
+      }));
+    }
+  };
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
+      // Sauvegarder toutes les données du profil
+      console.log("Profil utilisateur sauvegardé:", userData);
+      
+      // Stocker les données dans localStorage pour persistance
+      localStorage.setItem('myFitHeroUserProfile', JSON.stringify(userData));
+      
       toast({
-        title: "Profil créé avec succès!",
-        description: "Votre profil personnalisé a été enregistré.",
+        description: "Votre profil personnalisé a été enregistré avec succès!",
       });
-      // Redirect to dashboard or home
+      
+      // Rediriger vers le dashboard
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 1500);
     }
   };
 
@@ -69,28 +156,57 @@ const OnboardingForm: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="firstName">Prénom</Label>
-                  <Input id="firstName" placeholder="Entrez votre prénom" required />
+                  <Input 
+                    id="firstName" 
+                    placeholder="Entrez votre prénom" 
+                    required 
+                    value={userData.firstName}
+                    onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Nom</Label>
-                  <Input id="lastName" placeholder="Entrez votre nom" required />
+                  <Input 
+                    id="lastName" 
+                    placeholder="Entrez votre nom" 
+                    required 
+                    value={userData.lastName}
+                    onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  />
                 </div>
               </div>
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="votre@email.com" required />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="votre@email.com" 
+                    required 
+                    value={userData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="birthdate">Date de naissance</Label>
-                  <Input id="birthdate" type="date" required />
+                  <Input 
+                    id="birthdate" 
+                    type="date" 
+                    required 
+                    value={userData.birthdate}
+                    onChange={(e) => handleInputChange('birthdate', e.target.value)}
+                  />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <Label>Genre</Label>
-                <RadioGroup defaultValue="male" className="flex space-x-4">
+                <RadioGroup 
+                  value={userData.gender} 
+                  onValueChange={(value) => handleInputChange('gender', value)}
+                  className="flex space-x-4"
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="male" id="male" />
                     <Label htmlFor="male">Homme</Label>
@@ -115,15 +231,36 @@ const OnboardingForm: React.FC = () => {
               <div className="grid grid-cols-3 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="height">Taille (cm)</Label>
-                  <Input id="height" type="number" min="100" max="250" placeholder="175" required />
+                  <Input 
+                    id="height" 
+                    type="number" 
+                    min="100" 
+                    max="250" 
+                    placeholder="175" 
+                    required 
+                    value={userData.height}
+                    onChange={(e) => handleInputChange('height', e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="weight">Poids (kg)</Label>
-                  <Input id="weight" type="number" min="30" max="300" placeholder="70" required />
+                  <Input 
+                    id="weight" 
+                    type="number" 
+                    min="30" 
+                    max="300" 
+                    placeholder="70" 
+                    required 
+                    value={userData.weight}
+                    onChange={(e) => handleInputChange('weight', e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="experience">Niveau</Label>
-                  <Select defaultValue="intermediate">
+                  <Select 
+                    value={userData.experienceLevel} 
+                    onValueChange={(value) => handleInputChange('experienceLevel', value)}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Choisissez votre niveau" />
                     </SelectTrigger>
@@ -138,7 +275,11 @@ const OnboardingForm: React.FC = () => {
               
               <div className="space-y-2">
                 <Label>Fréquence d'activité actuelle</Label>
-                <RadioGroup defaultValue="3-4" className="grid grid-cols-2 gap-2">
+                <RadioGroup 
+                  value={userData.frequency}
+                  onValueChange={(value) => handleInputChange('frequency', value)}
+                  className="grid grid-cols-2 gap-2"
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="0-1" id="freq-0-1" />
                     <Label htmlFor="freq-0-1">0-1 fois par semaine</Label>
@@ -166,7 +307,11 @@ const OnboardingForm: React.FC = () => {
               
               <div className="space-y-2">
                 <Label>Objectif principal</Label>
-                <RadioGroup defaultValue="strength" className="grid grid-cols-2 gap-2">
+                <RadioGroup 
+                  value={userData.mainGoal}
+                  onValueChange={(value) => handleInputChange('mainGoal', value)} 
+                  className="grid grid-cols-2 gap-2"
+                >
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="muscle" id="goal-muscle" />
                     <Label htmlFor="goal-muscle">Prise de masse musculaire</Label>
@@ -197,7 +342,13 @@ const OnboardingForm: React.FC = () => {
                     <div className="grid grid-cols-2 gap-2">
                       {["Football", "Basketball", "Handball", "Rugby", "Volleyball", "Hockey"].map((sport) => (
                         <div key={sport} className="flex items-center space-x-2">
-                          <Checkbox id={sport.toLowerCase()} />
+                          <Checkbox 
+                            id={sport.toLowerCase()} 
+                            checked={userData.sports.includes(sport)}
+                            onCheckedChange={(checked) => 
+                              handleArrayChange('sports', sport, checked as boolean)
+                            }
+                          />
                           <Label htmlFor={sport.toLowerCase()}>{sport}</Label>
                         </div>
                       ))}
@@ -207,7 +358,13 @@ const OnboardingForm: React.FC = () => {
                     <div className="grid grid-cols-2 gap-2">
                       {["Course à pied", "Natation", "Cyclisme", "Tennis", "Athlétisme", "Arts martiaux"].map((sport) => (
                         <div key={sport} className="flex items-center space-x-2">
-                          <Checkbox id={sport.toLowerCase().replace(/\s+/g, '-')} />
+                          <Checkbox 
+                            id={sport.toLowerCase().replace(/\s+/g, '-')}
+                            checked={userData.sports.includes(sport)}
+                            onCheckedChange={(checked) => 
+                              handleArrayChange('sports', sport, checked as boolean)
+                            }
+                          />
                           <Label htmlFor={sport.toLowerCase().replace(/\s+/g, '-')}>{sport}</Label>
                         </div>
                       ))}
@@ -227,7 +384,11 @@ const OnboardingForm: React.FC = () => {
                 <div className="grid grid-cols-4 gap-2">
                   {["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].map((day) => (
                     <div key={day} className="flex items-center space-x-2">
-                      <Checkbox id={day.toLowerCase()} defaultChecked />
+                      <Checkbox 
+                        id={day.toLowerCase()}
+                        checked={userData.availableDays.includes(day)}
+                        onCheckedChange={(checked) => handleDayChange(day, checked as boolean)}
+                      />
                       <Label htmlFor={day.toLowerCase()}>{day}</Label>
                     </div>
                   ))}
@@ -238,11 +399,23 @@ const OnboardingForm: React.FC = () => {
                 <Label>Équipement disponible</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="home" defaultChecked />
+                    <Checkbox 
+                      id="home" 
+                      checked={userData.equipment.home}
+                      onCheckedChange={(checked) => 
+                        handleNestedChange('equipment', 'home', checked as boolean)
+                      }
+                    />
                     <Label htmlFor="home">Matériel à domicile</Label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="gym" defaultChecked />
+                    <Checkbox 
+                      id="gym" 
+                      checked={userData.equipment.gym}
+                      onCheckedChange={(checked) => 
+                        handleNestedChange('equipment', 'gym', checked as boolean)
+                      }
+                    />
                     <Label htmlFor="gym">Salle de sport</Label>
                   </div>
                 </div>
@@ -253,7 +426,13 @@ const OnboardingForm: React.FC = () => {
                 <div className="grid grid-cols-2 gap-2">
                   {["Végétarien", "Végétalien", "Sans gluten", "Sans lactose"].map((restriction) => (
                     <div key={restriction} className="flex items-center space-x-2">
-                      <Checkbox id={restriction.toLowerCase().replace(/\s+/g, '-')} />
+                      <Checkbox 
+                        id={restriction.toLowerCase().replace(/\s+/g, '-')}
+                        checked={userData.dietaryRestrictions.includes(restriction)}
+                        onCheckedChange={(checked) => 
+                          handleArrayChange('dietaryRestrictions', restriction, checked as boolean)
+                        }
+                      />
                       <Label htmlFor={restriction.toLowerCase().replace(/\s+/g, '-')}>{restriction}</Label>
                     </div>
                   ))}
@@ -263,7 +442,13 @@ const OnboardingForm: React.FC = () => {
               <div className="space-y-2">
                 <Label>Communication</Label>
                 <div className="flex items-center space-x-2">
-                  <Checkbox id="notifications" defaultChecked />
+                  <Checkbox 
+                    id="notifications" 
+                    checked={userData.notifications}
+                    onCheckedChange={(checked) => 
+                      handleInputChange('notifications', checked)
+                    }
+                  />
                   <Label htmlFor="notifications">Recevoir des notifications personnalisées</Label>
                 </div>
               </div>
