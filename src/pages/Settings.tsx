@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,7 +10,7 @@ import { toast } from '@/components/ui/sonner';
 
 const Settings = () => {
   const [webhookUrl, setWebhookUrl] = useState<string>(
-    "https://directionlalune.app.n8n.cloud/webhook-test/738c99a4-1f1b-4604-9a7f-046af9ec5d36"
+    "https://n8n.srv825462.hstgr.cloud/webhook/738c99a4-1f1b-4604-9a7f-046af9ec5d36"
   );
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState<boolean>(false);
