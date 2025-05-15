@@ -13,7 +13,6 @@ export const sendToN8nWebhook = async (data: any): Promise<boolean> => {
       headers: {
         "Content-Type": "application/json",
       },
-      mode: "no-cors", // For handling CORS issues
       body: JSON.stringify({
         ...data,
         timestamp: new Date().toISOString(),
