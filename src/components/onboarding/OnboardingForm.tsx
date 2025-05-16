@@ -1,11 +1,9 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-// Import refactored components
 import ProgressBar from './ProgressBar';
 import Step1PersonalInfo from './Step1PersonalInfo';
 import Step2Measurements from './Step2Measurements';
@@ -20,117 +18,87 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // State to store user data
   const [userData, setUserData] = useState<UserData>({
-    // Step 1: Personal Information
     firstName: "",
     lastName: "",
     email: "",
     birthdate: "",
     gender: "male",
-    // Step 2: Measurements and Level
     height: "",
     weight: "",
     experienceLevel: "intermediate",
     frequency: "3-4",
-    // Step 3: Goals
     mainGoal: "strength",
-    sports: [] as string[],
-    // Step 4: Preferences and Constraints
+    sports: [],
     availableDays: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
     equipment: {
-      home: true,
+      home: false,
       gym: true
     },
-    dietaryRestrictions: [] as string[],
+    dietaryRestrictions: [],
     notifications: true
   });
 
-  // Handle changes for all fields
   const handleInputChange = (field: string, value: any) => {
+    setUserData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleArrayChange = (field: string, item: string, checked: boolean) => {
     setUserData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: checked
+        ? [...(prev[field as keyof typeof prev] as string[]), item]
+        : (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
     }));
   };
 
-  // Handle changes for arrays (like sports)
-  const handleArrayChange = (field: string, item: string, checked: boolean) => {
-    if (checked) {
-      setUserData((prev) => ({
-        ...prev,
-        [field]: [...prev[field as keyof typeof prev] as string[], item]
-      }));
-    } else {
-      setUserData((prev) => ({
-        ...prev,
-        [field]: (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
-      }));
-    }
-  };
-
-  // Handle changes for nested objects (like equipment)
   const handleNestedChange = (field: string, key: string, value: boolean) => {
     setUserData((prev) => ({
       ...prev,
       [field]: {
-        ...prev[field as keyof typeof prev] as Record<string, boolean>,
+        ...(prev[field as keyof typeof prev] as Record<string, boolean>),
         [key]: value
       }
     }));
   };
 
-  // Handle day availability changes
   const handleDayChange = (day: string, checked: boolean) => {
-    if (checked) {
-      setUserData(prev => ({
-        ...prev,
-        availableDays: [...prev.availableDays, day]
-      }));
-    } else {
-      setUserData(prev => ({
-        ...prev,
-        availableDays: prev.availableDays.filter(d => d !== day)
-      }));
-    }
+    setUserData(prev => ({
+      ...prev,
+      availableDays: checked
+        ? [...prev.availableDays, day]
+        : prev.availableDays.filter(d => d !== day)
+    }));
   };
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
     if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     } else {
-      // Final step - user completes the form
       setIsSubmitting(true);
 
-      // Calculate age from birthdate
       const age = calculateAge(userData.birthdate);
-
-      // Prepare enriched data for the webhook
       const enrichedData = {
         ...userData,
         age,
         calculatedAt: new Date().toISOString(),
         platform: navigator.userAgent
       };
-      
-      // Save data to localStorage for persistence
+
       localStorage.setItem('myFitHeroUserProfile', JSON.stringify(enrichedData));
-      
-      // Send data to n8n webhook
-      const webhookSuccess = await sendToN8nWebhook(enrichedData);
-      
-      // Notify user
+
+      const success = await sendToN8nWebhook(enrichedData);
+
       toast({
-        description: webhookSuccess 
-          ? "Votre profil personnalisé a été enregistré avec succès et synchronisé!"
-          : "Votre profil a été enregistré localement. La synchronisation sera tentée ultérieurement.",
+        description: success
+          ? "Votre profil a été enregistré"
+          : "Une erreur est survenue. Les données ont été enregistrées localement."
       });
-      
+
       setIsSubmitting(false);
-      
-      // Redirect to dashboard
+
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
@@ -150,9 +118,9 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {currentStep === 1 && (
-            <Step1PersonalInfo 
-              userData={userData} 
-              handleInputChange={handleInputChange} 
+            <Step1PersonalInfo
+              userData={userData}
+              handleInputChange={handleInputChange}
             />
           )}
 
@@ -180,24 +148,26 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
               handleDayChange={handleDayChange}
             />
           )}
+
+          <CardFooter className="flex justify-between pt-4 border-t">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setCurrentStep(currentStep - 1)}
+              disabled={currentStep === 1 || isSubmitting}
+            >
+              Précédent
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting
+                ? "Envoi..."
+                : currentStep < 4
+                ? "Continuer"
+                : "Terminer"}
+            </Button>
+          </CardFooter>
         </form>
       </CardContent>
-      <CardFooter className="flex justify-between border-t p-6">
-        <Button
-          variant="outline"
-          onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
-          disabled={currentStep === 1 || isSubmitting}
-        >
-          Précédent
-        </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting 
-            ? "Traitement en cours..." 
-            : currentStep < 4 
-              ? "Continuer" 
-              : "Terminer"}
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
