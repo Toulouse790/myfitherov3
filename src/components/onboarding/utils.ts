@@ -1,10 +1,9 @@
-
-export const sendToN8nWebhook = async (data: any): Promise<boolean> => {
+export async function sendToN8nWebhook(data: any): Promise<boolean> {
   const webhookUrl = "https://n8n.srv825462.hstgr.cloud/webhook/formulaire-onboarding";
 
   try {
     const response = await fetch(webhookUrl, {
-      method: "POST", // ← bien POST, pas GET
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
@@ -16,27 +15,27 @@ export const sendToN8nWebhook = async (data: any): Promise<boolean> => {
       }),
     });
 
-    if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+    if (!response.ok) {
+      console.error("Erreur lors de l’envoi à n8n :", await response.text());
+      return false;
+    }
 
-    console.log("✅ Données envoyées avec succès à n8n");
     return true;
   } catch (error) {
-    console.error("❌ Erreur lors de l'envoi au webhook :", error);
+    console.error("Échec envoi webhook :", error);
     return false;
   }
-};
+}
 
-export const calculateAge = (birthdate: string): number => {
-  if (!birthdate) return 0;
-  
+export function calculateAge(birthdate: string): number {
+  const birth = new Date(birthdate);
   const today = new Date();
-  const birthDate = new Date(birthdate);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-  
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
     age--;
   }
-  
+
   return age;
-};
+}
