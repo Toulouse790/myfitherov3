@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
 
-import ProgressBar from './ProgressBar';
-import Step1PersonalInfo from './Step1PersonalInfo';
-import Step2Measurements from './Step2Measurements';
-import Step3Goals from './Step3Goals';
-import Step4Preferences from './Step4Preferences';
-import { UserData, OnboardingFormProps } from './types';
-import { calculateAge } from './utils';
+export function calculateAge(birthdate: string): number {
+  const today = new Date();
+  const birthdateObj = new Date(birthdate);
+  let age = today.getFullYear() - birthdateObj.getFullYear();
+  const monthDifference = today.getMonth() - birthdateObj.getMonth();
+  
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthdateObj.getDate())) {
+    age--;
+  }
+  
+  return age;
+}
 
-async function sendToSupabase(data: any): Promise<boolean> {
+export async function sendToSupabase(data: any): Promise<boolean> {
   const SUPABASE_URL = "https://otpimqedxtwpuvbvdxhz.supabase.co";
   const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGltcWVkeHR3cHV2YnZkeGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzk2NzEsImV4cCI6MjA2Mjk1NTY3MX0.mJ-rhSsKJc9ySQnqFq12v4A_Mc05ktdoBWyvGqtifxQ";
 
@@ -41,172 +41,27 @@ async function sendToSupabase(data: any): Promise<boolean> {
   }
 }
 
-const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
-  const [currentStep, setCurrentStep] = useState(initialStep);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [userData, setUserData] = useState<UserData>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    birthdate: "",
-    gender: "male",
-    height: "",
-    weight: "",
-    experienceLevel: "intermediate",
-    frequency: "3-4",
-    mainGoal: "strength",
-    sports: [],
-    availableDays: ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
-    equipment: {
-      home: true,
-      gym: true
-    },
-    dietaryRestrictions: [],
-    notifications: true
-  });
-
-  const handleInputChange = (field: string, value: any) => {
-    setUserData((prev) => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleArrayChange = (field: string, item: string, checked: boolean) => {
-    if (checked) {
-      setUserData((prev) => ({
-        ...prev,
-        [field]: [...(prev[field as keyof typeof prev] as string[]), item]
-      }));
-    } else {
-      setUserData((prev) => ({
-        ...prev,
-        [field]: (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
-      }));
+// Function to send data to the new n8n webhook URL
+export async function sendToN8nWebhook(data: any): Promise<boolean> {
+  const N8N_WEBHOOK_URL = "https://n8n.srv825462.hstgr.cloud/webhook/formulaire-onboarding";
+  
+  try {
+    const response = await fetch(N8N_WEBHOOK_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      console.error("Échec envoi webhook :", await response.text());
+      return false;
     }
-  };
-
-  const handleNestedChange = (field: string, key: string, value: boolean) => {
-    setUserData((prev) => ({
-      ...prev,
-      [field]: {
-        ...(prev[field as keyof typeof prev] as Record<string, boolean>),
-        [key]: value
-      }
-    }));
-  };
-
-  const handleDayChange = (day: string, checked: boolean) => {
-    if (checked) {
-      setUserData(prev => ({
-        ...prev,
-        availableDays: [...prev.availableDays, day]
-      }));
-    } else {
-      setUserData(prev => ({
-        ...prev,
-        availableDays: prev.availableDays.filter(d => d !== day)
-      }));
-    }
-  };
-
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setIsSubmitting(true);
-      const age = calculateAge(userData.birthdate);
-      const enrichedData = {
-        ...userData,
-        age,
-        calculatedAt: new Date().toISOString(),
-        platform: navigator.userAgent
-      };
-
-      localStorage.setItem('myFitHeroUserProfile', JSON.stringify(enrichedData));
-      const webhookSuccess = await sendToSupabase(enrichedData);
-
-      toast({
-        description: webhookSuccess 
-          ? "Votre profil personnalisé a été enregistré!"
-          : "Votre profil a été enregistré localement. La synchronisation sera tentée ultérieurement."
-      });
-
-      setIsSubmitting(false);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    }
-  };
-
-  return (
-    <Card className="w-full max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl">Bienvenue sur MyFitHero</CardTitle>
-        <CardDescription>
-          Créez votre profil personnalisé pour obtenir un programme sur mesure
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <ProgressBar currentStep={currentStep} totalSteps={4} />
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {currentStep === 1 && (
-            <Step1PersonalInfo 
-              userData={userData} 
-              handleInputChange={handleInputChange} 
-            />
-          )}
-
-          {currentStep === 2 && (
-            <Step2Measurements
-              userData={userData}
-              handleInputChange={handleInputChange}
-            />
-          )}
-
-          {currentStep === 3 && (
-            <Step3Goals
-              userData={userData}
-              handleInputChange={handleInputChange}
-              handleArrayChange={handleArrayChange}
-            />
-          )}
-
-          {currentStep === 4 && (
-            <Step4Preferences
-              userData={userData}
-              handleInputChange={handleInputChange}
-              handleArrayChange={handleArrayChange}
-              handleNestedChange={handleNestedChange}
-              handleDayChange={handleDayChange}
-            />
-          )}
-        </form>
-      </CardContent>
-      <CardFooter className="flex justify-between border-t p-6">
-        <Button
-          variant="outline"
-          onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
-          disabled={currentStep === 1 || isSubmitting}
-        >
-          Précédent
-        </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting 
-            ? "Traitement en cours..." 
-            : currentStep < 4 
-              ? "Continuer" 
-              : "Terminer"}
-        </Button>
-      </CardFooter>
-    </Card>
-  );
-};
-
-export default OnboardingForm;
+    
+    return true;
+  } catch (error) {
+    console.error("Échec envoi webhook :", error);
+    return false;
+  }
+}
