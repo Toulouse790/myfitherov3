@@ -1,3 +1,4 @@
+
 // === FONCTION : calcul de l'âge ===
 export function calculateAge(birthdate: string): number {
   const birth = new Date(birthdate);
@@ -40,6 +41,9 @@ export async function sendToSupabase(userData: any): Promise<boolean> {
   const SUPABASE_API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGltcWVkeHR3cHV2YnZkeGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzk2NzEsImV4cCI6MjA2Mjk1NTY3MX0.mJ-rhSsKJc9ySQnqFq12v4A_Mc05ktdoBWyvGqtifxQ";
 
   try {
+    // On supprime la propriété 'age' car la table n'a pas cette colonne
+    const { age, ...dataWithoutAge } = userData;
+    
     const response = await fetch(`${SUPABASE_URL}/rest/v1/utilisateurs`, {
       method: "POST",
       headers: {
@@ -48,7 +52,7 @@ export async function sendToSupabase(userData: any): Promise<boolean> {
         Authorization: `Bearer ${SUPABASE_API_KEY}`,
         Prefer: "return=minimal"
       },
-      body: JSON.stringify(userData),
+      body: JSON.stringify(dataWithoutAge),
     });
 
     if (response.ok) {
@@ -63,4 +67,3 @@ export async function sendToSupabase(userData: any): Promise<boolean> {
     return false;
   }
 }
-
