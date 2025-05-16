@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,24 +40,16 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
   });
 
   const handleInputChange = (field: string, value: any) => {
-    setUserData((prev) => ({
-      ...prev,
-      [field]: value
-    }));
+    setUserData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleArrayChange = (field: string, item: string, checked: boolean) => {
-    if (checked) {
-      setUserData((prev) => ({
-        ...prev,
-        [field]: [...(prev[field as keyof typeof prev] as string[]), item]
-      }));
-    } else {
-      setUserData((prev) => ({
-        ...prev,
-        [field]: (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
-      }));
-    }
+    setUserData((prev) => ({
+      ...prev,
+      [field]: checked
+        ? [...(prev[field as keyof typeof prev] as string[]), item]
+        : (prev[field as keyof typeof prev] as string[]).filter(i => i !== item)
+    }));
   };
 
   const handleNestedChange = (field: string, key: string, value: boolean) => {
@@ -72,17 +63,12 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
   };
 
   const handleDayChange = (day: string, checked: boolean) => {
-    if (checked) {
-      setUserData(prev => ({
-        ...prev,
-        availableDays: [...prev.availableDays, day]
-      }));
-    } else {
-      setUserData(prev => ({
-        ...prev,
-        availableDays: prev.availableDays.filter(d => d !== day)
-      }));
-    }
+    setUserData(prev => ({
+      ...prev,
+      availableDays: checked
+        ? [...prev.availableDays, day]
+        : prev.availableDays.filter(d => d !== day)
+    }));
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -93,6 +79,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
     } else {
       setIsSubmitting(true);
       const age = calculateAge(userData.birthdate);
+
       const enrichedData = {
         ...userData,
         age,
@@ -101,20 +88,17 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
       };
 
       localStorage.setItem('myFitHeroUserProfile', JSON.stringify(enrichedData));
-      
-      // Try n8n webhook first, fallback to Supabase
+
       const webhookSuccess = await sendToN8nWebhook(enrichedData) || await sendToSupabase(enrichedData);
 
       toast({
-        description: webhookSuccess 
+        description: webhookSuccess
           ? "Votre profil personnalisé a été enregistré!"
           : "Votre profil a été enregistré localement. La synchronisation sera tentée ultérieurement."
       });
 
       setIsSubmitting(false);
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
+      setTimeout(() => navigate('/dashboard'), 1500);
     }
   };
 
@@ -131,35 +115,16 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {currentStep === 1 && (
-            <Step1PersonalInfo 
-              userData={userData} 
-              handleInputChange={handleInputChange} 
-            />
+            <Step1PersonalInfo userData={userData} handleInputChange={handleInputChange} />
           )}
-
           {currentStep === 2 && (
-            <Step2Measurements
-              userData={userData}
-              handleInputChange={handleInputChange}
-            />
+            <Step2Measurements userData={userData} handleInputChange={handleInputChange} />
           )}
-
           {currentStep === 3 && (
-            <Step3Goals
-              userData={userData}
-              handleInputChange={handleInputChange}
-              handleArrayChange={handleArrayChange}
-            />
+            <Step3Goals userData={userData} handleInputChange={handleInputChange} handleArrayChange={handleArrayChange} />
           )}
-
           {currentStep === 4 && (
-            <Step4Preferences
-              userData={userData}
-              handleInputChange={handleInputChange}
-              handleArrayChange={handleArrayChange}
-              handleNestedChange={handleNestedChange}
-              handleDayChange={handleDayChange}
-            />
+            <Step4Preferences userData={userData} handleInputChange={handleInputChange} handleArrayChange={handleArrayChange} handleNestedChange={handleNestedChange} handleDayChange={handleDayChange} />
           )}
         </form>
       </CardContent>
@@ -171,12 +136,8 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
         >
           Précédent
         </Button>
-        <Button onClick={handleSubmit} disabled={isSubmitting}>
-          {isSubmitting 
-            ? "Traitement en cours..." 
-            : currentStep < 4 
-              ? "Continuer" 
-              : "Terminer"}
+        <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
+          {isSubmitting ? "Traitement en cours..." : currentStep < 4 ? "Continuer" : "Terminer"}
         </Button>
       </CardFooter>
     </Card>
@@ -184,3 +145,4 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
 };
 
 export default OnboardingForm;
+
