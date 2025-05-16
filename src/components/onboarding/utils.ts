@@ -5,7 +5,7 @@
  * @returns Promise resolving to boolean indicating success
  */
 export const sendToN8nWebhook = async (data: any): Promise<boolean> => {
-  const webhookUrl = "https://n8n.srv825462.hstgr.cloud/webhook/738c99a4-1f1b-4604-9a7f-046af9ec5d36";
+  const webhookUrl = "https://n8n.srv825462.hstgr.cloud/webhook/formulaire-onboarding";
   
   try {
     await fetch(webhookUrl, {
