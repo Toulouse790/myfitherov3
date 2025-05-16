@@ -54,16 +54,17 @@ export async function sendToSupabase(data: any): Promise<boolean> {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": SUPABASE_API_KEY,
-        "Authorization": `Bearer ${SUPABASE_API_KEY}`,
-        "Prefer": "return=representation"
+        "apikey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGltcWVkeHR3cHV2YnZkeGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzk2NzEsImV4cCI6MjA2Mjk1NTY3MX0.mJ-rhSsKJc9ySQnqFq12v4A_Mc05ktdoBWyvGqtifxQ",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGltcWVkeHR3cHV2YnZkeGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzk2NzEsImV4cCI6MjA2Mjk1NTY3MX0.mJ-rhSsKJc9ySQnqFq12v4A_Mc05ktdoBWyvGqtifxQ",
+        "Prefer": "return=minimal"
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(userData),
     });
 
-    if (!response.ok) {
-      console.error("Erreur Supabase:", await response.text());
-      return false;
+    return response.ok;
+  } catch (error) {
+    console.error("Erreur lors de l'envoi vers Supabase :", error);
+    return false;
     }
 
     console.log("Données enregistrées avec succès !");
