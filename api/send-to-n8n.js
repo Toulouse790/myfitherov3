@@ -1,10 +1,10 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Méthode non autorisée' });
   }
 
   try {
-    const n8nWebhookURL = 'https://webhook.site/6642c8b1-ede1-49c3-b3b0-5be34bc9c443';
+    const n8nWebhookURL = 'https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609';
 
     const response = await fetch(n8nWebhookURL, {
       method: 'POST',
@@ -14,17 +14,13 @@ export default async function handler(req, res) {
       body: JSON.stringify(req.body)
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Erreur n8n :", errorText);
-      return res.status(500).json({ error: 'n8n webhook error', details: errorText });
-    }
-
-    const result = await response.json();
-    return res.status(200).json({ success: true, result });
-
+    return res.status(response.status).json({ message: 'Requête transmise à n8n' });
   } catch (error) {
-    console.error("Erreur proxy :", error);
+    console.error('Erreur dans le proxy :', error);
+    return res.status(500).json({ error: 'Erreur lors de l’envoi vers n8n' });
+  }
+}
+
     return res.status(500).json({ error: 'Proxy error', details: error.message });
   }
 }
