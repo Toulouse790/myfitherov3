@@ -13,12 +13,9 @@ export function calculateAge(birthdate: string): number {
 // === FONCTION : envoi vers le proxy sécurisé (Vercel) ===
 export async function sendToN8nWebhook(data: any): Promise<boolean> {
   try {
-    const webhookProxyUrl = "https://myfitherov3.vercel.app/api/send-to-n8n";
-
-    console.log("📤 Envoi de données au proxy Vercel...");
-    console.log("🔎 Données envoyées :", JSON.stringify(data, null, 2));
-
-    const response = await fetch(webhookProxyUrl, {
+    alert("✅ Fonction appelée !");
+    
+    const response = await fetch("/api/send-to-n8n", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -26,18 +23,15 @@ export async function sendToN8nWebhook(data: any): Promise<boolean> {
       body: JSON.stringify(data)
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ Échec d'envoi vers le proxy :", errorText);
+    if (response.ok || response.status === 204) {
+      alert("📬 Données envoyées avec succès !");
+      return true;
+    } else {
+      alert("❌ Échec de l'envoi : " + response.status);
       return false;
     }
-
-    const result = await response.json();
-    console.log("✅ Données transférées à n8n avec succès :", result);
-    return true;
-
   } catch (error) {
-    console.error("🚨 Erreur de communication avec le proxy Vercel :", error);
+    alert("🚨 Erreur réseau : " + error);
     return false;
   }
 }
