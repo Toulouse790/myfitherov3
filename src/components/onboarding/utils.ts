@@ -1,16 +1,15 @@
+// === Envoi vers proxy local ===
 export async function sendToN8nWebhook(data: any): Promise<boolean> {
   try {
-    const response = await fetch("/api/send-to-n8n", {
+    const res = await fetch("/api/send-to-n8n", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(data)
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
 
-    return response.ok;
+    return res.ok;
   } catch (error) {
-    console.error("Erreur proxy → n8n :", error);
+    console.error("Erreur proxy vers n8n :", error);
     return false;
   }
 }
