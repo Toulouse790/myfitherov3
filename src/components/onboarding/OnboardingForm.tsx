@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,7 @@ import Step2Measurements from './Step2Measurements';
 import Step3Goals from './Step3Goals';
 import Step4Preferences from './Step4Preferences';
 import { UserData, OnboardingFormProps } from './types';
-import { calculateAge, sendToSupabase, sendToN8nWebhook } from './utils';
+import { calculateAge, sendToN8nWebhook } from './utils';
 
 const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -89,7 +90,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
 
       localStorage.setItem('myFitHeroUserProfile', JSON.stringify(enrichedData));
 
-      const webhookSuccess = await sendToN8nWebhook(enrichedData) || await sendToSupabase(enrichedData);
+      const webhookSuccess = await sendToN8nWebhook(enrichedData);
 
       toast({
         description: webhookSuccess
@@ -145,4 +146,3 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
 };
 
 export default OnboardingForm;
-
