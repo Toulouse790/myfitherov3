@@ -4,23 +4,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const n8nWebhookURL = 'https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609';
-
-    const response = await fetch(n8nWebhookURL, {
-      method: 'POST',
+    const response = await fetch("https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       },
       body: JSON.stringify(req.body)
     });
 
-    return res.status(response.status).json({ message: 'Requête transmise à n8n' });
+    if (response.ok) {
+      return res.status(200).json({ success: true });
+    } else {
+      const text = await response.text();
+      return res.status(500).json({ success: false, message: "Erreur côté n8n", response: text });
+    }
   } catch (error) {
-    console.error('Erreur dans le proxy :', error);
-    return res.status(500).json({ error: 'Erreur lors de l’envoi vers n8n' });
-  }
-}
-
-    return res.status(500).json({ error: 'Proxy error', details: error.message });
+    return res.status(500).json({ success: false, message: "Erreur du proxy", error: error.message });
   }
 }
