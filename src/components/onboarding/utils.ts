@@ -1,4 +1,3 @@
-
 // === FONCTION : calcul de l'âge ===
 export function calculateAge(birthdate: string): number {
   const birth = new Date(birthdate);
@@ -11,33 +10,34 @@ export function calculateAge(birthdate: string): number {
   return age;
 }
 
-// === FONCTION : envoi vers n8n ===
+// === FONCTION : envoi vers le proxy sécurisé (Vercel) ===
 export async function sendToN8nWebhook(data: any): Promise<boolean> {
   try {
-    console.log("Envoi de données au webhook n8n...");
-    console.log("Données envoyées:", JSON.stringify(data, null, 2));
-    
-    // URL corrigée pour s'assurer qu'elle correspond exactement à celle attendue
-    const webhookUrl = "https://n8n.srv825462.hstgr.cloud/webhook-test/d84d0c09-59b4-4706-9746-0a4a83ad2609";
-    
-    const response = await fetch(webhookUrl, {
+    const webhookProxyUrl = "https://myfitherov3.vercel.app/api/send-to-n8n";
+
+    console.log("📤 Envoi de données au proxy Vercel...");
+    console.log("🔎 Données envoyées :", JSON.stringify(data, null, 2));
+
+    const response = await fetch(webhookProxyUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      mode: "no-cors", // Mode no-cors pour contourner les restrictions CORS
       body: JSON.stringify(data)
     });
 
-    // Ajoutons des logs pour suivre l'exécution
-    console.log("Requête envoyée à n8n en mode no-cors");
-    console.log("URL utilisée:", webhookUrl);
-    
-    // Comme nous utilisons no-cors, nous ne recevrons pas de réponse analysable
-    // Donc nous supposons que la demande a été envoyée avec succès
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("❌ Échec d'envoi vers le proxy :", errorText);
+      return false;
+    }
+
+    const result = await response.json();
+    console.log("✅ Données transférées à n8n avec succès :", result);
     return true;
+
   } catch (error) {
-    console.error("Erreur lors de l'envoi vers le webhook n8n :", error);
+    console.error("🚨 Erreur de communication avec le proxy Vercel :", error);
     return false;
   }
 }
