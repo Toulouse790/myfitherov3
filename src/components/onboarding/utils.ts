@@ -14,7 +14,7 @@ export function calculateAge(birthdate: string): number {
 // === FONCTION : envoi vers n8n ===
 export async function sendToN8nWebhook(data: any): Promise<boolean> {
   try {
-    const response = await fetch("https://n8n.srv825462.hstgr.cloud/webhook/formulaire-onboarding", {
+    const response = await fetch("https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
