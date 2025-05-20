@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const n8nWebhookURL = 'https://n8n.srv825462.hstgr.cloud/webhook/formulaire-onboarding';
+    const n8nWebhookURL = 'https://webhook.site/6642c8b1-ede1-49c3-b3b0-5be34bc9c443';
 
     const response = await fetch(n8nWebhookURL, {
       method: 'POST',
