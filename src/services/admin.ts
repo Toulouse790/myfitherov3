@@ -21,6 +21,23 @@ export interface AgentStats {
   model: string;
 }
 
+export interface LogEntry {
+  timestamp: string;
+  type: 'error' | 'warning' | 'info';
+  source: string;
+  message: string;
+}
+
+export interface N8nConfig {
+  url: string;
+  status: 'connected' | 'error' | 'unknown';
+}
+
+export interface OpenAIConfig {
+  key: string;
+  model: string;
+}
+
 export class AdminService {
   private static ADMIN_AUTH_KEY = 'adminAuth';
   
@@ -160,11 +177,34 @@ export class AdminService {
     type?: 'error' | 'warning' | 'info';
     date?: string;
     limit?: number;
-  }): Promise<any[]> {
+  }): Promise<LogEntry[]> {
     try {
-      const response = await ApiService.request('/admin/logs', {
+      let url = '/admin/logs';
+      
+      // Build query string for filters
+      if (filters) {
+        const params = new URLSearchParams();
+        
+        if (filters.type) {
+          params.append('type', filters.type);
+        }
+        
+        if (filters.date) {
+          params.append('date', filters.date);
+        }
+        
+        if (filters.limit) {
+          params.append('limit', filters.limit.toString());
+        }
+        
+        const queryString = params.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
+      }
+      
+      const response = await ApiService.request<LogEntry[]>(url, {
         method: 'GET',
-        params: filters,
       });
       
       if (response.success && response.data) {
@@ -199,9 +239,9 @@ export class AdminService {
   }
 
   // Configurations
-  static async getN8nConfig(): Promise<{url: string, status: 'connected' | 'error' | 'unknown'}> {
+  static async getN8nConfig(): Promise<N8nConfig> {
     try {
-      const response = await ApiService.request('/admin/config/n8n', {
+      const response = await ApiService.request<N8nConfig>('/admin/config/n8n', {
         method: 'GET',
       });
       
@@ -233,9 +273,9 @@ export class AdminService {
     }
   }
 
-  static async getOpenAIConfig(): Promise<{key: string, model: string}> {
+  static async getOpenAIConfig(): Promise<OpenAIConfig> {
     try {
-      const response = await ApiService.request('/admin/config/openai', {
+      const response = await ApiService.request<OpenAIConfig>('/admin/config/openai', {
         method: 'GET',
       });
       
