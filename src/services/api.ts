@@ -39,8 +39,7 @@ export class ApiService {
       
       // Affichage d'un toast uniquement en production
       if (!import.meta.env.DEV) {
-        toast({
-          title: "Une erreur est survenue",
+        toast("Une erreur est survenue", {
           description: "Veuillez réessayer plus tard"
         });
       }
