@@ -1,180 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { toast } from '@/components/ui/sonner';
-import { 
-  LineChart, 
-  BarChart, 
-  Bar, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
-  ResponsiveContainer 
-} from 'recharts';
 import { 
   LayoutDashboard, 
   Users, 
   Brain, 
   Workflow, 
   Activity, 
-  Settings, 
-  BarChart3, 
-  LineChart as LineChartIcon,
+  Settings,
   Clock,
   CheckCircle2
 } from 'lucide-react';
+
 import AdminHeader from '@/components/admin/AdminHeader';
 import AdminStatCard from '@/components/admin/AdminStatCard';
 import AdminAgentTable from '@/components/admin/AdminAgentTable';
 import AdminIntegrationPanel from '@/components/admin/AdminIntegrationPanel';
-import { AdminService } from '@/services/admin';
-
-// Données fictives pour les graphiques
-const activityData = [
-  { name: 'Lundi', conversations: 65, requests: 78 },
-  { name: 'Mardi', conversations: 59, requests: 65 },
-  { name: 'Mercredi', conversations: 80, requests: 91 },
-  { name: 'Jeudi', conversations: 81, requests: 90 },
-  { name: 'Vendredi', conversations: 56, requests: 85 },
-  { name: 'Samedi', conversations: 55, requests: 53 },
-  { name: 'Dimanche', conversations: 40, requests: 42 },
-];
-
-const agentDistribution = [
-  { name: 'Nutrition', value: 35 },
-  { name: 'Sommeil', value: 25 },
-  { name: 'Musculation', value: 30 },
-  { name: 'Hydratation', value: 10 },
-];
+import AdminLoginForm from '@/components/admin/AdminLoginForm';
+import AdminActivityCharts from '@/components/admin/AdminActivityCharts';
+import AdminOpenAIConfig from '@/components/admin/AdminOpenAIConfig';
+import AdminSystemLogs from '@/components/admin/AdminSystemLogs';
+import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 
 const AdminDashboard = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [stats, setStats] = useState({
-    users: 0,
-    conversations: 0,
-    successRate: 0,
-    responseTime: 0,
-    activeSessions: 0
-  });
-  const [dashboardLoading, setDashboardLoading] = useState(false);
-  const navigate = useNavigate();
-  
-  useEffect(() => {
-    // Vérifier si l'admin est déjà authentifié
-    const checkAuth = async () => {
-      const isAuth = AdminService.isAuthenticated();
-      setIsAuthenticated(isAuth);
-      
-      if (isAuth) {
-        fetchDashboardData();
-      }
-    };
-    
-    checkAuth();
-  }, []);
-  
-  const fetchDashboardData = async () => {
-    setDashboardLoading(true);
-    try {
-      // Charger les statistiques du système
-      const systemStats = await AdminService.getSystemStats();
-      setStats(systemStats);
-      
-      // Autres données à charger ici...
-      
-    } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
-      toast.error('Erreur', { 
-        description: 'Impossible de charger les données du dashboard' 
-      });
-    } finally {
-      setDashboardLoading(false);
-    }
-  };
-  
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    
-    try {
-      const success = await AdminService.authenticate(password);
-      
-      if (success) {
-        setIsAuthenticated(true);
-        fetchDashboardData();
-        toast.success("Connexion réussie", {
-          description: "Bienvenue dans l'interface d'administration"
-        });
-      } else {
-        toast.error("Échec de l'authentification", {
-          description: "Mot de passe incorrect"
-        });
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast.error("Erreur", {
-        description: "Erreur lors de l'authentification"
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { 
+    isAuthenticated, 
+    setIsAuthenticated,
+    stats, 
+    logs,
+    dashboardLoading, 
+    fetchDashboardData 
+  } = useAdminDashboard();
 
   const handleLogout = () => {
-    AdminService.logout();
-    setIsAuthenticated(false);
-    setPassword('');
-    toast.info("Déconnexion réussie");
+    import('@/services/admin').then(({ AdminService }) => {
+      AdminService.logout();
+      setIsAuthenticated(false);
+    });
   };
 
   if (!isAuthenticated) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">Admin Dashboard</CardTitle>
-            <CardDescription className="text-center">
-              Entrez le mot de passe administrateur pour accéder au tableau de bord
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin}>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Mot de passe"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Vérification..." : "Connexion"}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => navigate('/')}
-                >
-                  Retour à l'accueil
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <AdminLoginForm />;
   }
 
   return (
@@ -254,78 +120,12 @@ const AdminDashboard = () => {
 
           {/* Vue d'ensemble */}
           <TabsContent value="overview" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <LineChartIcon className="h-5 w-5 text-blue-500" />
-                    Activité utilisateurs
-                  </CardTitle>
-                  <CardDescription>Conversations et requêtes sur 7 jours</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart
-                        data={activityData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="conversations" stroke="#8884d8" />
-                        <Line type="monotone" dataKey="requests" stroke="#82ca9d" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-purple-500" />
-                    Distribution des requêtes
-                  </CardTitle>
-                  <CardDescription>Par type d'agent</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={agentDistribution}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="value" fill="#8884d8" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <AdminActivityCharts />
           </TabsContent>
 
           {/* Agents IA */}
           <TabsContent value="agents" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-purple-500" />
-                  Gestion des agents IA
-                </CardTitle>
-                <CardDescription>Configuration et performance des agents</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <AdminAgentTable />
-              </CardContent>
-            </Card>
+            <AdminAgentTable />
           </TabsContent>
 
           {/* Intégrations */}
@@ -335,127 +135,12 @@ const AdminDashboard = () => {
 
           {/* Configuration */}
           <TabsContent value="config" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5 text-gray-500" />
-                  Configuration OpenAI
-                </CardTitle>
-                <CardDescription>Gestion des clés API et des modèles</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium">Clé API OpenAI</label>
-                    <div className="flex gap-2">
-                      <Input 
-                        type="password" 
-                        value="sk-••••••••••••••••••••••••••••••" 
-                        readOnly
-                        className="font-mono"
-                      />
-                      <Button variant="outline">Modifier</Button>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium">Modèle par défaut</label>
-                    <select className="w-full p-2 border rounded-md dark:bg-gray-800">
-                      <option value="gpt-4o">GPT-4o (Recommandé)</option>
-                      <option value="gpt-4o-mini">GPT-4o Mini</option>
-                      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                    </select>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium">Température</label>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="2" 
-                      step="0.1" 
-                      defaultValue="0.7"
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-xs">
-                      <span>0 (Déterministe)</span>
-                      <span>1 (Équilibré)</span>
-                      <span>2 (Créatif)</span>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AdminOpenAIConfig />
           </TabsContent>
 
           {/* Logs système */}
           <TabsContent value="logs" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Activity className="h-5 w-5 text-red-500" />
-                  Journaux système
-                </CardTitle>
-                <CardDescription>Erreurs et événements système récents</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="flex justify-between mb-4">
-                    <div className="flex gap-2">
-                      <select className="p-2 text-sm border rounded-md dark:bg-gray-800">
-                        <option>Tous les types</option>
-                        <option>Erreur</option>
-                        <option>Warning</option>
-                        <option>Info</option>
-                      </select>
-                      <Input type="date" className="text-sm" />
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Exporter
-                    </Button>
-                  </div>
-                  
-                  <div className="border rounded-md overflow-hidden">
-                    <table className="min-w-full divide-y">
-                      <thead className="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Horodatage</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Type</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Source</th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Message</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                        <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">2025-05-21 14:32:15</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Erreur</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">Agent Nutrition</td>
-                          <td className="px-6 py-4 text-sm">Échec de connexion à l'API OpenAI - Timeout après 30s</td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">2025-05-21 14:28:10</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className="px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">Warning</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">n8n Webhook</td>
-                          <td className="px-6 py-4 text-sm">Réponse lente du service externe (5.2s)</td>
-                        </tr>
-                        <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">2025-05-21 14:15:43</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                            <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">Info</span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">Système</td>
-                          <td className="px-6 py-4 text-sm">Configuration mise à jour avec succès</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <AdminSystemLogs initialLogs={logs} />
           </TabsContent>
         </Tabs>
       </main>
