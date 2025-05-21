@@ -6,8 +6,7 @@ export default async function handler(req, res) {
 
   try {
     // Utiliser l'URL du webhook depuis les variables d'environnement ou la requête
-    const webhookUrl = process.env.N8N_WEBHOOK_URL || 
-                       "https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609";
+    const webhookUrl = process.env.N8N_WEBHOOK_URL;
     
     if (!webhookUrl) {
       return res.status(500).json({ success: false, message: "Configuration de webhook manquante" });

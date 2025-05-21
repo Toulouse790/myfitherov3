@@ -12,7 +12,7 @@ import { ApiService } from '@/services/api';
 const Settings = () => {
   // Utiliser une variable d'environnement par défaut si disponible
   const defaultWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 
-    "https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609";
+    "";
   
   const [webhookUrl, setWebhookUrl] = useState<string>(defaultWebhookUrl);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
