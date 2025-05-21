@@ -23,7 +23,13 @@ const AIChat: React.FC = () => {
   useEffect(() => {
     const savedMessages = StorageService.getItem<ChatMessage[]>(STORAGE_KEY, []);
     
-    if (savedMessages.length === 0) {
+    // Ensure all timestamps are proper Date objects
+    const parsedMessages = savedMessages.map(msg => ({
+      ...msg,
+      timestamp: msg.timestamp instanceof Date ? msg.timestamp : new Date(msg.timestamp)
+    }));
+    
+    if (parsedMessages.length === 0) {
       // Message de bienvenue par défaut
       setMessages([{
         id: '1',
@@ -32,7 +38,7 @@ const AIChat: React.FC = () => {
         timestamp: new Date(),
       }]);
     } else {
-      setMessages(savedMessages);
+      setMessages(parsedMessages);
     }
   }, []);
   
