@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,12 +7,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from '@/components/ui/sonner';
 import { Workflow, Webhook, CheckCircle2, XCircle, RefreshCw, Play, ExternalLink } from 'lucide-react';
-import { ApiService } from '@/services/api';
+import { AdminService } from '@/services/admin';
 
 const AdminIntegrationPanel = () => {
-  const [n8nUrl, setN8nUrl] = useState('https://n8n.example.com/webhook/myfit-prod-123456');
+  const [n8nUrl, setN8nUrl] = useState('');
   const [n8nTestLoading, setN8nTestLoading] = useState(false);
   const [n8nConnectionStatus, setN8nConnectionStatus] = useState<'connected' | 'error' | 'unknown'>('unknown');
+  const [loading, setLoading] = useState(true);
 
   // État pour les webhooks configurés
   const [webhooks, setWebhooks] = useState([
@@ -38,17 +39,34 @@ const AdminIntegrationPanel = () => {
       lastUsed: '2025-05-20T15:32:18Z'
     }
   ]);
+  
+  useEffect(() => {
+    fetchN8nConfig();
+  }, []);
+  
+  const fetchN8nConfig = async () => {
+    setLoading(true);
+    try {
+      const config = await AdminService.getN8nConfig();
+      setN8nUrl(config.url);
+      setN8nConnectionStatus(config.status);
+    } catch (error) {
+      console.error('Error fetching n8n config:', error);
+      toast.error('Erreur', { 
+        description: 'Impossible de charger la configuration n8n' 
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const testN8nConnection = async () => {
     setN8nTestLoading(true);
     try {
       // API call to test webhook
-      const testResult = await ApiService.testWebhook(n8nUrl, {
-        test_type: 'connection',
-        timestamp: new Date().toISOString()
-      });
+      const testResult = await AdminService.updateN8nConfig(n8nUrl);
       
-      if (testResult.success) {
+      if (testResult) {
         setN8nConnectionStatus('connected');
         toast.success("Test réussi", { 
           description: "Connexion établie avec n8n" 
@@ -95,16 +113,24 @@ const AdminIntegrationPanel = () => {
                   </div>
                   
                   <div className="flex items-center gap-2">
-                    {n8nConnectionStatus === 'connected' && (
+                    {loading ? (
+                      <span className="text-xs flex items-center text-gray-600">
+                        <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                        Chargement...
+                      </span>
+                    ) : n8nConnectionStatus === 'connected' ? (
                       <span className="text-xs flex items-center text-green-600">
                         <CheckCircle2 className="h-3 w-3 mr-1" />
                         Connecté
                       </span>
-                    )}
-                    {n8nConnectionStatus === 'error' && (
+                    ) : n8nConnectionStatus === 'error' ? (
                       <span className="text-xs flex items-center text-red-600">
                         <XCircle className="h-3 w-3 mr-1" />
                         Déconnecté
+                      </span>
+                    ) : (
+                      <span className="text-xs flex items-center text-gray-600">
+                        Statut inconnu
                       </span>
                     )}
                   </div>
@@ -122,7 +148,7 @@ const AdminIntegrationPanel = () => {
                       />
                       <Button 
                         onClick={testN8nConnection} 
-                        disabled={n8nTestLoading || !n8nUrl} 
+                        disabled={n8nTestLoading || !n8nUrl || loading} 
                         variant="outline"
                       >
                         {n8nTestLoading ? (
@@ -275,10 +301,22 @@ const AdminIntegrationPanel = () => {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">n8n</span>
-                  <span className="flex items-center text-green-600">
-                    <CheckCircle2 className="h-3 w-3 mr-1" />
-                    Connecté
-                  </span>
+                  {loading ? (
+                    <span className="flex items-center text-gray-600">
+                      <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+                      Chargement...
+                    </span>
+                  ) : n8nConnectionStatus === 'connected' ? (
+                    <span className="flex items-center text-green-600">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Connecté
+                    </span>
+                  ) : (
+                    <span className="flex items-center text-red-600">
+                      <XCircle className="h-3 w-3 mr-1" />
+                      Déconnecté
+                    </span>
+                  )}
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">OpenAI API</span>
@@ -305,8 +343,8 @@ const AdminIntegrationPanel = () => {
               
               <div className="pt-2">
                 <p className="text-xs text-muted-foreground">Dernière vérification: 21/05/2025 14:45</p>
-                <Button variant="outline" size="sm" className="mt-2 w-full text-sm">
-                  <RefreshCw className="h-3 w-3 mr-2" />
+                <Button variant="outline" size="sm" className="mt-2 w-full text-sm" onClick={fetchN8nConfig}>
+                  <RefreshCw className={`h-3 w-3 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Vérifier maintenant
                 </Button>
               </div>

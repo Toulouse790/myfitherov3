@@ -25,22 +25,16 @@ import {
   Workflow, 
   Activity, 
   Settings, 
-  ShieldAlert, 
-  Lock, 
   BarChart3, 
   LineChart as LineChartIcon,
-  BookOpenCheck, 
   Clock,
-  CheckCircle2,
-  XCircle
+  CheckCircle2
 } from 'lucide-react';
 import AdminHeader from '@/components/admin/AdminHeader';
 import AdminStatCard from '@/components/admin/AdminStatCard';
 import AdminAgentTable from '@/components/admin/AdminAgentTable';
 import AdminIntegrationPanel from '@/components/admin/AdminIntegrationPanel';
-import { StorageService } from '@/services/storage';
-
-const ADMIN_PASSWORD = "admin123"; // À des fins de démonstration uniquement
+import { AdminService } from '@/services/admin';
 
 // Données fictives pour les graphiques
 const activityData = [
@@ -60,36 +54,63 @@ const agentDistribution = [
   { name: 'Hydratation', value: 10 },
 ];
 
-const systemStats = {
-  users: 1245,
-  conversations: 8790,
-  successRate: 94.2,
-  responseTime: 1.8
-};
-
 const AdminDashboard = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState({
+    users: 0,
+    conversations: 0,
+    successRate: 0,
+    responseTime: 0,
+    activeSessions: 0
+  });
+  const [dashboardLoading, setDashboardLoading] = useState(false);
   const navigate = useNavigate();
   
   useEffect(() => {
     // Vérifier si l'admin est déjà authentifié
-    const adminAuth = StorageService.getItem('adminAuth', false);
-    if (adminAuth) {
-      setIsAuthenticated(true);
-    }
+    const checkAuth = async () => {
+      const isAuth = AdminService.isAuthenticated();
+      setIsAuthenticated(isAuth);
+      
+      if (isAuth) {
+        fetchDashboardData();
+      }
+    };
+    
+    checkAuth();
   }, []);
   
-  const handleLogin = (e: React.FormEvent) => {
+  const fetchDashboardData = async () => {
+    setDashboardLoading(true);
+    try {
+      // Charger les statistiques du système
+      const systemStats = await AdminService.getSystemStats();
+      setStats(systemStats);
+      
+      // Autres données à charger ici...
+      
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+      toast.error('Erreur', { 
+        description: 'Impossible de charger les données du dashboard' 
+      });
+    } finally {
+      setDashboardLoading(false);
+    }
+  };
+  
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     
-    // Simuler une attente de validation
-    setTimeout(() => {
-      if (password === ADMIN_PASSWORD) {
-        StorageService.setItem('adminAuth', true);
+    try {
+      const success = await AdminService.authenticate(password);
+      
+      if (success) {
         setIsAuthenticated(true);
+        fetchDashboardData();
         toast.success("Connexion réussie", {
           description: "Bienvenue dans l'interface d'administration"
         });
@@ -98,12 +119,18 @@ const AdminDashboard = () => {
           description: "Mot de passe incorrect"
         });
       }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("Erreur", {
+        description: "Erreur lors de l'authentification"
+      });
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const handleLogout = () => {
-    StorageService.removeItem('adminAuth');
+    AdminService.logout();
     setIsAuthenticated(false);
     setPassword('');
     toast.info("Déconnexion réussie");
@@ -168,32 +195,36 @@ const AdminDashboard = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <AdminStatCard 
             title="Utilisateurs"
-            value={systemStats.users}
+            value={stats.users}
             icon={<Users className="text-blue-500" />}
             trend={12.5}
             description="Total des comptes"
+            className={dashboardLoading ? "animate-pulse" : ""}
           />
           <AdminStatCard 
             title="Conversations"
-            value={systemStats.conversations}
+            value={stats.conversations}
             icon={<Brain className="text-purple-500" />}
             trend={8.3}
             description="Interactions IA"
+            className={dashboardLoading ? "animate-pulse" : ""}
           />
           <AdminStatCard 
             title="Taux de réussite"
-            value={`${systemStats.successRate}%`}
+            value={`${stats.successRate}%`}
             icon={<CheckCircle2 className="text-green-500" />}
             trend={-1.2}
             description="Réponses valides"
+            className={dashboardLoading ? "animate-pulse" : ""}
           />
           <AdminStatCard 
             title="Temps de réponse"
-            value={`${systemStats.responseTime}s`}
+            value={`${stats.responseTime}s`}
             icon={<Clock className="text-orange-500" />}
             trend={-5.7}
             trendDirection="down"
             description="Moyenne"
+            className={dashboardLoading ? "animate-pulse" : ""}
           />
         </div>
 
