@@ -12,6 +12,7 @@ import Sleep from "./pages/Sleep";
 import Coach from "./pages/Coach";
 import Onboarding from "./pages/Onboarding";
 import Settings from "./pages/Settings";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/sleep" element={<Sleep />} />
           <Route path="/coach" element={<Coach />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/onboarding" element={<Onboarding />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
