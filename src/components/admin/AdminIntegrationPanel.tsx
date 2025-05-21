@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,11 +8,38 @@ import { toast } from '@/components/ui/sonner';
 import { Workflow, Webhook, CheckCircle2, XCircle, RefreshCw, Play, ExternalLink } from 'lucide-react';
 import { AdminService } from '@/services/admin';
 
+/**
+ * Fonction utilitaire pour réessayer une opération asynchrone
+ * 
+ * @param operation La fonction à exécuter
+ * @param retries Le nombre de tentatives maximum
+ * @param delay Le délai entre les tentatives (en ms)
+ * @param backoff Facteur multiplicateur pour augmenter le délai à chaque tentative
+ */
+const retry = async (
+  operation: () => Promise<any>,
+  retries = 3,
+  delay = 300,
+  backoff = 2
+): Promise<any> => {
+  try {
+    return await operation();
+  } catch (error) {
+    if (retries <= 0) {
+      throw error;
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, delay));
+    return retry(operation, retries - 1, delay * backoff, backoff);
+  }
+};
+
 const AdminIntegrationPanel = () => {
   const [n8nUrl, setN8nUrl] = useState('');
   const [n8nTestLoading, setN8nTestLoading] = useState(false);
   const [n8nConnectionStatus, setN8nConnectionStatus] = useState<'connected' | 'error' | 'unknown'>('unknown');
   const [loading, setLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // État pour les webhooks configurés
   const [webhooks, setWebhooks] = useState([
@@ -46,14 +72,31 @@ const AdminIntegrationPanel = () => {
   
   const fetchN8nConfig = async () => {
     setLoading(true);
+    setErrorMessage(null); // Réinitialiser les messages d'erreur
+    
     try {
-      const config = await AdminService.getN8nConfig();
+      // Utiliser la fonction retry pour réessayer jusqu'à 3 fois avec un délai exponentiel
+      const config = await retry(
+        () => AdminService.getN8nConfig(),
+        3, // 3 tentatives
+        300, // Délai initial de 300ms
+        2 // Facteur de backoff
+      );
+      
       setN8nUrl(config.url);
       setN8nConnectionStatus(config.status);
     } catch (error) {
-      console.error('Error fetching n8n config:', error);
+      console.error('Error fetching n8n config after retries:', error);
+      setN8nConnectionStatus('error');
+      
+      if (error instanceof Error) {
+        setErrorMessage(`Échec après plusieurs tentatives : ${error.message}`);
+      } else {
+        setErrorMessage('Échec après plusieurs tentatives : erreur inconnue');
+      }
+      
       toast.error('Erreur', { 
-        description: 'Impossible de charger la configuration n8n' 
+        description: 'Impossible de charger la configuration n8n après plusieurs tentatives' 
       });
     } finally {
       setLoading(false);
@@ -62,6 +105,8 @@ const AdminIntegrationPanel = () => {
 
   const testN8nConnection = async () => {
     setN8nTestLoading(true);
+    setErrorMessage(null);
+    
     try {
       // API call to test webhook
       const testResult = await AdminService.updateN8nConfig(n8nUrl);
@@ -73,12 +118,20 @@ const AdminIntegrationPanel = () => {
         });
       } else {
         setN8nConnectionStatus('error');
+        setErrorMessage("Échec de connexion au webhook n8n");
         toast.error("Échec du test", { 
           description: "Impossible de se connecter au webhook n8n" 
         });
       }
     } catch (error) {
       setN8nConnectionStatus('error');
+      
+      if (error instanceof Error) {
+        setErrorMessage(`Erreur de connexion : ${error.message}`);
+      } else {
+        setErrorMessage("Une erreur s'est produite lors du test");
+      }
+      
       toast.error("Erreur", { 
         description: "Une erreur s'est produite lors du test"
       });
@@ -167,6 +220,14 @@ const AdminIntegrationPanel = () => {
                       <p className="mt-1">Assurez-vous que l'URL est accessible depuis Internet et que n8n est configuré correctement.</p>
                     </AlertDescription>
                   </Alert>
+                  
+                  {errorMessage && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertDescription className="text-xs">
+                        {errorMessage}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
               </TabsContent>
               
@@ -347,6 +408,14 @@ const AdminIntegrationPanel = () => {
                   <RefreshCw className={`h-3 w-3 mr-2 ${loading ? 'animate-spin' : ''}`} />
                   Vérifier maintenant
                 </Button>
+                
+                {errorMessage && (
+                  <Alert variant="destructive" className="mt-2">
+                    <AlertDescription className="text-xs">
+                      {errorMessage}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </div>
             </div>
           </CardContent>

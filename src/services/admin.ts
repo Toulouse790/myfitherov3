@@ -40,6 +40,7 @@ export interface OpenAIConfig {
 
 export class AdminService {
   private static ADMIN_AUTH_KEY = 'adminAuth';
+  private static API_BASE_URL = '/api/admin';
   
   // Authentification
   static isAuthenticated(): boolean {
@@ -238,18 +239,29 @@ export class AdminService {
     }
   }
 
-  // Configurations
+  /**
+   * Récupère la configuration n8n
+   * @returns Promise contenant les informations de configuration
+   */
   static async getN8nConfig(): Promise<N8nConfig> {
     try {
-      const response = await ApiService.request<N8nConfig>('/admin/config/n8n', {
-        method: 'GET',
-      });
+      const response = await fetch(`${this.API_BASE_URL}/config/n8n`);
       
-      if (response.success && response.data) {
-        return response.data;
+      if (!response.ok) {
+        // Extraction des détails d'erreur si disponibles
+        let errorDetails = '';
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.message || '';
+        } catch (e) {
+          // Ignorer les erreurs lors de l'analyse JSON
+        }
+        
+        throw new Error(`Réponse du serveur: ${response.status} ${errorDetails}`);
       }
       
-      throw new Error('Failed to fetch n8n config');
+      const data = await response.json();
+      return data.data || { url: '', status: 'unknown' };
     } catch (error) {
       console.error('Error fetching n8n config:', error);
       return {
@@ -259,14 +271,35 @@ export class AdminService {
     }
   }
 
+  /**
+   * Met à jour la configuration n8n
+   * @param url L'URL du webhook n8n
+   * @returns Promise avec le résultat du test de connexion
+   */
   static async updateN8nConfig(url: string): Promise<boolean> {
     try {
-      const response = await ApiService.request('/admin/config/n8n', {
+      const response = await fetch(`${this.API_BASE_URL}/config/n8n`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({ url }),
       });
       
-      return response.success;
+      if (!response.ok) {
+        let errorDetails = '';
+        try {
+          const errorData = await response.json();
+          errorDetails = errorData.message || '';
+        } catch (e) {
+          // Ignorer les erreurs lors de l'analyse JSON
+        }
+        
+        throw new Error(`Réponse du serveur: ${response.status} ${errorDetails}`);
+      }
+      
+      const data = await response.json();
+      return data.success;
     } catch (error) {
       console.error('Error updating n8n config:', error);
       return false;
