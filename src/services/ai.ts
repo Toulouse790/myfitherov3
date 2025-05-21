@@ -8,6 +8,10 @@ export interface ChatMessage {
   timestamp: Date;
 }
 
+interface AIResponse {
+  content: string;
+}
+
 export class AIService {
   // Utilise un mock en dev, OpenAI en prod
   static async getChatResponse(
@@ -21,7 +25,7 @@ export class AIService {
     
     // Version prod - OpenAI
     try {
-      const response = await ApiService.request('/ai/chat', {
+      const response = await ApiService.request<AIResponse>('/ai/chat', {
         method: 'POST',
         body: JSON.stringify({
           message,

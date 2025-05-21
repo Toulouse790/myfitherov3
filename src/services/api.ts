@@ -12,7 +12,7 @@ export class ApiService {
     ? '/api' 
     : 'https://myfithero.app/api';
 
-  private static async request<T>(
+  public static async request<T>(
     endpoint: string, 
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
