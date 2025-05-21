@@ -18,6 +18,7 @@ export interface AgentQuery {
   responses: AgentResponse[]; // Tableau des réponses des agents
 }
 
+// Gestionnaire d'état des agents
 export interface AgentState {
   queries: AgentQuery[];      // Historique des requêtes
   activeQueryId: string | null; // Requête active
