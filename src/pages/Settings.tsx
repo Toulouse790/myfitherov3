@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,11 +7,14 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/sonner';
+import { ApiService } from '@/services/api';
 
 const Settings = () => {
-  const [webhookUrl, setWebhookUrl] = useState<string>(
-    "https://n8n.srv825462.hstgr.cloud/webhook/formulaire-onboarding"
-  );
+  // Utiliser une variable d'environnement par défaut si disponible
+  const defaultWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 
+    "https://n8n.srv825462.hstgr.cloud/webhook/d84d0c09-59b4-4706-9746-0a4a83ad2609";
+  
+  const [webhookUrl, setWebhookUrl] = useState<string>(defaultWebhookUrl);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -26,25 +30,18 @@ const Settings = () => {
     }
 
     setIsLoading(true);
-    console.log("Déclenchement du webhook n8n:", webhookUrl);
+    console.log("Test de connexion au webhook n8n:", webhookUrl);
 
     try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        mode: "no-cors", // Ajout pour gérer le CORS
-        body: JSON.stringify({
-          timestamp: new Date().toISOString(),
-          triggered_from: window.location.origin,
-          app: "MyFitHero",
-          action: "test_connection"
-        }),
+      // Utiliser notre service API pour le test
+      const response = await ApiService.testWebhook(webhookUrl, {
+        timestamp: new Date().toISOString(),
+        triggered_from: window.location.origin,
+        app: "MyFitHero",
+        action: "test_connection"
       });
 
-      // Comme nous utilisons no-cors, nous ne recevrons pas de statut de réponse
-      // Nous affichons donc un message informatif
+      // Comme nous utilisons no-cors, nous affichons un message informatif
       toast("Requête envoyée", {
         description: "La requête a été envoyée à n8n. Veuillez vérifier l'historique de votre workflow pour confirmer son déclenchement."
       });

@@ -1,37 +1,55 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Send, Mic, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
+import { AIService, ChatMessage } from '@/services/ai';
+import { StorageService } from '@/services/storage';
 
-interface Message {
-  id: string;
-  content: string;
-  sender: 'user' | 'assistant';
-  timestamp: Date;
-}
+const STORAGE_KEY = 'chatHistory';
+const MAX_SAVED_MESSAGES = 50;
 
 const AIChat: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: '1',
-      content: 'Bonjour, je suis votre coach personnel MyFitHero. Comment puis-je vous aider aujourd\'hui ?',
-      sender: 'assistant',
-      timestamp: new Date(),
-    },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const handleSendMessage = () => {
+  // Charger l'historique des messages au démarrage
+  useEffect(() => {
+    const savedMessages = StorageService.getItem<ChatMessage[]>(STORAGE_KEY, []);
+    
+    if (savedMessages.length === 0) {
+      // Message de bienvenue par défaut
+      setMessages([{
+        id: '1',
+        content: 'Bonjour, je suis votre coach personnel MyFitHero. Comment puis-je vous aider aujourd\'hui ?',
+        sender: 'assistant',
+        timestamp: new Date(),
+      }]);
+    } else {
+      setMessages(savedMessages);
+    }
+  }, []);
+  
+  // Enregistrer les messages mis à jour
+  useEffect(() => {
+    if (messages.length > 0) {
+      // Ne sauvegarder que les X derniers messages pour éviter de surcharger le localStorage
+      const limitedHistory = messages.slice(-MAX_SAVED_MESSAGES);
+      StorageService.setItem(STORAGE_KEY, limitedHistory);
+    }
+  }, [messages]);
+  
+  const handleSendMessage = useCallback(async () => {
     if (!inputValue.trim()) return;
     
-    // Add user message
-    const userMessage: Message = {
+    // Ajouter le message de l'utilisateur
+    const userMessage: ChatMessage = {
       id: Date.now().toString(),
       content: inputValue,
       sender: 'user',
@@ -42,40 +60,29 @@ const AIChat: React.FC = () => {
     setInputValue('');
     setIsProcessing(true);
     
-    // Simulate AI response after a delay
-    setTimeout(() => {
-      // Predefined responses based on keywords
-      let response = '';
-      const input = inputValue.toLowerCase();
+    try {
+      // Obtenir la réponse de l'IA (avec l'historique pour le contexte)
+      const aiResponse = await AIService.getChatResponse(
+        inputValue, 
+        messages.slice(-10) // Limiter au contexte récent pour performances
+      );
       
-      if (input.includes('bonjour') || input.includes('salut')) {
-        response = "Bonjour ! Comment puis-je vous aider avec votre entraînement aujourd'hui ?";
-      } else if (input.includes('musculation') || input.includes('exercice')) {
-        response = "Pour progresser en musculation, la constance est clé. Je recommande 3-4 séances par semaine avec une attention particulière à votre technique et à la récupération. Souhaitez-vous un plan d'entraînement personnalisé ?";
-      } else if (input.includes('nutrition') || input.includes('alimentation') || input.includes('manger')) {
-        response = "Une bonne nutrition est essentielle pour atteindre vos objectifs. Pour la prise de masse, visez un surplus calorique d'environ 10-15% avec 1.6-2g de protéines par kg de poids corporel par jour.";
-      } else if (input.includes('dormir') || input.includes('sommeil')) {
-        response = "Le sommeil est crucial pour la récupération musculaire et vos performances. Visez 7-9h de sommeil par nuit et établissez une routine régulière pour optimiser votre récupération.";
-      } else {
-        response = "Merci pour votre message. Pour vous aider efficacement, pourriez-vous me préciser si votre question concerne l'entraînement, la nutrition, la récupération ou un autre aspect de votre programme ?";
-      }
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response,
-        sender: 'assistant',
-        timestamp: new Date(),
-      };
-      
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, aiResponse]);
+    } catch (error) {
+      console.error("Erreur lors de la génération de la réponse:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible d'obtenir une réponse de l'assistant pour le moment."
+      });
+    } finally {
       setIsProcessing(false);
-    }, 1000);
-  };
+    }
+  }, [inputValue, messages, toast]);
   
   const handleVoiceInput = () => {
     toast({
       title: "Fonctionnalité à venir",
-      description: "La reconnaissance vocale sera disponible prochainement.",
+      description: "La reconnaissance vocale sera disponible prochainement."
     });
   };
   
@@ -84,6 +91,11 @@ const AIChat: React.FC = () => {
       handleSendMessage();
     }
   };
+  
+  // Scroll automatique vers le dernier message
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
   
   return (
     <Card className="flex flex-col h-[600px] max-h-[80vh]">
@@ -128,6 +140,7 @@ const AIChat: React.FC = () => {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </CardContent>
       <CardFooter className="border-t p-4">
         <div className="flex w-full items-center space-x-2">

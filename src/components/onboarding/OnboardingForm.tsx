@@ -11,7 +11,9 @@ import Step2Measurements from './Step2Measurements';
 import Step3Goals from './Step3Goals';
 import Step4Preferences from './Step4Preferences';
 import { UserData, OnboardingFormProps } from './types';
-import { calculateAge, sendToN8nWebhook } from './utils';
+import { calculateAge } from './utils';
+import { StorageService } from '@/services/storage';
+import { ApiService } from '@/services/api';
 
 const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
   const [currentStep, setCurrentStep] = useState(initialStep);
@@ -88,12 +90,14 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
         platform: navigator.userAgent
       };
 
-      localStorage.setItem('myFitHeroUserProfile', JSON.stringify(enrichedData));
+      // Sauvegarder localement avec notre service
+      StorageService.setItem('userProfile', enrichedData);
 
-      const webhookSuccess = await sendToN8nWebhook(enrichedData);
+      // Envoyer à n8n via notre service API
+      const response = await ApiService.sendToN8n(enrichedData);
 
       toast({
-        description: webhookSuccess
+        description: response.success
           ? "Votre profil personnalisé a été enregistré!"
           : "Votre profil a été enregistré localement. La synchronisation sera tentée ultérieurement."
       });
