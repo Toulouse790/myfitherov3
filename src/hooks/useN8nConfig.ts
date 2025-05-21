@@ -1,13 +1,7 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { AdminService } from '@/services/admin';
+import { AdminService, N8nConfig } from '@/services/admin';
 import { retryOperation } from '@/utils/retryOperation';
-
-export interface N8nConfig {
-  url: string;
-  status: 'connected' | 'error' | 'unknown';
-}
 
 export const useN8nConfig = () => {
   const [n8nUrl, setN8nUrl] = useState('');
