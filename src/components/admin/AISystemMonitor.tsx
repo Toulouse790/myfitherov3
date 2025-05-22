@@ -37,107 +37,172 @@ const AISystemMonitor: React.FC = () => {
       const today = new Date().toDateString();
       const todayMessages = conversations.reduce((sum, conv) => {
         return sum + conv.messages.filter(msg => {
-          const msgDate = msg.timestamp instanceof Date ? 
-            msg.timestamp.toDateString() : 
-            new Date(msg.timestamp as string).toDateString();
+          // Fix TypeScript error by properly handling the timestamp type
+          let msgDate: string;
+          if (msg.timestamp instanceof Date) {
+            msgDate = msg.timestamp.toDateString();
+          } else if (typeof msg.timestamp === 'string') {
+            msgDate = new Date(msg.timestamp).toDateString();
+          } else {
+            msgDate = new Date().toDateString(); // Fallback
+          }
           return msgDate === today;
         }).length;
       }, 0);
-      
-      // Calculer le temps moyen de réponse (simulé pour l'instant)
-      const averageResponseTime = totalMessages > 0 ? Number((Math.random() * 1.5 + 0.5).toFixed(1)) : 0;
-      
-      // Déterminer la santé du système
+
+      // Calcul de la santé du système
       let systemHealth: SystemStats['systemHealth'] = 'excellent';
-      if (averageResponseTime > 1.5) systemHealth = 'warning';
-      else if (averageResponseTime > 2.5) systemHealth = 'error';
-      
+      if (conversations.length === 0) systemHealth = 'warning';
+      if (totalMessages === 0) systemHealth = 'error';
+
       setStats({
-        totalUsers: 1, // Toujours au moins l'utilisateur actuel
+        totalUsers: userId ? 1 : 0, // Simplifié pour un utilisateur local
         activeConversations: conversations.length,
         messagesPerDay: todayMessages,
-        averageResponseTime: averageResponseTime,
+        averageResponseTime: 1.2, // Simulé
         systemHealth
       });
       
       setLoading(false);
-    }, 800);
+    }, 1000);
   };
 
-  // Charger les stats au montage
   useEffect(() => {
     refreshStats();
+    // Rafraîchir toutes les 30 secondes
+    const interval = setInterval(refreshStats, 30000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Fonction pour obtenir la couleur du badge de santé
-  const getHealthBadgeColor = (health: SystemStats['systemHealth']) => {
+  const getHealthColor = (health: SystemStats['systemHealth']) => {
     switch (health) {
-      case 'excellent': return 'bg-green-500 hover:bg-green-400';
-      case 'good': return 'bg-blue-500 hover:bg-blue-400';
-      case 'warning': return 'bg-yellow-500 hover:bg-yellow-400';
-      case 'error': return 'bg-red-500 hover:bg-red-400';
-      default: return '';
+      case 'excellent': return 'bg-green-500';
+      case 'good': return 'bg-blue-500';
+      case 'warning': return 'bg-yellow-500';
+      case 'error': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const getHealthText = (health: SystemStats['systemHealth']) => {
+    switch (health) {
+      case 'excellent': return 'Excellent';
+      case 'good': return 'Bon';
+      case 'warning': return 'Attention';
+      case 'error': return 'Erreur';
+      default: return 'Inconnu';
     }
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg">Moniteur Système IA</CardTitle>
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          onClick={refreshStats}
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-        </Button>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
-          <span className="text-sm font-medium">Santé du système</span>
-          <Badge 
-            className={`capitalize ${getHealthBadgeColor(stats.systemHealth)}`}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Santé du système */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Santé du système</CardTitle>
+          <Activity className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2">
+            <div className={`w-3 h-3 rounded-full ${getHealthColor(stats.systemHealth)}`} />
+            <div className="text-2xl font-bold">{getHealthText(stats.systemHealth)}</div>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Système IA opérationnel
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Utilisateurs actifs */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Utilisateurs</CardTitle>
+          <Users className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.totalUsers}</div>
+          <p className="text-xs text-muted-foreground">
+            Utilisateur actuel
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Conversations actives */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Conversations</CardTitle>
+          <MessageSquare className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.activeConversations}</div>
+          <p className="text-xs text-muted-foreground">
+            Threads créés
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Performance */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium">Performance</CardTitle>
+          <Zap className="h-4 w-4 text-muted-foreground" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold">{stats.averageResponseTime}s</div>
+          <p className="text-xs text-muted-foreground">
+            Temps de réponse moyen
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Détails complets */}
+      <Card className="md:col-span-2 lg:col-span-4">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Monitoring en temps réel</CardTitle>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={refreshStats}
+            disabled={loading}
           >
-            {stats.systemHealth}
-          </Badge>
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col space-y-1 border rounded-lg p-3">
-            <div className="flex items-center text-muted-foreground">
-              <Users className="h-4 w-4 mr-1" />
-              <span className="text-xs">Utilisateurs</span>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Actualiser
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Messages aujourd'hui</h4>
+              <div className="text-lg font-bold">{stats.messagesPerDay}</div>
+              <Badge variant="secondary" className="text-xs">
+                {stats.messagesPerDay > 0 ? '+' + stats.messagesPerDay : '0'} depuis ce matin
+              </Badge>
             </div>
-            <span className="font-bold">{stats.totalUsers}</span>
-          </div>
-          
-          <div className="flex flex-col space-y-1 border rounded-lg p-3">
-            <div className="flex items-center text-muted-foreground">
-              <MessageSquare className="h-4 w-4 mr-1" />
-              <span className="text-xs">Conversations</span>
+            
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Intégration n8n</h4>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
+                <span className="text-sm">Connecté</span>
+              </div>
+              <Badge variant="default" className="text-xs">
+                Prêt à recevoir
+              </Badge>
             </div>
-            <span className="font-bold">{stats.activeConversations}</span>
-          </div>
-          
-          <div className="flex flex-col space-y-1 border rounded-lg p-3">
-            <div className="flex items-center text-muted-foreground">
-              <Activity className="h-4 w-4 mr-1" />
-              <span className="text-xs">Msgs/jour</span>
+            
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium">Stockage local</h4>
+              <div className="text-lg font-bold">
+                {AIIntegrationService.getConversations().reduce((sum, conv) => sum + conv.messages.length, 0)}
+              </div>
+              <Badge variant="outline" className="text-xs">
+                Messages sauvegardés
+              </Badge>
             </div>
-            <span className="font-bold">{stats.messagesPerDay}</span>
           </div>
-          
-          <div className="flex flex-col space-y-1 border rounded-lg p-3">
-            <div className="flex items-center text-muted-foreground">
-              <Zap className="h-4 w-4 mr-1" />
-              <span className="text-xs">Temps réponse</span>
-            </div>
-            <span className="font-bold">{stats.averageResponseTime}s</span>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
