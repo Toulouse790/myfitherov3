@@ -9,6 +9,7 @@ import N8nConfigPanel from './N8nConfigPanel';
 import WebhooksPanel from './WebhooksPanel';
 import ApiConfigPanel from './ApiConfigPanel';
 import N8nConnectionTest from './N8nConnectionTest';
+import AISystemMonitor from './AISystemMonitor';
 
 const AdminIntegrationPanel: React.FC = () => {
   const {
@@ -73,13 +74,16 @@ const AdminIntegrationPanel: React.FC = () => {
         </Tabs>
       </div>
       
-      <div>
+      <div className="space-y-4">
         <SystemStatusCard 
           n8nStatus={n8nConnectionStatus}
           loading={loading}
           errorMessage={errorMessage}
           onRefresh={fetchN8nConfig}
         />
+        
+        {/* Ajout du moniteur système IA */}
+        <AISystemMonitor />
       </div>
     </div>
   );
