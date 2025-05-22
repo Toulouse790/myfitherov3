@@ -11,6 +11,7 @@ interface StatCardProps {
   trendLabel?: string;
   className?: string;
   iconBackground?: string;
+  onClick?: () => void;
 }
 
 const StatCard: React.FC<StatCardProps> = ({
@@ -22,9 +23,13 @@ const StatCard: React.FC<StatCardProps> = ({
   trendLabel,
   className,
   iconBackground,
+  onClick,
 }) => {
   return (
-    <div className={cn("neumorphic-card dark:neumorphic-card-dark p-6", className)}>
+    <div 
+      className={cn("neumorphic-card dark:neumorphic-card-dark p-6", className)} 
+      onClick={onClick}
+    >
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>
