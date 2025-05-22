@@ -37,9 +37,9 @@ export class ApiService {
       console.error(`API error (${endpoint}):`, error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       
-      // Affichage d'un toast uniquement en production
+      // Affichage d'un toast uniquement en production pour éviter le spam en dev
       if (!import.meta.env.DEV) {
-        toast("Une erreur est survenue", {
+        toast.error("Une erreur est survenue", {
           description: "Veuillez réessayer plus tard"
         });
       }
@@ -48,13 +48,24 @@ export class ApiService {
     }
   }
 
+  /**
+   * Envoie des données vers n8n avec la structure attendue
+   * @param data Données à envoyer (UserInteraction)
+   */
   static async sendToN8n(data: any): Promise<ApiResponse<any>> {
+    console.log('📤 Envoi vers n8n:', data);
+    
     return this.request('/send-to-n8n', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
+  /**
+   * Teste la connexion avec un webhook n8n
+   * @param webhookUrl URL du webhook à tester
+   * @param testData Données de test
+   */
   static async testWebhook(webhookUrl: string, testData: any): Promise<ApiResponse<any>> {
     return this.request('/test-webhook', {
       method: 'POST',
@@ -62,6 +73,15 @@ export class ApiService {
         webhookUrl,
         ...testData
       }),
+    });
+  }
+
+  /**
+   * Récupère la configuration n8n depuis l'admin
+   */
+  static async getN8nConfig(): Promise<ApiResponse<{ url: string; status: string }>> {
+    return this.request('/admin/config/n8n', {
+      method: 'GET',
     });
   }
 }
