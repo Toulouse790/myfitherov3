@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import AIChat from '@/components/coach/AIChat';
+import EnhancedAIChat from '@/components/coach/EnhancedAIChat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -58,7 +58,7 @@ const Coach = () => {
           <TabsContent value="chat" className="space-y-6 mt-0">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <div className="lg:col-span-2">
-                <AIChat />
+                <EnhancedAIChat />
               </div>
               <div className="space-y-6">
                 <Card>
