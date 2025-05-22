@@ -1,186 +1,144 @@
 
+import { v4 as uuidv4 } from 'uuid';
 import { ApiService } from './api';
-import { AIService, ChatMessage } from './ai';
 import { StorageService } from './storage';
+import { ChatMessage } from './ai';
 
-const STORAGE_KEY_PREFIX = 'ai_thread_';
-const THREADS_LIST_KEY = 'ai_threads';
-
-export interface AIResponse {
-  response: string;
-  thread_id: string;
-}
+const STORAGE_KEY = 'ai_conversations';
 
 export interface ConversationThread {
   id: string;
   title: string;
   lastMessage: string;
-  timestamp: Date;
+  updatedAt: Date;
   messages: ChatMessage[];
 }
 
 export class AIIntegrationService {
   /**
-   * Génère un identifiant unique pour un fil de conversation
+   * Génère un nouvel identifiant de thread
    */
   static generateThreadId(): string {
-    return `thread_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-  }
-
-  /**
-   * Envoie une interaction utilisateur à l'API
-   */
-  static async sendUserInteraction(
-    message: string,
-    threadId: string,
-    typeDemande?: string
-  ): Promise<AIResponse> {
-    try {
-      // Récupérer l'historique du thread si disponible
-      const conversation = this.getConversation(threadId);
-      const history = conversation ? conversation.messages : [];
-
-      // Utiliser le service AI existant pour obtenir la réponse
-      const aiMessage = await AIService.getChatResponse(message, history);
-
-      // Créer le message utilisateur
-      const userMessage: ChatMessage = {
-        id: `msg_${Date.now()}_user`,
-        content: message,
-        sender: 'user',
-        timestamp: new Date(),
-      };
-
-      // Sauvegarder la conversation
-      this.saveMessage(threadId, userMessage);
-      this.saveMessage(threadId, aiMessage);
-
-      // Mettre à jour la liste des threads
-      this.updateThreadsList(threadId, message);
-
-      return {
-        response: aiMessage.content,
-        thread_id: threadId
-      };
-    } catch (error) {
-      console.error("Erreur lors de l'envoi du message:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Récupère une conversation par son identifiant
-   */
-  static getConversation(threadId: string): ConversationThread | null {
-    const storageKey = `${STORAGE_KEY_PREFIX}${threadId}`;
-    const threadData = StorageService.getItem<{
-      title: string;
-      lastMessage: string;
-      timestamp: string;
-      messages: ChatMessage[];
-    }>(storageKey);
-
-    if (!threadData) return null;
-
-    return {
-      id: threadId,
-      title: threadData.title || "Nouvelle conversation",
-      lastMessage: threadData.lastMessage || "",
-      timestamp: new Date(threadData.timestamp),
-      messages: threadData.messages.map(msg => ({
-        ...msg,
-        timestamp: new Date(msg.timestamp)
-      }))
-    };
+    return uuidv4();
   }
 
   /**
    * Récupère toutes les conversations
    */
   static getConversations(): ConversationThread[] {
-    const threadsList = StorageService.getItem<{
-      id: string;
-      title: string;
-      lastMessage: string;
-      timestamp: string;
-    }[]>(THREADS_LIST_KEY, []);
-
-    return threadsList.map(thread => ({
-      ...thread,
-      timestamp: new Date(thread.timestamp),
-      messages: this.getConversation(thread.id)?.messages || []
-    }));
+    return StorageService.getItem<ConversationThread[]>(STORAGE_KEY) || [];
   }
 
   /**
-   * Sauvegarde un message dans une conversation
+   * Récupère une conversation par son ID
    */
-  private static saveMessage(threadId: string, message: ChatMessage): void {
-    const storageKey = `${STORAGE_KEY_PREFIX}${threadId}`;
-    const existingData = StorageService.getItem<{
-      title: string;
-      lastMessage: string;
-      timestamp: string;
-      messages: ChatMessage[];
-    }>(storageKey, {
-      title: "Nouvelle conversation",
-      lastMessage: "",
-      timestamp: new Date().toISOString(),
-      messages: []
-    });
-
-    // Ajouter le nouveau message
-    const updatedData = {
-      ...existingData,
-      lastMessage: message.content.substring(0, 50) + (message.content.length > 50 ? "..." : ""),
-      timestamp: new Date().toISOString(),
-      messages: [...existingData.messages, message]
-    };
-
-    // Si c'est le premier message utilisateur, extraire un titre
-    if (existingData.title === "Nouvelle conversation" && message.sender === 'user') {
-      updatedData.title = message.content.substring(0, 30) + (message.content.length > 30 ? "..." : "");
-    }
-
-    StorageService.setItem(storageKey, updatedData);
+  static getConversation(threadId: string): ConversationThread | undefined {
+    const conversations = this.getConversations();
+    return conversations.find((c) => c.id === threadId);
   }
 
   /**
-   * Met à jour la liste des threads de conversation
+   * Met à jour la liste des threads avec le nouveau message
    */
   private static updateThreadsList(threadId: string, lastMessage: string): void {
-    const threadsList = StorageService.getItem<{
-      id: string;
-      title: string;
-      lastMessage: string;
-      timestamp: string;
-    }[]>(THREADS_LIST_KEY, []);
-
-    const threadIndex = threadsList.findIndex(t => t.id === threadId);
-    const conversation = this.getConversation(threadId);
-
-    if (!conversation) return;
-
-    const threadInfo = {
-      id: threadId,
-      title: conversation.title,
-      lastMessage: lastMessage.substring(0, 50) + (lastMessage.length > 50 ? "..." : ""),
-      timestamp: new Date().toISOString()
-    };
-
-    if (threadIndex >= 0) {
-      // Mettre à jour un thread existant
-      threadsList[threadIndex] = threadInfo;
+    const conversations = this.getConversations();
+    const conversationIndex = conversations.findIndex((c) => c.id === threadId);
+    
+    if (conversationIndex >= 0) {
+      // Mettre à jour une conversation existante
+      conversations[conversationIndex].lastMessage = lastMessage;
+      conversations[conversationIndex].updatedAt = new Date();
     } else {
-      // Ajouter un nouveau thread
-      threadsList.push(threadInfo);
+      // Créer une nouvelle conversation
+      conversations.push({
+        id: threadId,
+        title: lastMessage.slice(0, 40) + (lastMessage.length > 40 ? '...' : ''),
+        lastMessage,
+        updatedAt: new Date(),
+        messages: []
+      });
     }
-
-    // Trier par date décroissante
-    threadsList.sort((a, b) => 
-      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    
+    // Trier par date de mise à jour
+    conversations.sort((a, b) => 
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
     );
+    
+    StorageService.setItem(STORAGE_KEY, conversations);
+  }
 
-    StorageService.setItem(THREADS_LIST_KEY, threadsList);
+  /**
+   * Envoie une interaction utilisateur à l'IA et met à jour les messages locaux
+   */
+  static async sendUserInteraction(message: string, threadId: string, type?: string): Promise<any> {
+    // Mettre à jour la liste des threads
+    this.updateThreadsList(threadId, message);
+    
+    // Ajouter le message de l'utilisateur à la conversation
+    const userMessage: ChatMessage = {
+      id: `${threadId}_${Date.now()}`,
+      content: message,
+      sender: 'user',
+      timestamp: new Date()
+    };
+    
+    this.saveMessageToThread(threadId, userMessage);
+    
+    try {
+      // Envoyer le message à n8n
+      const response = await ApiService.sendToN8n({
+        message,
+        thread_id: threadId,
+        interaction_type: type || 'chat'
+      });
+      
+      if (!response.success) {
+        throw new Error(response.error || 'Échec de l\'envoi à l\'IA');
+      }
+      
+      const aiResponse = response.data;
+      
+      // Ajouter la réponse de l'IA à la conversation
+      const aiMessage: ChatMessage = {
+        id: `${threadId}_${Date.now()}_ai`,
+        content: aiResponse.message || '',
+        sender: 'assistant',
+        timestamp: new Date()
+      };
+      
+      this.saveMessageToThread(threadId, aiMessage);
+      
+      // Mettre à jour le résumé du thread avec la réponse de l'IA
+      this.updateThreadsList(threadId, aiMessage.content);
+      
+      return aiResponse;
+    } catch (error) {
+      console.error('Erreur lors de l\'envoi à l\'IA:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Sauvegarde un message dans un thread
+   */
+  private static saveMessageToThread(threadId: string, message: ChatMessage): void {
+    const conversations = this.getConversations();
+    const conversationIndex = conversations.findIndex((c) => c.id === threadId);
+    
+    if (conversationIndex >= 0) {
+      // Ajouter à une conversation existante
+      conversations[conversationIndex].messages.push(message);
+    } else {
+      // Créer une nouvelle conversation
+      conversations.push({
+        id: threadId,
+        title: message.content.slice(0, 40) + (message.content.length > 40 ? '...' : ''),
+        lastMessage: message.content,
+        updatedAt: new Date(),
+        messages: [message]
+      });
+    }
+    
+    StorageService.setItem(STORAGE_KEY, conversations);
   }
 }
