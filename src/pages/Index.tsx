@@ -2,11 +2,13 @@ import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight, Dumbbell, AppleIcon, Moon, MessageSquare, BarChart3, Medal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   // Modules avec codes couleurs distincts
   const modules = [
     { 
@@ -18,7 +20,8 @@ const Index = () => {
       gradientFrom: "from-blue-500",
       gradientTo: "to-blue-700",
       icon: Dumbbell,
-      path: "/workout"
+      path: "/workout",
+      actionLabel: "Voir les programmes"
     },
     { 
       title: "Nutrition", 
@@ -29,7 +32,8 @@ const Index = () => {
       gradientFrom: "from-green-500",
       gradientTo: "to-green-700", 
       icon: AppleIcon,
-      path: "/nutrition" 
+      path: "/nutrition",
+      actionLabel: "Voir les plans alimentaires"
     },
     { 
       title: "Sommeil", 
@@ -40,7 +44,8 @@ const Index = () => {
       gradientFrom: "from-purple-500",
       gradientTo: "to-purple-700", 
       icon: Moon,
-      path: "/sleep" 
+      path: "/sleep",
+      actionLabel: "Analyser mon sommeil" 
     },
     { 
       title: "Coach IA", 
@@ -51,7 +56,8 @@ const Index = () => {
       gradientFrom: "from-teal-500",
       gradientTo: "to-teal-700", 
       icon: MessageSquare,
-      path: "/coach" 
+      path: "/coach",
+      actionLabel: "Discuter avec le coach" 
     },
     { 
       title: "Tableau de bord", 
@@ -62,7 +68,8 @@ const Index = () => {
       gradientFrom: "from-orange-500",
       gradientTo: "to-orange-700",
       icon: BarChart3,
-      path: "/dashboard" 
+      path: "/dashboard",
+      actionLabel: "Voir mes statistiques" 
     }
   ];
 
@@ -131,12 +138,10 @@ const Index = () => {
                       "w-full text-sm sm:text-base",
                       module.buttonColor
                     )}
-                    asChild
+                    onClick={() => navigate(module.path)}
                   >
-                    <Link to={module.path} className="flex items-center justify-center">
-                      <span>Explorer</span>
-                      <ArrowRight className="ml-2" size={16} />
-                    </Link>
+                    <span>{module.actionLabel}</span>
+                    <ArrowRight className="ml-2" size={16} />
                   </Button>
                 </CardContent>
                 {/* Barre décorative en bas */}

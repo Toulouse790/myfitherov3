@@ -8,8 +8,11 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { toast } from '@/components/ui/sonner';
 import { ApiService } from '@/services/api';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 
 const Settings = () => {
+  const navigate = useNavigate();
   // Utiliser une variable d'environnement par défaut si disponible
   const defaultWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 
     "";
@@ -18,6 +21,7 @@ const Settings = () => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
   const [darkModeEnabled, setDarkModeEnabled] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const handleTrigger = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,19 +59,38 @@ const Settings = () => {
     }
   };
 
-  const handleSaveSettings = (e: React.FormEvent) => {
+  const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast("Paramètres enregistrés", {
-      description: "Vos paramètres ont été enregistrés avec succès."
-    });
+    setIsSaving(true);
+    
+    try {
+      // Simuler une opération d'enregistrement
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      toast("Paramètres enregistrés", {
+        description: "Vos paramètres ont été enregistrés avec succès."
+      });
+    } catch (error) {
+      toast("Erreur", {
+        description: "Une erreur s'est produite lors de l'enregistrement des paramètres."
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <MainLayout>
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Paramètres</h1>
-          <p className="text-muted-foreground">Gérez vos préférences et intégrations.</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Paramètres</h1>
+            <p className="text-muted-foreground">Gérez vos préférences et intégrations.</p>
+          </div>
+          
+          <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
+            Panel Admin
+          </Button>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -92,7 +115,14 @@ const Settings = () => {
             </CardContent>
             <CardFooter className="flex justify-end">
               <Button onClick={handleTrigger} disabled={isLoading}>
-                {isLoading ? "Envoi..." : "Tester la connexion"}
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Envoi...
+                  </>
+                ) : (
+                  "Tester la connexion"
+                )}
               </Button>
             </CardFooter>
           </Card>
@@ -134,7 +164,16 @@ const Settings = () => {
               </form>
             </CardContent>
             <CardFooter className="flex justify-end">
-              <Button onClick={handleSaveSettings}>Enregistrer</Button>
+              <Button onClick={handleSaveSettings} disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Enregistrement...
+                  </>
+                ) : (
+                  "Enregistrer"
+                )}
+              </Button>
             </CardFooter>
           </Card>
         </div>

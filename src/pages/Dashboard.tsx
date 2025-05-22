@@ -7,6 +7,7 @@ import { Dumbbell, Flame, Timer, Apple, Heart, MoveUp, Calendar, Award } from 'l
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/sonner';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -35,6 +36,13 @@ const Dashboard = () => {
     { id: 3, name: 'Musculation - Bas du corps', time: 'Mercredi, 18:00', duration: '50 min' },
   ];
 
+  const handleWorkoutClick = (workoutId: number) => {
+    navigate(`/workout/${workoutId}`);
+    toast.info("Entraînement sélectionné", {
+      description: "Détails de la séance chargés"
+    });
+  };
+
   return (
     <MainLayout>
       <div className="space-y-8">
@@ -59,6 +67,7 @@ const Dashboard = () => {
             trend={10}
             trendLabel="vs semaine dernière"
             onClick={() => navigate('/workout')}
+            actionLabel="Voir mes séances"
             className="cursor-pointer hover:shadow-md transition-shadow"
           />
           <StatCard 
@@ -70,6 +79,7 @@ const Dashboard = () => {
             trendLabel="vs semaine dernière"
             iconBackground="bg-fitness-orange/10"
             onClick={() => navigate('/nutrition')}
+            actionLabel="Voir mon plan nutritionnel"
             className="cursor-pointer hover:shadow-md transition-shadow"
           />
           <StatCard 
@@ -81,6 +91,7 @@ const Dashboard = () => {
             trendLabel="vs semaine dernière"
             iconBackground="bg-fitness-blue/10"
             onClick={() => navigate('/workout/history')}
+            actionLabel="Voir mon historique"
             className="cursor-pointer hover:shadow-md transition-shadow"
           />
           <StatCard 
@@ -92,6 +103,7 @@ const Dashboard = () => {
             trendLabel="vs semaine dernière"
             iconBackground="bg-fitness-purple/10"
             onClick={() => navigate('/sleep')}
+            actionLabel="Analyser mon sommeil"
             className="cursor-pointer hover:shadow-md transition-shadow"
           />
         </div>
@@ -133,7 +145,7 @@ const Dashboard = () => {
                   <div 
                     key={workout.id} 
                     className="flex items-center justify-between cursor-pointer hover:bg-muted/50 p-3 rounded-lg transition-colors"
-                    onClick={() => navigate(`/workout/${workout.id}`)}
+                    onClick={() => handleWorkoutClick(workout.id)}
                   >
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">

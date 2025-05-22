@@ -1,13 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import MealPlanCard, { MealPlanProps } from '@/components/nutrition/MealPlanCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sliders } from 'lucide-react';
+import { Search, Sliders, Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 const Nutrition = () => {
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  
   const mealPlans: MealPlanProps[] = [
     {
       id: '1',
@@ -64,6 +69,41 @@ const Nutrition = () => {
       category: 'Maintenance',
     },
   ];
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleFilterClick = () => {
+    setShowFilters(!showFilters);
+    toast.info(showFilters ? "Filtres masqués" : "Filtres affichés", {
+      description: showFilters ? "Les filtres ont été masqués" : "Sélectionnez vos critères de filtrage"
+    });
+  };
+  
+  const handleCreatePlan = async () => {
+    setIsLoading(true);
+    try {
+      // Simuler un chargement
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success("Plan nutritionnel créé", {
+        description: "Votre plan nutritionnel personnalisé est prêt"
+      });
+      // Ici, on pourrait rediriger vers une page de création de plan
+    } catch (error) {
+      toast.error("Erreur", {
+        description: "Impossible de créer un nouveau plan nutritionnel"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filtrer les plans nutritionnels en fonction de la recherche
+  const filteredMealPlans = mealPlans.filter(plan => 
+    plan.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    plan.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <MainLayout>
@@ -76,16 +116,66 @@ const Nutrition = () => {
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input placeholder="Rechercher un plan nutritionnel..." className="pl-10" />
+            <Input 
+              placeholder="Rechercher un plan nutritionnel..." 
+              className="pl-10" 
+              value={searchQuery}
+              onChange={handleSearch}
+            />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleFilterClick}>
               <Sliders size={16} className="mr-2" />
               Filtres
             </Button>
-            <Button>Mon plan personnalisé</Button>
+            <Button onClick={handleCreatePlan} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Création...
+                </>
+              ) : (
+                "Mon plan personnalisé"
+              )}
+            </Button>
           </div>
         </div>
+        
+        {showFilters && (
+          <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
+            <h3 className="font-medium">Filtres avancés</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Calories</label>
+                <select className="w-full p-2 border rounded-md">
+                  <option value="">Toutes les calories</option>
+                  <option value="low">Faible (&lt; 2000 kcal)</option>
+                  <option value="medium">Moyen (2000-2500 kcal)</option>
+                  <option value="high">Élevé (&gt; 2500 kcal)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type de régime</label>
+                <select className="w-full p-2 border rounded-md">
+                  <option value="">Tous les régimes</option>
+                  <option value="standard">Standard</option>
+                  <option value="vegetarien">Végétarien</option>
+                  <option value="cetogene">Cétogène</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Repas par jour</label>
+                <select className="w-full p-2 border rounded-md">
+                  <option value="">Tous</option>
+                  <option value="3">3 repas</option>
+                  <option value="4">4 repas</option>
+                  <option value="5">5 repas</option>
+                  <option value="6">6 repas</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="recommandé" className="w-full">
           <TabsList className="mb-6">
@@ -97,15 +187,21 @@ const Nutrition = () => {
           
           <TabsContent value="recommandé" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mealPlans.map((plan) => (
+              {filteredMealPlans.map((plan) => (
                 <MealPlanCard key={plan.id} {...plan} />
               ))}
             </div>
+            {filteredMealPlans.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-lg font-medium">Aucun plan nutritionnel ne correspond à votre recherche</p>
+                <p className="text-muted-foreground">Essayez avec d'autres termes ou filtres</p>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="objectifs" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mealPlans.filter(p => ["Prise de masse", "Perte de poids", "Performance"].includes(p.category)).map((plan) => (
+              {filteredMealPlans.filter(p => ["Prise de masse", "Perte de poids", "Performance"].includes(p.category)).map((plan) => (
                 <MealPlanCard key={plan.id} {...plan} />
               ))}
             </div>
@@ -113,7 +209,7 @@ const Nutrition = () => {
           
           <TabsContent value="régimes" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mealPlans.filter(p => ["Cétogène", "Végétarien"].includes(p.category)).map((plan) => (
+              {filteredMealPlans.filter(p => ["Cétogène", "Végétarien"].includes(p.category)).map((plan) => (
                 <MealPlanCard key={plan.id} {...plan} />
               ))}
             </div>
@@ -121,7 +217,7 @@ const Nutrition = () => {
           
           <TabsContent value="favoris" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mealPlans.slice(0, 2).map((plan) => (
+              {filteredMealPlans.slice(0, 2).map((plan) => (
                 <MealPlanCard key={plan.id} {...plan} />
               ))}
             </div>

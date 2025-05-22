@@ -1,13 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import WorkoutCard, { WorkoutProps } from '@/components/workout/WorkoutCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, Sliders } from 'lucide-react';
+import { Search, Sliders, Loader2 } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 const Workout = () => {
+  const [showFilters, setShowFilters] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
   const workouts: WorkoutProps[] = [
     {
       id: '1',
@@ -82,6 +87,41 @@ const Workout = () => {
       exercises: 10,
     },
   ];
+  
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleFilterClick = () => {
+    setShowFilters(!showFilters);
+    toast.info(showFilters ? "Filtres masqués" : "Filtres affichés", {
+      description: showFilters ? "Les filtres ont été masqués" : "Sélectionnez vos critères de filtrage"
+    });
+  };
+  
+  const handleCreatePlan = async () => {
+    setIsLoading(true);
+    try {
+      // Simuler un chargement
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      toast.success("Plan d'entraînement créé", {
+        description: "Votre nouveau plan d'entraînement est prêt"
+      });
+      // Ici, on pourrait rediriger vers une page de création de plan
+    } catch (error) {
+      toast.error("Erreur", {
+        description: "Impossible de créer un nouveau plan"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Filtrer les entraînements en fonction de la recherche
+  const filteredWorkouts = workouts.filter(workout => 
+    workout.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    workout.description.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <MainLayout>
@@ -94,16 +134,66 @@ const Workout = () => {
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-            <Input placeholder="Rechercher un entraînement..." className="pl-10" />
+            <Input 
+              placeholder="Rechercher un entraînement..." 
+              className="pl-10"
+              value={searchQuery}
+              onChange={handleSearch}
+            />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleFilterClick}>
               <Sliders size={16} className="mr-2" />
               Filtres
             </Button>
-            <Button>Créer un plan</Button>
+            <Button onClick={handleCreatePlan} disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Création...
+                </>
+              ) : (
+                "Créer un plan"
+              )}
+            </Button>
           </div>
         </div>
+
+        {showFilters && (
+          <div className="p-4 border rounded-lg bg-muted/30 space-y-4">
+            <h3 className="font-medium">Filtres avancés</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Durée</label>
+                <select className="w-full p-2 border rounded-md">
+                  <option value="">Toutes les durées</option>
+                  <option value="short">Court (&lt; 30 min)</option>
+                  <option value="medium">Moyen (30-45 min)</option>
+                  <option value="long">Long (&gt; 45 min)</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Niveau</label>
+                <select className="w-full p-2 border rounded-md">
+                  <option value="">Tous les niveaux</option>
+                  <option value="débutant">Débutant</option>
+                  <option value="intermédiaire">Intermédiaire</option>
+                  <option value="avancé">Avancé</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Catégorie</label>
+                <select className="w-full p-2 border rounded-md">
+                  <option value="">Toutes les catégories</option>
+                  <option value="Musculation">Musculation</option>
+                  <option value="Circuit training">Circuit training</option>
+                  <option value="Cardio">Cardio</option>
+                  <option value="Mobilité">Mobilité</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         <Tabs defaultValue="recommandé" className="w-full">
           <TabsList className="mb-6">
@@ -115,15 +205,21 @@ const Workout = () => {
           
           <TabsContent value="recommandé" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {workouts.map((workout) => (
+              {filteredWorkouts.map((workout) => (
                 <WorkoutCard key={workout.id} {...workout} />
               ))}
             </div>
+            {filteredWorkouts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-lg font-medium">Aucun entraînement ne correspond à votre recherche</p>
+                <p className="text-muted-foreground">Essayez avec d'autres termes ou filtres</p>
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="objectifs" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {workouts.filter(w => w.category === "Musculation").map((workout) => (
+              {filteredWorkouts.filter(w => w.category === "Musculation").map((workout) => (
                 <WorkoutCard key={workout.id} {...workout} />
               ))}
             </div>
@@ -131,7 +227,7 @@ const Workout = () => {
           
           <TabsContent value="niveau" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {workouts.filter(w => w.level === "débutant").map((workout) => (
+              {filteredWorkouts.filter(w => w.level === "débutant").map((workout) => (
                 <WorkoutCard key={workout.id} {...workout} />
               ))}
             </div>
@@ -139,7 +235,7 @@ const Workout = () => {
           
           <TabsContent value="mes-plans" className="mt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {workouts.slice(0, 3).map((workout) => (
+              {filteredWorkouts.slice(0, 3).map((workout) => (
                 <WorkoutCard key={workout.id} {...workout} />
               ))}
             </div>

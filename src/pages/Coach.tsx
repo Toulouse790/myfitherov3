@@ -1,13 +1,16 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import AIChat from '@/components/coach/AIChat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Check, Brain } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 const Coach = () => {
+  const [currentInput, setCurrentInput] = useState('');
+  
   const suggestionTopics = [
     "Créer un programme d'entraînement pour débutant",
     "Conseils nutritionnels pour prise de masse",
@@ -15,6 +18,13 @@ const Coach = () => {
     "Plan d'hydratation personnalisé",
     "Exercices pour renforcer le dos"
   ];
+  
+  const handleSuggestionClick = (suggestion: string) => {
+    setCurrentInput(suggestion);
+    toast.success("Suggestion sélectionnée", {
+      description: "Posez votre question au coach IA"
+    });
+  };
 
   const faqItems = [
     {
@@ -44,11 +54,36 @@ const Coach = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chat principal */}
           <div className="lg:col-span-3">
-            <AIChat />
+            <AIChat currentInput={currentInput} setCurrentInput={setCurrentInput} />
           </div>
 
-          {/* Sidebar avec informations */}
+          {/* Sidebar avec informations et suggestions */}
           <div className="space-y-4">
+            {/* Suggestions rapides */}
+            <Card className="h-fit">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center">
+                  <ArrowRight className="mr-2" size={18} />
+                  Questions rapides
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                {suggestionTopics.map((topic, i) => (
+                  <Button 
+                    key={i} 
+                    variant="outline" 
+                    className="w-full justify-start text-sm h-auto py-3 px-4" 
+                    size="sm"
+                    onClick={() => handleSuggestionClick(topic)}
+                  >
+                    <ArrowRight className="mr-2 flex-shrink-0" size={14} />
+                    <span className="text-left">{topic}</span>
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+            
+            {/* Agent IA info */}
             <Card className="h-fit">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center">
