@@ -1,6 +1,14 @@
 
 // This is the Supabase service implementation
 // It provides functions to interact with Supabase for storing conversations and messages
+import { createClient } from '@supabase/supabase-js';
+
+// Configuration Supabase
+const supabaseUrl = 'https://otpimqedxtwpuvbvdxhz.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90cGltcWVkeHR3cHV2YnZkeGh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDczNzk2NzEsImV4cCI6MjA2Mjk1NTY3MX0.mJ-rhSsKJc9ySQnqFq12v4A_Mc05ktdoBWyvGqtifxQ';
+
+// Création du client Supabase
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface User {
   id: string;
@@ -34,15 +42,48 @@ export class SupabaseService {
    * Teste la connexion à Supabase
    */
   static async testConnection(): Promise<boolean> {
-    console.log('Test de connexion Supabase (mock)');
-    return true;
+    try {
+      const { data, error } = await supabase.from('health_check').select('*').limit(1);
+      if (error) {
+        console.error('Erreur de connexion Supabase:', error);
+        return false;
+      }
+      console.log('Connexion Supabase OK:', data);
+      return true;
+    } catch (err) {
+      console.error('Exception connexion Supabase:', err);
+      return false;
+    }
   }
 
   /**
    * Récupère les conversations d'un utilisateur
    */
   static async getUserConversations(userId: string): Promise<Conversation[]> {
-    console.log(`Récupération des conversations pour l'utilisateur ${userId} (mock)`);
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur récupération conversations:', error);
+        return this.getMockConversations(userId);
+      }
+
+      return data as Conversation[];
+    } catch (err) {
+      console.error('Exception récupération conversations:', err);
+      return this.getMockConversations(userId);
+    }
+  }
+
+  /**
+   * Génère des données mock pour les conversations
+   */
+  private static getMockConversations(userId: string): Conversation[] {
+    console.log(`Génération de conversations mock pour l'utilisateur ${userId}`);
     
     // Pour l'instant, retourne des données mock
     const mockConversations: Conversation[] = [
@@ -71,7 +112,30 @@ export class SupabaseService {
    * Récupère les messages d'une conversation
    */
   static async getConversationMessages(threadId: string): Promise<Message[]> {
-    console.log(`Récupération des messages pour la conversation ${threadId} (mock)`);
+    try {
+      const { data, error } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('thread_id', threadId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Erreur récupération messages:', error);
+        return this.getMockMessages(threadId);
+      }
+
+      return data as Message[];
+    } catch (err) {
+      console.error('Exception récupération messages:', err);
+      return this.getMockMessages(threadId);
+    }
+  }
+
+  /**
+   * Génère des données mock pour les messages
+   */
+  private static getMockMessages(threadId: string): Message[] {
+    console.log(`Génération de messages mock pour la conversation ${threadId}`);
     
     // Pour l'instant, retourne des données mock
     const mockMessages: Message[] = [
@@ -100,16 +164,42 @@ export class SupabaseService {
    * Crée une nouvelle conversation
    */
   static async createConversation(conversation: Conversation): Promise<boolean> {
-    console.log('Création d\'une nouvelle conversation (mock)', conversation);
-    return true;
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .insert(conversation);
+
+      if (error) {
+        console.error('Erreur création conversation:', error);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Exception création conversation:', err);
+      return false;
+    }
   }
 
   /**
    * Sauvegarde un message dans une conversation
    */
   static async saveMessage(message: Message): Promise<boolean> {
-    console.log('Sauvegarde d\'un message (mock)', message);
-    return true;
+    try {
+      const { error } = await supabase
+        .from('messages')
+        .insert(message);
+
+      if (error) {
+        console.error('Erreur sauvegarde message:', error);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Exception sauvegarde message:', err);
+      return false;
+    }
   }
 
   /**
@@ -120,8 +210,26 @@ export class SupabaseService {
     agentName: string,
     durationSeconds: number
   ): Promise<boolean> {
-    console.log(`Log d'interaction: ${userId}, ${agentName}, ${durationSeconds}s (mock)`);
-    return true;
+    try {
+      const { error } = await supabase
+        .from('interactions')
+        .insert({
+          user_id: userId,
+          agent_name: agentName,
+          duration_seconds: durationSeconds,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Erreur log interaction:', error);
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Exception log interaction:', err);
+      return false;
+    }
   }
 
   /**
@@ -131,7 +239,57 @@ export class SupabaseService {
     userId: string, 
     localConversations: any[]
   ): Promise<boolean> {
-    console.log('Synchronisation des données locales (mock)', { userId, count: localConversations.length });
-    return true;
+    try {
+      console.log('Synchronisation des données locales', { userId, count: localConversations.length });
+      
+      // Pour chaque conversation locale, vérifier si elle existe déjà dans Supabase
+      for (const conv of localConversations) {
+        // Vérifier si la conversation existe
+        const { data: existingConv } = await supabase
+          .from('conversations')
+          .select('thread_id')
+          .eq('thread_id', conv.thread_id)
+          .single();
+
+        // Si la conversation n'existe pas, la créer
+        if (!existingConv) {
+          await supabase.from('conversations').insert({
+            thread_id: conv.thread_id,
+            user_id: userId,
+            title: conv.title || `Conversation du ${new Date(conv.created_at).toLocaleDateString()}`,
+            status: 'active',
+            created_at: conv.created_at,
+            updated_at: conv.updated_at
+          });
+        }
+
+        // Synchroniser les messages
+        for (const msg of conv.messages) {
+          const { data: existingMsg } = await supabase
+            .from('messages')
+            .select('message_id')
+            .eq('message_id', msg.id)
+            .single();
+
+          // Si le message n'existe pas, le créer
+          if (!existingMsg) {
+            await supabase.from('messages').insert({
+              message_id: msg.id,
+              thread_id: conv.thread_id,
+              user_id: userId,
+              sender: msg.sender,
+              content: msg.content,
+              type_demande: msg.type_demande,
+              created_at: msg.timestamp
+            });
+          }
+        }
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Exception synchronisation données:', err);
+      return false;
+    }
   }
 }
