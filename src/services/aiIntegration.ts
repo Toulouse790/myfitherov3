@@ -26,7 +26,7 @@ export class AIIntegrationService {
    * Récupère toutes les conversations
    */
   static getConversations(): ConversationThread[] {
-    return StorageService.getItem<ConversationThread[]>(STORAGE_KEY) || [];
+    return StorageService.getItem<ConversationThread[]>(STORAGE_KEY, []);
   }
 
   /**
