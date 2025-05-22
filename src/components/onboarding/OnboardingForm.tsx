@@ -27,6 +27,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
     email: "",
     birthdate: "",
     gender: "male",
+    pseudo: "",
     height: "",
     weight: "",
     experienceLevel: "intermediate",

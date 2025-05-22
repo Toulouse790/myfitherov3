@@ -6,6 +6,7 @@ export interface UserData {
   email: string;
   birthdate: string;
   gender: string;
+  pseudo: string;
   // Step 2: Measurements and Level
   height: string;
   weight: string;

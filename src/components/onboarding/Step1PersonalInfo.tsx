@@ -15,6 +15,17 @@ const Step1PersonalInfo: React.FC<Step1Props> = ({ userData, handleInputChange }
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Informations personnelles</h3>
       
+      <div className="space-y-2">
+        <Label htmlFor="pseudo">Pseudo (visible dans l'application)</Label>
+        <Input 
+          id="pseudo" 
+          placeholder="Choisissez un pseudo" 
+          required 
+          value={userData.pseudo}
+          onChange={(e) => handleInputChange('pseudo', e.target.value)}
+        />
+      </div>
+      
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="firstName">Prénom</Label>
