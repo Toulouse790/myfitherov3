@@ -1,7 +1,6 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { AIIntegrationService, ConversationThread } from '@/services/aiIntegration';
-import { ChatMessage } from '@/services/ai';
+import { AIIntegrationService, ConversationThread, ChatMessage } from '@/services/aiIntegration';
 
 export type { ChatMessage };
 
@@ -18,7 +17,7 @@ export const useAIChat = (threadId?: string) => {
     if (currentThreadId) {
       const conversation = AIIntegrationService.getConversation(currentThreadId);
       if (conversation) {
-        setMessages(conversation.messages);
+        setMessages(conversation.messages as ChatMessage[]);
       }
     }
   }, [currentThreadId]);
@@ -37,13 +36,13 @@ export const useAIChat = (threadId?: string) => {
       const aiResponse = await AIIntegrationService.sendUserInteraction(
         content.trim(),
         currentThreadId,
-        typeDemande
+        typeDemande as any
       );
 
       // Récupérer les messages mis à jour
       const conversation = AIIntegrationService.getConversation(currentThreadId);
       if (conversation) {
-        setMessages(conversation.messages);
+        setMessages(conversation.messages as ChatMessage[]);
       }
 
       // Mettre à jour le thread ID si nécessaire
@@ -90,7 +89,7 @@ export const useAIChat = (threadId?: string) => {
     const conversation = AIIntegrationService.getConversation(threadId);
     if (conversation) {
       setCurrentThreadId(threadId);
-      setMessages(conversation.messages);
+      setMessages(conversation.messages as ChatMessage[]);
       setError(null);
     }
   }, []);
