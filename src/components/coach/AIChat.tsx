@@ -6,84 +6,34 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Send, Mic, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { AIService, ChatMessage } from '@/services/ai';
-import { StorageService } from '@/services/storage';
-
-const STORAGE_KEY = 'chatHistory';
-const MAX_SAVED_MESSAGES = 50;
+import { useConversation } from '@/contexts/ConversationContext';
+import { useAIChat, ChatMessage } from '@/hooks/useAIChat';
 
 const AIChat: React.FC = () => {
-  const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
+  const { currentInput, setCurrentInput } = useConversation();
+  const { messages, loading, sendMessage } = useAIChat();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // Charger l'historique des messages au démarrage
+  // Scroll automatique vers le dernier message
   useEffect(() => {
-    const savedMessages = StorageService.getItem<ChatMessage[]>(STORAGE_KEY, []);
-    
-    // Ensure all timestamps are proper Date objects
-    const parsedMessages = savedMessages.map(msg => ({
-      ...msg,
-      timestamp: msg.timestamp instanceof Date ? msg.timestamp : new Date(msg.timestamp)
-    }));
-    
-    if (parsedMessages.length === 0) {
-      // Message de bienvenue par défaut
-      setMessages([{
-        id: '1',
-        content: 'Bonjour, je suis votre coach personnel MyFitHero. Comment puis-je vous aider aujourd\'hui ?',
-        sender: 'assistant',
-        timestamp: new Date(),
-      }]);
-    } else {
-      setMessages(parsedMessages);
-    }
-  }, []);
-  
-  // Enregistrer les messages mis à jour
-  useEffect(() => {
-    if (messages.length > 0) {
-      // Ne sauvegarder que les X derniers messages pour éviter de surcharger le localStorage
-      const limitedHistory = messages.slice(-MAX_SAVED_MESSAGES);
-      StorageService.setItem(STORAGE_KEY, limitedHistory);
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
   const handleSendMessage = useCallback(async () => {
-    if (!inputValue.trim()) return;
-    
-    // Ajouter le message de l'utilisateur
-    const userMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content: inputValue,
-      sender: 'user',
-      timestamp: new Date(),
-    };
-    
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
-    setIsProcessing(true);
+    if (!currentInput.trim()) return;
     
     try {
-      // Obtenir la réponse de l'IA (avec l'historique pour le contexte)
-      const aiResponse = await AIService.getChatResponse(
-        inputValue, 
-        messages.slice(-10) // Limiter au contexte récent pour performances
-      );
-      
-      setMessages((prev) => [...prev, aiResponse]);
+      await sendMessage(currentInput);
+      setCurrentInput('');
     } catch (error) {
       console.error("Erreur lors de la génération de la réponse:", error);
       toast({
         title: "Erreur",
         description: "Impossible d'obtenir une réponse de l'assistant pour le moment."
       });
-    } finally {
-      setIsProcessing(false);
     }
-  }, [inputValue, messages, toast]);
+  }, [currentInput, sendMessage, setCurrentInput, toast]);
   
   const handleVoiceInput = () => {
     toast({
@@ -97,11 +47,6 @@ const AIChat: React.FC = () => {
       handleSendMessage();
     }
   };
-  
-  // Scroll automatique vers le dernier message
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
   
   return (
     <Card className="flex flex-col h-[600px] max-h-[80vh]">
@@ -135,7 +80,7 @@ const AIChat: React.FC = () => {
             </div>
           </div>
         ))}
-        {isProcessing && (
+        {loading && (
           <div className="flex justify-start">
             <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
               <div className="flex space-x-1">
@@ -160,14 +105,14 @@ const AIChat: React.FC = () => {
           </Button>
           <Input
             placeholder="Posez une question à votre coach..."
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            value={currentInput}
+            onChange={(e) => setCurrentInput(e.target.value)}
             onKeyPress={handleKeyPress}
             className="flex-1"
           />
           <Button 
             onClick={handleSendMessage} 
-            disabled={!inputValue.trim() || isProcessing}
+            disabled={!currentInput.trim() || loading}
             aria-label="Envoyer"
           >
             <Send size={20} />
