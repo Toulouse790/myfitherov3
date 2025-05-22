@@ -42,10 +42,11 @@ const WorkoutDetail = () => {
   }
 
   const handleStartWorkout = () => {
+    // Rediriger vers la page d'entraînement en cours
+    navigate(`/workout/${id}/session`);
     toast.success("Entraînement démarré !", {
       description: `${workout.title} - ${workout.duration} minutes`,
     });
-    // In a real app, this would start a workout session
   };
   
   const handleSaveToFavorites = () => {
