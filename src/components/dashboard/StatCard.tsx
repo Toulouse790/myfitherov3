@@ -1,108 +1,89 @@
 
-import { cn } from "@/lib/utils";
-import React from "react";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { TrendingUp, TrendingDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface StatCardProps {
   title: string;
-  value: string | number;
-  description?: string;
-  icon?: React.ReactNode;
+  value: string;
+  description: string;
+  icon: React.ReactNode;
   trend?: number;
   trendLabel?: string;
-  className?: string;
   iconBackground?: string;
   onClick?: () => void;
   actionLabel?: string;
+  className?: string;
 }
 
-const StatCard: React.FC<StatCardProps> = ({
-  title,
-  value,
-  description,
-  icon,
-  trend,
+const StatCard = ({ 
+  title, 
+  value, 
+  description, 
+  icon, 
+  trend, 
   trendLabel,
-  className,
-  iconBackground,
+  iconBackground = "bg-primary/10",
   onClick,
   actionLabel,
-}) => {
-  const isClickable = !!onClick;
-
+  className 
+}: StatCardProps) => {
   return (
-    <div 
-      className={cn(
-        "neumorphic-card dark:neumorphic-card-dark p-6 relative group",
-        isClickable && "cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02]",
-        className
-      )}
-      onClick={onClick}
-      role={isClickable ? "button" : undefined}
-      tabIndex={isClickable ? 0 : undefined}
-      onKeyDown={isClickable ? (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onClick?.();
-        }
-      } : undefined}
-    >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <h3 className={cn(
-            "text-sm font-medium text-muted-foreground",
-            isClickable && "group-hover:text-primary transition-colors"
-          )}>
-            {title}
-          </h3>
-          <div className="mt-1 flex items-baseline">
-            <p className={cn(
-              "text-2xl font-semibold",
-              isClickable && "group-hover:text-primary transition-colors"
+    <Card className={cn(
+      "transition-all duration-300 hover:scale-105 hover:shadow-lg group",
+      "border-2 hover:border-primary/20",
+      className
+    )}>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-muted-foreground">
+          {title}
+        </CardTitle>
+        <div className={cn(
+          "p-2 rounded-full transition-all duration-300 group-hover:scale-110",
+          iconBackground
+        )}>
+          {icon}
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold mb-1 transition-colors duration-300 group-hover:text-primary">
+          {value}
+        </div>
+        <p className="text-xs text-muted-foreground mb-2">{description}</p>
+        
+        {trend && (
+          <div className="flex items-center space-x-1">
+            {trend > 0 ? (
+              <TrendingUp className="w-4 h-4 text-green-500" />
+            ) : (
+              <TrendingDown className="w-4 h-4 text-red-500" />
+            )}
+            <span className={cn(
+              "text-xs font-medium",
+              trend > 0 ? "text-green-500" : "text-red-500"
             )}>
-              {value}
-            </p>
-            {trend !== undefined && (
-              <span
-                className={cn(
-                  "ml-2 text-xs font-medium",
-                  trend >= 0 ? "text-green-600" : "text-red-600"
-                )}
-              >
-                {trend >= 0 ? "+" : ""}{trend}%
-                {trendLabel && <span className="ml-1 text-muted-foreground">{trendLabel}</span>}
-              </span>
+              {trend > 0 ? '+' : ''}{trend}%
+            </span>
+            {trendLabel && (
+              <span className="text-xs text-muted-foreground">{trendLabel}</span>
             )}
           </div>
-          {description && (
-            <p className="mt-1 text-sm text-muted-foreground">
-              {description}
-            </p>
-          )}
-          
-          {/* Action label visible au hover si cliquable */}
-          {isClickable && actionLabel && (
-            <p className="mt-2 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-              {actionLabel} →
-            </p>
-          )}
-        </div>
-        
-        {icon && (
-          <div className={cn(
-            "rounded-full p-2 transition-all duration-300",
-            iconBackground || "bg-primary/10",
-            isClickable && "group-hover:scale-110"
-          )}>
-            {icon}
-          </div>
         )}
-      </div>
-      
-      {/* Indicateur visuel pour les cartes cliquables */}
-      {isClickable && (
-        <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-primary/20 transition-colors pointer-events-none" />
-      )}
-    </div>
+        
+        {onClick && actionLabel && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={onClick}
+            className="mt-2 w-full h-8 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+            {actionLabel}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
