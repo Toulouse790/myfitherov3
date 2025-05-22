@@ -1,15 +1,16 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import AIChat from '@/components/coach/AIChat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Check, Brain } from 'lucide-react';
+import { ArrowRight, Brain } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { useConversation } from '@/contexts/ConversationContext';
 
 const Coach = () => {
-  const [currentInput, setCurrentInput] = useState('');
+  const { setCurrentInput } = useConversation();
   
   const suggestionTopics = [
     "Créer un programme d'entraînement pour débutant",
@@ -54,7 +55,7 @@ const Coach = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Chat principal */}
           <div className="lg:col-span-3">
-            <AIChat currentInput={currentInput} setCurrentInput={setCurrentInput} />
+            <AIChat />
           </div>
 
           {/* Sidebar avec informations et suggestions */}
