@@ -1,15 +1,14 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { toast } from '@/components/ui/sonner';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Timer, Minus, Plus, Play, Pause, SkipForward } from 'lucide-react';
 import { useWorkoutSessionData } from '@/hooks/useWorkoutSessionData';
 import WorkoutSessionHeader from '@/components/workout/session/WorkoutSessionHeader';
-import RestTimer from '@/components/workout/session/RestTimer';
 import ExerciseCard from '@/components/workout/session/ExerciseCard';
 import NextExercisePreview from '@/components/workout/session/NextExercisePreview';
 
@@ -160,6 +159,12 @@ const WorkoutSession = () => {
     }
   };
   
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+  
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -176,13 +181,79 @@ const WorkoutSession = () => {
         
         {/* Timer de repos ou exercice actuel */}
         {isResting ? (
-          <RestTimer 
-            restTime={restTime}
-            isTimerActive={isTimerActive}
-            onToggleTimer={() => setIsTimerActive(!isTimerActive)}
-            onSkip={handleSkipRest}
-            onAdjustTime={adjustRestTime}
-          />
+          <Card className="glass-card border-blue-200 relative overflow-hidden">
+            <div className="absolute inset-0 gradient-flow opacity-10"></div>
+            <CardContent className="pt-6 text-center relative z-10">
+              <div className="float">
+                <Timer className="mx-auto mb-4 text-blue-600" size={48} />
+              </div>
+              <h2 className="text-2xl font-bold text-blue-800 mb-2">Temps de repos</h2>
+              <div className="text-7xl font-mono font-bold text-blue-600 mb-4 pulse-glow">
+                {formatTime(restTime)}
+              </div>
+              
+              {/* Progress Circle */}
+              <div className="relative w-24 h-24 mx-auto mb-4">
+                <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="transparent"
+                    className="text-blue-200"
+                  />
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="transparent"
+                    strokeDasharray={`${2 * Math.PI * 45}`}
+                    strokeDashoffset={`${2 * Math.PI * 45 * (1 - (restTime / (customRestTime[currentExercise.id] || currentExercise.rest)))}`}
+                    className="text-blue-500 transition-all duration-1000 ease-linear"
+                  />
+                </svg>
+              </div>
+              
+              <div className="flex justify-center gap-2 mb-4">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => adjustRestTime(-15)}
+                  className="bg-white/80 hover:bg-white hover-grow"
+                >
+                  <Minus size={16} className="mr-1" />
+                  15s
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => adjustRestTime(15)}
+                  className="bg-white/80 hover:bg-white hover-grow"
+                >
+                  <Plus size={16} className="mr-1" />
+                  15s
+                </Button>
+              </div>
+              <div className="flex justify-center gap-2">
+                <Button 
+                  variant="outline"
+                  onClick={() => setIsTimerActive(!isTimerActive)}
+                  className="bg-white/80 hover:bg-white hover-grow"
+                >
+                  {isTimerActive ? <Pause size={16} className="mr-2" /> : <Play size={16} className="mr-2" />}
+                  {isTimerActive ? 'Pause' : 'Reprendre'}
+                </Button>
+                <Button onClick={handleSkipRest} className="bg-blue-600 hover:bg-blue-700 hover-grow">
+                  <SkipForward size={16} className="mr-2" />
+                  Passer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         ) : (
           <ExerciseCard
             exercise={currentExercise}
