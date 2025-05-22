@@ -3,7 +3,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { AIIntegrationService, ConversationThread } from '@/services/aiIntegration';
 import { ChatMessage } from '@/services/ai';
 
-export { ChatMessage };
+export type { ChatMessage };
 
 export const useAIChat = (threadId?: string) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
