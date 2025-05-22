@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   LayoutDashboard, 
@@ -24,24 +24,74 @@ import { useAdminDashboard } from '@/hooks/useAdminDashboard';
 import AgentManagement from '@/components/admin/AgentManagement';
 
 const AdminDashboard = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const { 
-    isAuthenticated, 
-    setIsAuthenticated,
     stats, 
     logs,
     dashboardLoading, 
     fetchDashboardData 
   } = useAdminDashboard();
 
-  const handleLogout = () => {
-    import('@/services/admin').then(({ AdminService }) => {
-      AdminService.logout();
+  // Vérifier l'authentification au chargement
+  useEffect(() => {
+    checkAuthentication();
+  }, []);
+
+  const checkAuthentication = () => {
+    try {
+      const isAuth = localStorage.getItem('adminAuthenticated') === 'true';
+      const loginTime = localStorage.getItem('adminLoginTime');
+      
+      // Vérifier si la session n'a pas expiré (24h)
+      if (isAuth && loginTime) {
+        const timeElapsed = Date.now() - parseInt(loginTime);
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+        
+        if (timeElapsed < twentyFourHours) {
+          setIsAuthenticated(true);
+        } else {
+          // Session expirée
+          handleLogout();
+        }
+      }
+    } catch (error) {
+      console.error('Erreur vérification auth:', error);
       setIsAuthenticated(false);
-    });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
+  const handleLogin = (success: boolean) => {
+    if (success) {
+      setIsAuthenticated(true);
+      fetchDashboardData(); // Charger les données après connexion
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminAuthenticated');
+    localStorage.removeItem('adminLoginTime');
+    setIsAuthenticated(false);
+  };
+
+  // Affichage pendant le chargement
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Vérification des accès...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Affichage du formulaire de connexion si non authentifié
   if (!isAuthenticated) {
-    return <AdminLoginForm />;
+    return <AdminLoginForm onLogin={handleLogin} />;
   }
 
   return (
