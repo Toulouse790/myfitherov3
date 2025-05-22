@@ -1,6 +1,6 @@
 
-// This is a placeholder for the Supabase service
-// In a real implementation, this would connect to your Supabase instance
+// This is the Supabase service implementation
+// It provides functions to interact with Supabase for storing conversations and messages
 
 export interface User {
   id: string;
@@ -43,7 +43,28 @@ export class SupabaseService {
    */
   static async getUserConversations(userId: string): Promise<Conversation[]> {
     console.log(`Récupération des conversations pour l'utilisateur ${userId} (mock)`);
-    return [];
+    
+    // Pour l'instant, retourne des données mock
+    const mockConversations: Conversation[] = [
+      {
+        thread_id: `thread_${Date.now()}_mock1`,
+        user_id: userId,
+        title: 'Conversation sur la nutrition',
+        status: 'active',
+        created_at: new Date(Date.now() - 86400000).toISOString(), // Hier
+        updated_at: new Date().toISOString()
+      },
+      {
+        thread_id: `thread_${Date.now()}_mock2`,
+        user_id: userId,
+        title: 'Programme d\'entraînement',
+        status: 'active',
+        created_at: new Date(Date.now() - 172800000).toISOString(), // Avant-hier
+        updated_at: new Date(Date.now() - 86400000).toISOString()
+      }
+    ];
+    
+    return mockConversations;
   }
 
   /**
@@ -51,7 +72,28 @@ export class SupabaseService {
    */
   static async getConversationMessages(threadId: string): Promise<Message[]> {
     console.log(`Récupération des messages pour la conversation ${threadId} (mock)`);
-    return [];
+    
+    // Pour l'instant, retourne des données mock
+    const mockMessages: Message[] = [
+      {
+        message_id: `msg_${Date.now()}_mock1`,
+        thread_id: threadId,
+        user_id: 'user_mock',
+        sender: 'user',
+        content: 'Bonjour, pouvez-vous me donner des conseils pour améliorer ma nutrition?',
+        created_at: new Date(Date.now() - 3600000).toISOString() // Il y a 1 heure
+      },
+      {
+        message_id: `msg_${Date.now()}_mock2`,
+        thread_id: threadId,
+        user_id: 'user_mock',
+        sender: 'assistant',
+        content: 'Bien sûr! Pour améliorer votre nutrition, concentrez-vous sur des aliments entiers, non transformés, et variez votre alimentation. Avez-vous des objectifs spécifiques?',
+        created_at: new Date(Date.now() - 3500000).toISOString() // Il y a 58 minutes
+      }
+    ];
+    
+    return mockMessages;
   }
 
   /**

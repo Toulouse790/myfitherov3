@@ -1,6 +1,7 @@
 
 import { ApiService } from './api';
 import { StorageService } from './storage';
+import { SupabaseService, User, Conversation, Message } from './supabase';
 
 export interface UserInteraction {
   user_id: string;
@@ -55,6 +56,21 @@ export interface ChatMessage {
 export class AIIntegrationService {
   private static readonly USER_ID_KEY = 'user_id';
   private static readonly CONVERSATIONS_KEY = 'conversations';
+  private static readonly SYNC_ENABLED_KEY = 'supabase_sync_enabled';
+
+  /**
+   * Vérifie si la synchronisation Supabase est activée
+   */
+  private static isSyncEnabled(): boolean {
+    return StorageService.getItem<boolean>(this.SYNC_ENABLED_KEY, true);
+  }
+
+  /**
+   * Active/désactive la synchronisation Supabase
+   */
+  static setSyncEnabled(enabled: boolean) {
+    StorageService.setItem(this.SYNC_ENABLED_KEY, enabled);
+  }
 
   /**
    * Génère un UUID simple sans dépendance externe
@@ -114,7 +130,7 @@ export class AIIntegrationService {
   }
 
   /**
-   * Envoie une interaction utilisateur vers n8n
+   * Envoie une interaction utilisateur vers n8n avec sauvegarde Supabase
    */
   static async sendUserInteraction(
     content: string,
@@ -124,6 +140,7 @@ export class AIIntegrationService {
     const userId = this.getUserId();
     const finalThreadId = threadId || this.generateThreadId();
     const finalTypeDemande = typeDemande || this.detectRequestType(content);
+    const startTime = Date.now();
 
     const interaction: UserInteraction = {
       user_id: userId,
@@ -141,28 +158,41 @@ export class AIIntegrationService {
     };
 
     try {
-      // Envoi vers n8n via l'API
+      // 1. Sauvegarder le message utilisateur
+      await this.saveMessage(finalThreadId, content, 'user', finalTypeDemande);
+
+      // 2. Envoi vers n8n
       const response = await ApiService.sendToN8n(interaction);
+      
+      let aiResponse: AIResponse;
       
       if (!response.success) {
         throw new Error(response.error || 'Erreur lors de l\'envoi vers n8n');
       }
 
-      // Simulation de réponse si n8n ne répond pas encore (en attendant l'intégration complète)
-      const aiResponse: AIResponse = response.data || {
+      // 3. Traitement de la réponse n8n ou fallback
+      aiResponse = response.data || {
         thread_id: finalThreadId,
         response: this.generateMockResponse(content, finalTypeDemande),
         type_reponse: finalTypeDemande,
         metadata: {
           agent_utilise: `agent_${finalTypeDemande}`,
           confiance_score: 0.85,
-          duree_traitement: 1.2
+          duree_traitement: (Date.now() - startTime) / 1000
         }
       };
 
-      // Sauvegarder la conversation
-      this.saveConversationMessage(finalThreadId, content, 'user', finalTypeDemande);
-      this.saveConversationMessage(finalThreadId, aiResponse.response, 'assistant');
+      // 4. Sauvegarder la réponse IA
+      await this.saveMessage(finalThreadId, aiResponse.response, 'assistant');
+
+      // 5. Mettre à jour les analytics si Supabase est activé
+      if (this.isSyncEnabled() && aiResponse.metadata) {
+        await SupabaseService.logInteraction(
+          userId, 
+          aiResponse.metadata.agent_utilise, 
+          aiResponse.metadata.duree_traitement
+        );
+      }
 
       return aiResponse;
     } catch (error) {
@@ -176,39 +206,82 @@ export class AIIntegrationService {
         metadata: {
           agent_utilise: 'fallback',
           confiance_score: 0,
-          duree_traitement: 0
+          duree_traitement: (Date.now() - startTime) / 1000
         }
       };
+
+      // Sauvegarder même la réponse d'erreur
+      await this.saveMessage(finalThreadId, fallbackResponse.response, 'assistant');
 
       return fallbackResponse;
     }
   }
 
   /**
-   * Récupère les conversations de l'utilisateur
+   * Sauvegarde un message (local + Supabase si activé)
    */
-  static getConversations(): ConversationThread[] {
-    return StorageService.getItem<ConversationThread[]>(this.CONVERSATIONS_KEY, []);
-  }
-
-  /**
-   * Récupère une conversation spécifique
-   */
-  static getConversation(threadId: string): ConversationThread | null {
-    const conversations = this.getConversations();
-    return conversations.find(conv => conv.thread_id === threadId) || null;
-  }
-
-  /**
-   * Sauvegarde un message dans une conversation
-   */
-  private static saveConversationMessage(
+  private static async saveMessage(
     threadId: string,
     content: string,
     sender: 'user' | 'assistant',
     typeDemande?: string
   ) {
-    const conversations = this.getConversations();
+    const userId = this.getUserId();
+    const messageId = `msg_${Date.now()}_${this.generateUUID().split('-')[0]}`;
+    const timestamp = new Date();
+
+    // 1. Sauvegarde locale (toujours)
+    this.saveConversationMessageLocal(threadId, content, sender, typeDemande, messageId, timestamp);
+
+    // 2. Sauvegarde Supabase (si activée et connexion disponible)
+    if (this.isSyncEnabled()) {
+      try {
+        // Créer la conversation si elle n'existe pas
+        const conversations = await SupabaseService.getUserConversations(userId);
+        const existingConv = conversations.find(conv => conv.thread_id === threadId);
+        
+        if (!existingConv) {
+          await SupabaseService.createConversation({
+            thread_id: threadId,
+            user_id: userId,
+            title: sender === 'user' ? content.substring(0, 50) + '...' : 'Nouvelle conversation',
+            status: 'active'
+          });
+        }
+
+        // Sauvegarder le message
+        await SupabaseService.saveMessage({
+          message_id: messageId,
+          thread_id: threadId,
+          user_id: userId,
+          sender,
+          content,
+          type_demande: typeDemande,
+          metadata: {
+            timestamp: timestamp.toISOString(),
+            device_info: navigator.userAgent
+          }
+        });
+
+      } catch (error) {
+        console.warn('Erreur lors de la sauvegarde Supabase (mode dégradé):', error);
+        // Continue en mode local seulement
+      }
+    }
+  }
+
+  /**
+   * Sauvegarde locale des messages (backup)
+   */
+  private static saveConversationMessageLocal(
+    threadId: string,
+    content: string,
+    sender: 'user' | 'assistant',
+    typeDemande?: string,
+    messageId?: string,
+    timestamp?: Date
+  ) {
+    const conversations = this.getConversationsLocal();
     const userId = this.getUserId();
     
     let conversation = conversations.find(conv => conv.thread_id === threadId);
@@ -218,25 +291,113 @@ export class AIIntegrationService {
         thread_id: threadId,
         user_id: userId,
         messages: [],
-        created_at: new Date(),
-        updated_at: new Date()
+        created_at: timestamp || new Date(),
+        updated_at: timestamp || new Date()
       };
       conversations.push(conversation);
     }
 
-    const messageId = `msg_${Date.now()}_${this.generateUUID().split('-')[0]}`;
+    const finalMessageId = messageId || `msg_${Date.now()}_${this.generateUUID().split('-')[0]}`;
     
     conversation.messages.push({
-      id: messageId,
+      id: finalMessageId,
       content,
       sender,
-      timestamp: new Date(),
+      timestamp: timestamp || new Date(),
       type_demande: typeDemande
     });
 
-    conversation.updated_at = new Date();
+    conversation.updated_at = timestamp || new Date();
     
     StorageService.setItem(this.CONVERSATIONS_KEY, conversations);
+  }
+
+  /**
+   * Récupère les conversations (Supabase en priorité, local en fallback)
+   */
+  static async getConversations(): Promise<ConversationThread[]> {
+    if (this.isSyncEnabled()) {
+      try {
+        const userId = this.getUserId();
+        const supabaseConversations = await SupabaseService.getUserConversations(userId);
+        
+        // Convertir les conversations Supabase au format local
+        const conversations: ConversationThread[] = [];
+        
+        for (const conv of supabaseConversations) {
+          const messages = await SupabaseService.getConversationMessages(conv.thread_id);
+          
+          conversations.push({
+            thread_id: conv.thread_id,
+            user_id: conv.user_id,
+            messages: messages.map(msg => ({
+              id: msg.message_id,
+              content: msg.content,
+              sender: msg.sender,
+              timestamp: new Date(msg.created_at || ''),
+              type_demande: msg.type_demande
+            })),
+            created_at: new Date(conv.created_at || ''),
+            updated_at: new Date(conv.updated_at || '')
+          });
+        }
+        
+        return conversations;
+      } catch (error) {
+        console.warn('Erreur Supabase, utilisation du stockage local:', error);
+      }
+    }
+    
+    // Fallback : conversations locales
+    return this.getConversationsLocal();
+  }
+
+  /**
+   * Récupère les conversations locales
+   */
+  private static getConversationsLocal(): ConversationThread[] {
+    return StorageService.getItem<ConversationThread[]>(this.CONVERSATIONS_KEY, []);
+  }
+
+  /**
+   * Récupère une conversation spécifique
+   */
+  static async getConversation(threadId: string): Promise<ConversationThread | null> {
+    const conversations = await this.getConversations();
+    return conversations.find(conv => conv.thread_id === threadId) || null;
+  }
+
+  /**
+   * Synchronise les données locales avec Supabase
+   */
+  static async syncWithSupabase(): Promise<boolean> {
+    if (!this.isSyncEnabled()) return false;
+
+    try {
+      const userId = this.getUserId();
+      const localConversations = this.getConversationsLocal();
+      
+      console.log('🔄 Synchronisation des données avec Supabase...');
+      
+      const success = await SupabaseService.syncLocalData(userId, localConversations);
+      
+      if (success) {
+        console.log('✅ Synchronisation réussie');
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('❌ Erreur lors de la synchronisation:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Test de connexion Supabase
+   */
+  static async testSupabaseConnection(): Promise<boolean> {
+    return await SupabaseService.testConnection();
   }
 
   /**

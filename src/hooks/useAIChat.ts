@@ -1,8 +1,14 @@
 
 import { useState, useCallback, useEffect } from 'react';
-import { AIIntegrationService, ConversationThread, ChatMessage } from '@/services/aiIntegration';
+import { AIIntegrationService, ConversationThread } from '@/services/aiIntegration';
 
-export type { ChatMessage };
+export interface ChatMessage {
+  id: string;
+  content: string;
+  sender: 'user' | 'assistant';
+  timestamp: Date;
+  type_demande?: string;
+}
 
 export const useAIChat = (threadId?: string) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -14,12 +20,16 @@ export const useAIChat = (threadId?: string) => {
 
   // Charger la conversation existante au montage
   useEffect(() => {
-    if (currentThreadId) {
-      const conversation = AIIntegrationService.getConversation(currentThreadId);
-      if (conversation) {
-        setMessages(conversation.messages as ChatMessage[]);
+    const loadConversation = async () => {
+      if (currentThreadId) {
+        const conversation = await AIIntegrationService.getConversation(currentThreadId);
+        if (conversation) {
+          setMessages(conversation.messages as ChatMessage[]);
+        }
       }
-    }
+    };
+    
+    loadConversation();
   }, [currentThreadId]);
 
   /**
@@ -40,7 +50,7 @@ export const useAIChat = (threadId?: string) => {
       );
 
       // Récupérer les messages mis à jour
-      const conversation = AIIntegrationService.getConversation(currentThreadId);
+      const conversation = await AIIntegrationService.getConversation(currentThreadId);
       if (conversation) {
         setMessages(conversation.messages as ChatMessage[]);
       }
@@ -85,8 +95,8 @@ export const useAIChat = (threadId?: string) => {
   /**
    * Charge une conversation existante
    */
-  const loadConversation = useCallback((threadId: string) => {
-    const conversation = AIIntegrationService.getConversation(threadId);
+  const loadConversation = useCallback(async (threadId: string) => {
+    const conversation = await AIIntegrationService.getConversation(threadId);
     if (conversation) {
       setCurrentThreadId(threadId);
       setMessages(conversation.messages as ChatMessage[]);
@@ -97,8 +107,8 @@ export const useAIChat = (threadId?: string) => {
   /**
    * Récupère toutes les conversations de l'utilisateur
    */
-  const getAllConversations = useCallback((): ConversationThread[] => {
-    return AIIntegrationService.getConversations();
+  const getAllConversations = useCallback(async (): Promise<ConversationThread[]> => {
+    return await AIIntegrationService.getConversations();
   }, []);
 
   /**
