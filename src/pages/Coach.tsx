@@ -4,10 +4,10 @@ import MainLayout from '@/components/layout/MainLayout';
 import AIChat from '@/components/coach/AIChat';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Brain } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
+import { ArrowRight } from 'lucide-react';
 import { useConversation } from '@/contexts/ConversationContext';
+import AICoachCard from '@/components/coach/AICoachCard';
+import { infoToast } from '@/components/ui/ModernToast';
 
 const Coach = () => {
   const { setCurrentInput } = useConversation();
@@ -22,9 +22,7 @@ const Coach = () => {
   
   const handleSuggestionClick = (suggestion: string) => {
     setCurrentInput(suggestion);
-    toast.success("Suggestion sélectionnée", {
-      description: "Posez votre question au coach IA"
-    });
+    infoToast("Suggestion sélectionnée", "Posez votre question au coach IA");
   };
 
   const faqItems = [
@@ -84,55 +82,8 @@ const Coach = () => {
               </CardContent>
             </Card>
             
-            {/* Agent IA info */}
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Brain className="mr-2" size={18} />
-                  Agents IA spécialisés
-                </CardTitle>
-                <CardDescription className="text-sm">Notre système utilise plusieurs agents experts</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-red-50 dark:bg-red-950">
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-medium">Agent Musculation</span>
-                    </div>
-                    <Badge variant="default" className="text-xs">Actif</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-green-50 dark:bg-green-950">
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-medium">Agent Nutrition</span>
-                    </div>
-                    <Badge variant="default" className="text-xs">Actif</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-purple-50 dark:bg-purple-950">
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-medium">Agent Sommeil</span>
-                    </div>
-                    <Badge variant="default" className="text-xs">Actif</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-cyan-50 dark:bg-cyan-950">
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-cyan-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-medium">Agent Hydratation</span>
-                    </div>
-                    <Badge variant="secondary" className="text-xs">Standby</Badge>
-                  </div>
-                  <div className="flex items-center justify-between p-2 rounded-lg bg-pink-50 dark:bg-pink-950">
-                    <div className="flex items-center">
-                      <div className="w-2 h-2 bg-pink-500 rounded-full mr-2"></div>
-                      <span className="text-sm font-medium">Agent Mental</span>
-                    </div>
-                    <Badge variant="default" className="text-xs">Actif</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Agent IA info - utilisation du nouveau composant */}
+            <AICoachCard />
 
             <Card className="h-fit">
               <CardHeader>

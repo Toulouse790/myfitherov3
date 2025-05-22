@@ -21,6 +21,7 @@ import AdminActivityCharts from '@/components/admin/AdminActivityCharts';
 import AdminOpenAIConfig from '@/components/admin/AdminOpenAIConfig';
 import AdminSystemLogs from '@/components/admin/AdminSystemLogs';
 import { useAdminDashboard } from '@/hooks/useAdminDashboard';
+import AgentManagement from '@/components/admin/AgentManagement';
 
 const AdminDashboard = () => {
   const { 
@@ -94,7 +95,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid md:grid-cols-5 grid-cols-2 md:grid-rows-1 grid-rows-3 h-auto">
+          <TabsList className="grid md:grid-cols-6 grid-cols-2 md:grid-rows-1 grid-rows-3 h-auto">
             <TabsTrigger value="overview" className="flex items-center gap-2">
               <LayoutDashboard className="h-4 w-4" />
               <span className="hidden md:inline">Vue d'ensemble</span>
@@ -103,6 +104,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="agents" className="flex items-center gap-2">
               <Brain className="h-4 w-4" />
               <span>Agents IA</span>
+            </TabsTrigger>
+            <TabsTrigger value="agents-ia" className="flex items-center gap-2">
+              <Brain className="h-4 w-4" />
+              <span>Gestion Agents</span>
             </TabsTrigger>
             <TabsTrigger value="integrations" className="flex items-center gap-2">
               <Workflow className="h-4 w-4" />
@@ -126,6 +131,11 @@ const AdminDashboard = () => {
           {/* Agents IA */}
           <TabsContent value="agents" className="space-y-4">
             <AdminAgentTable />
+          </TabsContent>
+
+          {/* Gestion des agents */}
+          <TabsContent value="agents-ia" className="space-y-4">
+            <AgentManagement />
           </TabsContent>
 
           {/* Intégrations */}
