@@ -8,6 +8,7 @@ import SystemStatusCard from './SystemStatusCard';
 import N8nConfigPanel from './N8nConfigPanel';
 import WebhooksPanel from './WebhooksPanel';
 import ApiConfigPanel from './ApiConfigPanel';
+import N8nConnectionTest from './N8nConnectionTest';
 
 const AdminIntegrationPanel: React.FC = () => {
   const {
@@ -55,6 +56,9 @@ const AdminIntegrationPanel: React.FC = () => {
                   errorMessage={errorMessage}
                   testConnection={testN8nConnection}
                 />
+                
+                {/* Ajout du composant de test de connexion n8n */}
+                <N8nConnectionTest />
               </TabsContent>
               
               <TabsContent value="webhooks" className="mt-0">
