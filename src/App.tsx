@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Workout from "./pages/Workout";
 import WorkoutDetail from "./pages/WorkoutDetail"; 
+import WorkoutSession from "./pages/WorkoutSession";
 import Nutrition from "./pages/Nutrition";
 import NutritionDetail from "./pages/NutritionDetail"; 
 import Sleep from "./pages/Sleep";
@@ -35,6 +36,7 @@ const App = () => (
             <Route path="/workout" element={<Workout />} />
             <Route path="/workout/:id" element={<WorkoutDetail />} />
             <Route path="/workout/:id/preview" element={<WorkoutDetail />} />
+            <Route path="/workout/:id/session" element={<WorkoutSession />} />
             <Route path="/nutrition" element={<Nutrition />} />
             <Route path="/nutrition/:id" element={<NutritionDetail />} />
             <Route path="/sleep" element={<Sleep />} />
