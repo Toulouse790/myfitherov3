@@ -36,26 +36,27 @@ const AISystemMonitor: React.FC = () => {
       const totalMessages = conversations.reduce((sum, conv) => sum + conv.messages.length, 0);
       const today = new Date().toDateString();
       const todayMessages = conversations.reduce((sum, conv) => {
-        return sum + conv.messages.filter(msg => 
-          msg.timestamp instanceof Date ? 
-          msg.timestamp.toDateString() === today :
-          new Date(msg.timestamp).toDateString() === today
-        ).length;
+        return sum + conv.messages.filter(msg => {
+          const msgDate = msg.timestamp instanceof Date ? 
+            msg.timestamp.toDateString() : 
+            new Date(msg.timestamp as string).toDateString();
+          return msgDate === today;
+        }).length;
       }, 0);
       
       // Calculer le temps moyen de réponse (simulé pour l'instant)
-      const averageResponseTime = totalMessages > 0 ? (Math.random() * 1.5 + 0.5).toFixed(1) : 0;
+      const averageResponseTime = totalMessages > 0 ? Number((Math.random() * 1.5 + 0.5).toFixed(1)) : 0;
       
       // Déterminer la santé du système
       let systemHealth: SystemStats['systemHealth'] = 'excellent';
-      if (parseFloat(averageResponseTime) > 1.5) systemHealth = 'warning';
-      else if (parseFloat(averageResponseTime) > 2.5) systemHealth = 'error';
+      if (averageResponseTime > 1.5) systemHealth = 'warning';
+      else if (averageResponseTime > 2.5) systemHealth = 'error';
       
       setStats({
         totalUsers: 1, // Toujours au moins l'utilisateur actuel
         activeConversations: conversations.length,
         messagesPerDay: todayMessages,
-        averageResponseTime: parseFloat(averageResponseTime),
+        averageResponseTime: averageResponseTime,
         systemHealth
       });
       
