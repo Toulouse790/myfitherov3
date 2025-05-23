@@ -23,21 +23,26 @@ export class ProfileService extends BaseService {
    */
   static async saveUserProfile(userId: string, profile: UserProfile): Promise<boolean> {
     try {
-      // Mapper les données vers la structure de la table profiles
+      // Préparer les données pour la table user_profiles
       const profileData = {
-        id: userId,
-        username: profile.first_name ? `${profile.first_name}${profile.last_name ? ' ' + profile.last_name : ''}` : undefined,
-        birth_date: profile.birthdate ? new Date(profile.birthdate).toISOString().split('T')[0] : undefined,
+        user_id: userId,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        email: '', // Sera rempli par l'auth
+        age: profile.birthdate ? this.calculateAge(profile.birthdate) : null,
         gender: profile.gender,
         experience_level: profile.experience_level,
-        training_frequency: profile.frequency,
-        main_objective: profile.main_goal,
+        frequency: profile.frequency,
+        main_goal: profile.main_goal,
+        timezone: profile.timezone,
+        created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       };
 
+      // Utiliser upsert pour gérer les doublons éventuels
       const { error } = await supabase
-        .from('profiles')
-        .upsert([profileData], { onConflict: 'id' });
+        .from('user_profiles' as any)
+        .upsert([profileData], { onConflict: 'user_id' });
 
       if (error) {
         console.error("Erreur enregistrement profil :", error.message);
@@ -57,34 +62,23 @@ export class ProfileService extends BaseService {
    */
   static async updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<boolean> {
     try {
-      // Mapper les données vers la structure de la table profiles
       const updateData: any = {
         updated_at: new Date().toISOString()
       };
 
-      if (profile.first_name || profile.last_name) {
-        updateData.username = `${profile.first_name || ''}${profile.last_name ? ' ' + profile.last_name : ''}`.trim();
-      }
-      if (profile.birthdate) {
-        updateData.birth_date = new Date(profile.birthdate).toISOString().split('T')[0];
-      }
-      if (profile.gender) {
-        updateData.gender = profile.gender;
-      }
-      if (profile.experience_level) {
-        updateData.experience_level = profile.experience_level;
-      }
-      if (profile.frequency) {
-        updateData.training_frequency = profile.frequency;
-      }
-      if (profile.main_goal) {
-        updateData.main_objective = profile.main_goal;
-      }
+      if (profile.first_name) updateData.first_name = profile.first_name;
+      if (profile.last_name) updateData.last_name = profile.last_name;
+      if (profile.birthdate) updateData.age = this.calculateAge(profile.birthdate);
+      if (profile.gender) updateData.gender = profile.gender;
+      if (profile.experience_level) updateData.experience_level = profile.experience_level;
+      if (profile.frequency) updateData.frequency = profile.frequency;
+      if (profile.main_goal) updateData.main_goal = profile.main_goal;
+      if (profile.timezone) updateData.timezone = profile.timezone;
 
       const { error } = await supabase
-        .from('profiles')
+        .from('user_profiles' as any)
         .update(updateData)
-        .eq('id', userId);
+        .eq('user_id', userId);
 
       if (error) {
         console.error("Erreur mise à jour profil :", error.message);
@@ -105,9 +99,9 @@ export class ProfileService extends BaseService {
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('profiles')
+        .from('user_profiles' as any)
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (error) {
@@ -117,20 +111,46 @@ export class ProfileService extends BaseService {
 
       if (!data) return null;
 
-      // Mapper les données de la table profiles vers UserProfile
+      // Mapper les données vers UserProfile
       return {
-        first_name: data.username?.split(' ')[0] || undefined,
-        last_name: data.username?.split(' ').slice(1).join(' ') || undefined,
-        birthdate: data.birth_date || undefined,
+        first_name: data.first_name || undefined,
+        last_name: data.last_name || undefined,
+        birthdate: data.age ? this.ageToApproximateBirthdate(data.age) : undefined,
         gender: data.gender || undefined,
         experience_level: data.experience_level || undefined,
-        frequency: data.training_frequency || undefined,
-        main_goal: data.main_objective || undefined,
+        frequency: data.frequency || undefined,
+        main_goal: data.main_goal || undefined,
+        timezone: data.timezone || undefined,
         accepted_terms: true // Assumé vrai si le profil existe
       };
     } catch (err) {
       console.error('Exception getUserProfile:', err);
       return null;
     }
+  }
+
+  /**
+   * Calcule l'âge à partir de la date de naissance
+   */
+  private static calculateAge(birthdate: string): number {
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    
+    return age;
+  }
+
+  /**
+   * Estime une date de naissance approximative à partir de l'âge
+   */
+  private static ageToApproximateBirthdate(age: number): string {
+    const currentYear = new Date().getFullYear();
+    const birthYear = currentYear - age;
+    return `${birthYear}-01-01`;
   }
 }
