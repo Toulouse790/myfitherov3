@@ -1,3 +1,4 @@
+
 // This is the Supabase service implementation
 // It provides functions to interact with Supabase for storing conversations and messages
 import { supabase } from '@/integrations/supabase/client';
@@ -35,11 +36,24 @@ export class SupabaseService {
    */
   static async testConnection(): Promise<boolean> {
     try {
-      const { data, error } = await supabase.from('health_check').select('*').limit(1);
+      // Vérifier si l'utilisateur est connecté
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError) {
+        console.error('Erreur d\'authentification Supabase:', authError);
+        return false;
+      }
+      
+      // Tenter une requête simple sur une table disponible (profiles)
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id')
+        .limit(1);
+        
       if (error) {
         console.error('Erreur de connexion Supabase:', error);
         return false;
       }
+      
       console.log('Connexion Supabase OK:', data);
       return true;
     } catch (err) {
@@ -53,18 +67,29 @@ export class SupabaseService {
    */
   static async getUserConversations(userId: string): Promise<Conversation[]> {
     try {
+      // Vérifiez si la table "ai_conversations" existe dans votre base de données
       const { data, error } = await supabase
-        .from('conversations')
+        .from('ai_conversations')
         .select('*')
         .eq('user_id', userId)
-        .order('updated_at', { ascending: false });
+        .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Erreur récupération conversations:', error);
         return this.getMockConversations(userId);
       }
 
-      return data as Conversation[];
+      // Convertir les données ai_conversations en format Conversation
+      const conversations: Conversation[] = data.map(conv => ({
+        thread_id: conv.id,
+        user_id: conv.user_id,
+        title: conv.content.substring(0, 30) + '...',
+        status: 'active',
+        created_at: conv.created_at,
+        updated_at: conv.created_at
+      }));
+
+      return conversations;
     } catch (err) {
       console.error('Exception récupération conversations:', err);
       return this.getMockConversations(userId);
@@ -105,18 +130,43 @@ export class SupabaseService {
    */
   static async getConversationMessages(threadId: string): Promise<Message[]> {
     try {
+      // Dans notre cas, nous n'avons qu'une seule ligne dans ai_conversations qui contient
+      // à la fois la question (content) et la réponse (response)
       const { data, error } = await supabase
-        .from('messages')
+        .from('ai_conversations')
         .select('*')
-        .eq('thread_id', threadId)
-        .order('created_at', { ascending: true });
+        .eq('id', threadId);
 
       if (error) {
         console.error('Erreur récupération messages:', error);
         return this.getMockMessages(threadId);
       }
 
-      return data as Message[];
+      if (data && data.length > 0) {
+        const conversation = data[0];
+        // Créer deux messages à partir de la conversation: question et réponse
+        const messages: Message[] = [
+          {
+            message_id: `msg_user_${conversation.id}`,
+            thread_id: conversation.id,
+            user_id: conversation.user_id,
+            sender: 'user',
+            content: conversation.content,
+            created_at: conversation.created_at
+          },
+          {
+            message_id: `msg_assistant_${conversation.id}`,
+            thread_id: conversation.id,
+            user_id: conversation.user_id,
+            sender: 'assistant',
+            content: conversation.response,
+            created_at: conversation.created_at
+          }
+        ];
+        return messages;
+      }
+
+      return this.getMockMessages(threadId);
     } catch (err) {
       console.error('Exception récupération messages:', err);
       return this.getMockMessages(threadId);
@@ -157,9 +207,16 @@ export class SupabaseService {
    */
   static async createConversation(conversation: Conversation): Promise<boolean> {
     try {
+      // Créer une entrée dans la table ai_conversations
       const { error } = await supabase
-        .from('conversations')
-        .insert(conversation);
+        .from('ai_conversations')
+        .insert({
+          id: conversation.thread_id,
+          user_id: conversation.user_id,
+          content: conversation.title,
+          response: "Conversation initiée", // Réponse par défaut
+          metadata: { status: conversation.status }
+        });
 
       if (error) {
         console.error('Erreur création conversation:', error);
@@ -178,13 +235,35 @@ export class SupabaseService {
    */
   static async saveMessage(message: Message): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('messages')
-        .insert(message);
-
-      if (error) {
-        console.error('Erreur sauvegarde message:', error);
-        return false;
+      // Pour les messages utilisateur, mettre à jour le contenu de la conversation
+      if (message.sender === 'user') {
+        const { error } = await supabase
+          .from('ai_conversations')
+          .update({ 
+            content: message.content,
+            metadata: { ...message.metadata, type_demande: message.type_demande }
+          })
+          .eq('id', message.thread_id);
+          
+        if (error) {
+          console.error('Erreur sauvegarde message utilisateur:', error);
+          return false;
+        }
+      } 
+      // Pour les messages assistant, mettre à jour la réponse de la conversation
+      else if (message.sender === 'assistant') {
+        const { error } = await supabase
+          .from('ai_conversations')
+          .update({ 
+            response: message.content,
+            metadata: message.metadata
+          })
+          .eq('id', message.thread_id);
+          
+        if (error) {
+          console.error('Erreur sauvegarde message assistant:', error);
+          return false;
+        }
       }
 
       return true;
@@ -204,11 +283,12 @@ export class SupabaseService {
   ): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from('interactions')
+        .from('ai_training_data')
         .insert({
           user_id: userId,
-          agent_name: agentName,
-          duration_seconds: durationSeconds,
+          model_name: agentName,
+          response_time_ms: Math.round(durationSeconds * 1000),
+          action_type: 'conversation',
           created_at: new Date().toISOString()
         });
 
@@ -238,43 +318,23 @@ export class SupabaseService {
       for (const conv of localConversations) {
         // Vérifier si la conversation existe
         const { data: existingConv } = await supabase
-          .from('conversations')
-          .select('thread_id')
-          .eq('thread_id', conv.thread_id)
+          .from('ai_conversations')
+          .select('id')
+          .eq('id', conv.thread_id)
           .single();
 
         // Si la conversation n'existe pas, la créer
         if (!existingConv) {
-          await supabase.from('conversations').insert({
-            thread_id: conv.thread_id,
+          await supabase.from('ai_conversations').insert({
+            id: conv.thread_id,
             user_id: userId,
-            title: conv.title || `Conversation du ${new Date(conv.created_at).toLocaleDateString()}`,
-            status: 'active',
-            created_at: conv.created_at,
-            updated_at: conv.updated_at
+            content: conv.messages.find((m: any) => m.sender === 'user')?.content || 'Nouvelle conversation',
+            response: conv.messages.find((m: any) => m.sender === 'assistant')?.content || '',
+            metadata: {
+              created_at: conv.created_at,
+              updated_at: conv.updated_at
+            }
           });
-        }
-
-        // Synchroniser les messages
-        for (const msg of conv.messages) {
-          const { data: existingMsg } = await supabase
-            .from('messages')
-            .select('message_id')
-            .eq('message_id', msg.id)
-            .single();
-
-          // Si le message n'existe pas, le créer
-          if (!existingMsg) {
-            await supabase.from('messages').insert({
-              message_id: msg.id,
-              thread_id: conv.thread_id,
-              user_id: userId,
-              sender: msg.sender,
-              content: msg.content,
-              type_demande: msg.type_demande,
-              created_at: msg.timestamp
-            });
-          }
         }
       }
 
