@@ -17,6 +17,23 @@ export interface UserProfile {
   accepted_terms?: boolean;
 }
 
+// Interface pour la table user_profiles
+interface UserProfileData {
+  id?: string;
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  age?: number;
+  gender?: string;
+  experience_level?: string;
+  frequency?: string;
+  main_goal?: string;
+  timezone?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export class ProfileService extends BaseService {
   /**
    * Sauvegarde le profil utilisateur
@@ -24,7 +41,7 @@ export class ProfileService extends BaseService {
   static async saveUserProfile(userId: string, profile: UserProfile): Promise<boolean> {
     try {
       // Préparer les données pour la table user_profiles
-      const profileData = {
+      const profileData: Partial<UserProfileData> = {
         user_id: userId,
         first_name: profile.first_name,
         last_name: profile.last_name,
@@ -41,7 +58,7 @@ export class ProfileService extends BaseService {
 
       // Utiliser upsert pour gérer les doublons éventuels
       const { error } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .upsert([profileData], { onConflict: 'user_id' });
 
       if (error) {
@@ -62,7 +79,7 @@ export class ProfileService extends BaseService {
    */
   static async updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<boolean> {
     try {
-      const updateData: any = {
+      const updateData: Partial<UserProfileData> = {
         updated_at: new Date().toISOString()
       };
 
@@ -76,7 +93,7 @@ export class ProfileService extends BaseService {
       if (profile.timezone) updateData.timezone = profile.timezone;
 
       const { error } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .update(updateData)
         .eq('user_id', userId);
 
@@ -99,7 +116,7 @@ export class ProfileService extends BaseService {
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
@@ -111,16 +128,19 @@ export class ProfileService extends BaseService {
 
       if (!data) return null;
 
+      // Typer explicitement les données récupérées
+      const profileData = data as UserProfileData;
+
       // Mapper les données vers UserProfile
       return {
-        first_name: data.first_name || undefined,
-        last_name: data.last_name || undefined,
-        birthdate: data.age ? this.ageToApproximateBirthdate(data.age) : undefined,
-        gender: data.gender || undefined,
-        experience_level: data.experience_level || undefined,
-        frequency: data.frequency || undefined,
-        main_goal: data.main_goal || undefined,
-        timezone: data.timezone || undefined,
+        first_name: profileData.first_name || undefined,
+        last_name: profileData.last_name || undefined,
+        birthdate: profileData.age ? this.ageToApproximateBirthdate(profileData.age) : undefined,
+        gender: profileData.gender || undefined,
+        experience_level: profileData.experience_level || undefined,
+        frequency: profileData.frequency || undefined,
+        main_goal: profileData.main_goal || undefined,
+        timezone: profileData.timezone || undefined,
         accepted_terms: true // Assumé vrai si le profil existe
       };
     } catch (err) {
