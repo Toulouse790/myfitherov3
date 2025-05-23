@@ -1,7 +1,6 @@
-
 import { ApiService } from './api';
 import { StorageService } from './storage';
-import { SupabaseService, User, Conversation, Message } from './supabase';
+import { SupabaseService, User, Conversation, Message } from './supabase/index';
 
 export interface UserInteraction {
   user_id: string;
