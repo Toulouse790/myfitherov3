@@ -58,7 +58,7 @@ export class ProfileService extends BaseService {
 
       // Utiliser upsert pour gérer les doublons éventuels
       const { error } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .upsert([profileData], { onConflict: 'user_id' });
 
       if (error) {
@@ -79,7 +79,7 @@ export class ProfileService extends BaseService {
    */
   static async updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<boolean> {
     try {
-      const updateData: Partial<UserProfileData> = {
+      const updateData: any = {
         updated_at: new Date().toISOString()
       };
 
@@ -93,7 +93,7 @@ export class ProfileService extends BaseService {
       if (profile.timezone) updateData.timezone = profile.timezone;
 
       const { error } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .update(updateData)
         .eq('user_id', userId);
 
@@ -116,7 +116,7 @@ export class ProfileService extends BaseService {
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('user_profiles')
+        .from('user_profiles' as any)
         .select('*')
         .eq('user_id', userId)
         .single();
@@ -128,10 +128,8 @@ export class ProfileService extends BaseService {
 
       if (!data) return null;
 
-      // Typer explicitement les données récupérées
-      const profileData = data as UserProfileData;
-
       // Mapper les données vers UserProfile
+      const profileData = data as any;
       return {
         first_name: profileData.first_name || undefined,
         last_name: profileData.last_name || undefined,
