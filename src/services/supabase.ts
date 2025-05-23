@@ -1,7 +1,7 @@
-
 // This is the Supabase service implementation
 // It provides functions to interact with Supabase for storing conversations and messages
 import { supabase } from '@/integrations/supabase/client';
+import { ApiService } from '@/services/api';
 
 export interface User {
   id: string;
@@ -29,6 +29,13 @@ export interface Message {
   metadata?: Record<string, any>;
   created_at?: string;
 }
+
+// Configuration pour l'API externe
+const API_CONFIG = {
+  // Utilisez l'URL de l'API fournie dans l'environnement ou utilisez une valeur par défaut
+  EXTERNAL_API_URL: import.meta.env.VITE_EXTERNAL_API_URL || 'https://api.lovable.ai/receive-synthese',
+  ENABLE_EXTERNAL_API: import.meta.env.VITE_ENABLE_EXTERNAL_API === 'true' || false
+};
 
 export class SupabaseService {
   /**
@@ -223,6 +230,14 @@ export class SupabaseService {
         return false;
       }
 
+      // Envoi optionnel à l'API externe
+      if (API_CONFIG.ENABLE_EXTERNAL_API) {
+        this.sendToExternalAPI({
+          type: 'conversation_created',
+          data: conversation
+        });
+      }
+
       return true;
     } catch (err) {
       console.error('Exception création conversation:', err);
@@ -266,6 +281,14 @@ export class SupabaseService {
         }
       }
 
+      // Envoi optionnel à l'API externe
+      if (API_CONFIG.ENABLE_EXTERNAL_API) {
+        this.sendToExternalAPI({
+          type: 'message_saved',
+          data: message
+        });
+      }
+
       return true;
     } catch (err) {
       console.error('Exception sauvegarde message:', err);
@@ -289,12 +312,29 @@ export class SupabaseService {
           model_name: agentName,
           response_time_ms: Math.round(durationSeconds * 1000),
           action_type: 'conversation',
-          created_at: new Date().toISOString()
+          // Ajout du context (Json) qui était manquant et causait l'erreur
+          context: JSON.stringify({
+            source: 'web_app',
+            timestamp: new Date().toISOString()
+          })
         });
 
       if (error) {
         console.error('Erreur log interaction:', error);
         return false;
+      }
+
+      // Envoi optionnel à l'API externe
+      if (API_CONFIG.ENABLE_EXTERNAL_API) {
+        this.sendToExternalAPI({
+          type: 'interaction_logged',
+          data: {
+            user_id: userId,
+            agent_name: agentName,
+            duration_seconds: durationSeconds,
+            timestamp: new Date().toISOString()
+          }
+        });
       }
 
       return true;
@@ -341,6 +381,37 @@ export class SupabaseService {
       return true;
     } catch (err) {
       console.error('Exception synchronisation données:', err);
+      return false;
+    }
+  }
+
+  /**
+   * Envoie des données à une API externe
+   * @param payload Données à envoyer
+   */
+  private static async sendToExternalAPI(payload: any): Promise<boolean> {
+    try {
+      console.log(`📤 Envoi de données vers API externe: ${API_CONFIG.EXTERNAL_API_URL}`, payload);
+      
+      const response = await fetch(API_CONFIG.EXTERNAL_API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // Ajoutez ici votre token d'authentification si nécessaire
+          'Authorization': `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`
+        },
+        body: JSON.stringify(payload)
+      });
+      
+      if (!response.ok) {
+        console.error(`❌ Erreur API externe: ${response.status} ${response.statusText}`);
+        return false;
+      }
+      
+      console.log('✅ Données envoyées avec succès à l\'API externe');
+      return true;
+    } catch (error) {
+      console.error('❌ Erreur lors de l\'envoi à l\'API externe:', error);
       return false;
     }
   }
