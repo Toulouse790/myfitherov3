@@ -415,4 +415,39 @@ export class SupabaseService {
       return false;
     }
   }
+
+  /**
+   * Envoie une synthèse finale au service Lovable
+   * @param payload Les données à envoyer incluant user_id, thread_id, synthese, contexte, et type
+   */
+  static async sendFinalSyntheseToLovable(payload: {
+    user_id: string;
+    thread_id: string;
+    synthese: string;
+    contexte: string;
+    type: string;
+  }) {
+    const apiUrl = import.meta.env.VITE_EXTERNAL_API_URL;
+    const apiKey = import.meta.env.VITE_LOVABLE_API_KEY;
+    const enabled = import.meta.env.VITE_ENABLE_EXTERNAL_API === 'true';
+
+    if (!enabled || !apiUrl || !apiKey) return;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        console.error('Erreur lors de l'envoi à Lovable', await response.text());
+      }
+    } catch (error) {
+      console.error('Erreur réseau vers Lovable', error);
+    }
+  }
 }
