@@ -5,6 +5,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/hooks/useAuth";
+import PrivateRoute from "@/components/auth/PrivateRoute";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Workout from "./pages/Workout";
@@ -30,25 +34,92 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/workout" element={<Workout />} />
-            <Route path="/workout/:id" element={<WorkoutDetail />} />
-            <Route path="/workout/:id/preview" element={<WorkoutDetail />} />
-            <Route path="/workout/:id/session" element={<WorkoutSession />} />
-            <Route path="/nutrition" element={<Nutrition />} />
-            <Route path="/nutrition/:id" element={<NutritionDetail />} />
-            <Route path="/sleep" element={<Sleep />} />
-            <Route path="/coach" element={<Coach />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/achievements" element={<Achievements />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              {/* Routes publiques */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              
+              {/* Routes protégées */}
+              <Route path="/" element={
+                <PrivateRoute>
+                  <Index />
+                </PrivateRoute>
+              } />
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              } />
+              <Route path="/workout" element={
+                <PrivateRoute>
+                  <Workout />
+                </PrivateRoute>
+              } />
+              <Route path="/workout/:id" element={
+                <PrivateRoute>
+                  <WorkoutDetail />
+                </PrivateRoute>
+              } />
+              <Route path="/workout/:id/preview" element={
+                <PrivateRoute>
+                  <WorkoutDetail />
+                </PrivateRoute>
+              } />
+              <Route path="/workout/:id/session" element={
+                <PrivateRoute>
+                  <WorkoutSession />
+                </PrivateRoute>
+              } />
+              <Route path="/nutrition" element={
+                <PrivateRoute>
+                  <Nutrition />
+                </PrivateRoute>
+              } />
+              <Route path="/nutrition/:id" element={
+                <PrivateRoute>
+                  <NutritionDetail />
+                </PrivateRoute>
+              } />
+              <Route path="/sleep" element={
+                <PrivateRoute>
+                  <Sleep />
+                </PrivateRoute>
+              } />
+              <Route path="/coach" element={
+                <PrivateRoute>
+                  <Coach />
+                </PrivateRoute>
+              } />
+              <Route path="/settings" element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              } />
+              <Route path="/profile" element={
+                <PrivateRoute>
+                  <Profile />
+                </PrivateRoute>
+              } />
+              <Route path="/onboarding" element={
+                <PrivateRoute>
+                  <Onboarding />
+                </PrivateRoute>
+              } />
+              <Route path="/admin" element={
+                <PrivateRoute>
+                  <AdminDashboard />
+                </PrivateRoute>
+              } />
+              <Route path="/achievements" element={
+                <PrivateRoute>
+                  <Achievements />
+                </PrivateRoute>
+              } />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
         </BrowserRouter>
       </TooltipProvider>
     </ThemeProvider>
