@@ -3,19 +3,20 @@ import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { 
   LayoutDashboard, 
-  Users, 
   Brain, 
   Workflow, 
   Activity, 
   Settings
 } from 'lucide-react';
-import AdminActivityCharts from '@/components/admin/AdminActivityCharts';
-import AdminAgentTable from '@/components/admin/AdminAgentTable';
-import AgentManagement from '@/components/admin/AgentManagement';
-import AdminIntegrationPanel from '@/components/admin/AdminIntegrationPanel';
-import AdminOpenAIConfig from '@/components/admin/AdminOpenAIConfig';
-import AdminSystemLogs from '@/components/admin/AdminSystemLogs';
 import { LogEntry } from '@/services/admin';
+
+// Import tab content components
+import AdminOverviewTab from './tabs/AdminOverviewTab';
+import AdminAgentsTab from './tabs/AdminAgentsTab';
+import AdminAgentManagementTab from './tabs/AdminAgentManagementTab';
+import AdminIntegrationsTab from './tabs/AdminIntegrationsTab';
+import AdminConfigTab from './tabs/AdminConfigTab';
+import AdminLogsTab from './tabs/AdminLogsTab';
 
 interface AdminTabsSectionProps {
   logs: LogEntry[];
@@ -52,34 +53,29 @@ const AdminTabsSection = ({ logs }: AdminTabsSectionProps) => {
         </TabsTrigger>
       </TabsList>
 
-      {/* Vue d'ensemble */}
-      <TabsContent value="overview" className="space-y-4">
-        <AdminActivityCharts />
+      {/* Tab contents using the separate components */}
+      <TabsContent value="overview">
+        <AdminOverviewTab />
       </TabsContent>
 
-      {/* Agents IA */}
-      <TabsContent value="agents" className="space-y-4">
-        <AdminAgentTable />
+      <TabsContent value="agents">
+        <AdminAgentsTab />
       </TabsContent>
 
-      {/* Gestion des agents */}
-      <TabsContent value="agents-ia" className="space-y-4">
-        <AgentManagement />
+      <TabsContent value="agents-ia">
+        <AdminAgentManagementTab />
       </TabsContent>
 
-      {/* Intégrations */}
-      <TabsContent value="integrations" className="space-y-4">
-        <AdminIntegrationPanel />
+      <TabsContent value="integrations">
+        <AdminIntegrationsTab />
       </TabsContent>
 
-      {/* Configuration */}
-      <TabsContent value="config" className="space-y-4">
-        <AdminOpenAIConfig />
+      <TabsContent value="config">
+        <AdminConfigTab />
       </TabsContent>
 
-      {/* Logs système */}
-      <TabsContent value="logs" className="space-y-4">
-        <AdminSystemLogs initialLogs={logs} />
+      <TabsContent value="logs">
+        <AdminLogsTab initialLogs={logs} />
       </TabsContent>
     </Tabs>
   );
