@@ -7,9 +7,6 @@ export * from './CrossDomainValidator';
 export * from './types/CrossDomainTypes';
 export * from './BiasTestingSystem';
 
-// Exports de composants de sécurité
-export { CrossDomainSafetyPanel } from '@/components/safety/CrossDomainSafetyPanel';
-
 // Exports de hooks
 export { useCrossDomainValidator } from '@/hooks/useCrossDomainValidator';
 export { useBiasTesting } from '@/hooks/useBiasTesting';
