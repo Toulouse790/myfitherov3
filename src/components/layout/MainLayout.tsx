@@ -1,6 +1,7 @@
 
 import { Outlet } from 'react-router-dom';
-import Navigation from './Navigation';
+import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { AppSidebar } from './AppSidebar';
 import { EmergencyFloatingButton } from '@/components/emergency/EmergencyFloatingButton';
 
 interface MainLayoutProps {
@@ -9,14 +10,21 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
-      <main className="container mx-auto px-4 py-6">
-        {children || <Outlet />}
-      </main>
-      
-      {/* Bouton urgence flottant toujours visible */}
-      <EmergencyFloatingButton />
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+          </header>
+          <main className="flex-1 p-4">
+            {children || <Outlet />}
+          </main>
+        </SidebarInset>
+        
+        {/* Bouton urgence flottant toujours visible */}
+        <EmergencyFloatingButton />
+      </div>
+    </SidebarProvider>
   );
 }
