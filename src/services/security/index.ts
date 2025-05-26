@@ -6,6 +6,7 @@ export { DataEncryptionService, encryptionService, encryptHealthData, decryptHea
 export { ConsentManager } from './ConsentManager';
 export { DataAnonymizer } from './DataAnonymizer';
 export { SecurityLogger } from './SecurityLogger';
+export { ConfigValidator, configValidator } from './ConfigValidator';
 
 export type {
   SecurityContext,
@@ -17,3 +18,7 @@ export type {
   LogLevel,
   SecurityLog
 } from './SecurityLogger';
+
+export type {
+  SecurityConfig
+} from './ConfigValidator';

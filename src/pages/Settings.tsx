@@ -1,214 +1,195 @@
 
 import React, { useState } from 'react';
-import MainLayout from '@/components/layout/MainLayout';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/components/ui/sonner';
-import { ApiService } from '@/services/api';
-import { useNavigate } from 'react-router-dom';
-import { Loader2, Shield, Settings as SettingsIcon, Database } from 'lucide-react';
-import { ConsentManagerUI } from '@/components/security/ConsentManager';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { useAuth } from '@/hooks/useAuth';
+import { ConsentManager } from '@/components/security/ConsentManager';
 import { SecurityDashboard } from '@/components/security/SecurityDashboard';
+import { SecurityConfigStatus } from '@/components/admin/SecurityConfigStatus';
+import { User, Shield, Database, Bell, Palette, Globe, Trash2 } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 const Settings = () => {
-  const navigate = useNavigate();
-  const defaultWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || "";
-  
-  const [webhookUrl, setWebhookUrl] = useState<string>(defaultWebhookUrl);
-  const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
-  const [darkModeEnabled, setDarkModeEnabled] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const { user } = useAuth();
+  const [notifications, setNotifications] = useState({
+    workouts: true,
+    meals: true,
+    sleep: false,
+    achievements: true
+  });
 
-  const handleTrigger = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!webhookUrl) {
-      toast("Erreur", {
-        description: "Veuillez saisir l'URL du webhook n8n"
-      });
-      return;
-    }
+  const [preferences, setPreferences] = useState({
+    language: 'fr',
+    timezone: 'Europe/Paris',
+    units: 'metric',
+    theme: 'system'
+  });
 
-    setIsLoading(true);
-    console.log("Test de connexion au webhook n8n:", webhookUrl);
-
-    try {
-      const response = await ApiService.testWebhook(webhookUrl, {
-        timestamp: new Date().toISOString(),
-        triggered_from: window.location.origin,
-        app: "MyFitHero",
-        action: "test_connection"
-      });
-
-      toast("Requête envoyée", {
-        description: "La requête a été envoyée à n8n. Veuillez vérifier l'historique de votre workflow pour confirmer son déclenchement."
-      });
-    } catch (error) {
-      console.error("Erreur lors du déclenchement du webhook:", error);
-      toast("Erreur", {
-        description: "Échec du déclenchement du webhook n8n. Veuillez vérifier l'URL et réessayer."
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSaveSettings = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSaving(true);
-    
-    try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      toast("Paramètres enregistrés", {
-        description: "Vos paramètres ont été enregistrés avec succès."
-      });
-    } catch (error) {
-      toast("Erreur", {
-        description: "Une erreur s'est produite lors de l'enregistrement des paramètres."
-      });
-    } finally {
-      setIsSaving(false);
-    }
+  const handleSaveSettings = () => {
+    // En production, ceci sauvegarderait dans Supabase
+    toast.success('Paramètres sauvegardés avec succès');
   };
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Paramètres</h1>
-            <p className="text-muted-foreground">Gérez vos préférences, sécurité et intégrations.</p>
-          </div>
-          
-          <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
-            Panel Admin
-          </Button>
-        </div>
-
-        <Tabs defaultValue="general" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="general" className="flex items-center gap-2">
-              <SettingsIcon className="h-4 w-4" />
-              Général
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
-              <Shield className="h-4 w-4" />
-              Sécurité & Confidentialité
-            </TabsTrigger>
-            <TabsTrigger value="data" className="flex items-center gap-2">
-              <Database className="h-4 w-4" />
-              Mes Données
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="general" className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* N8n Webhook Integration */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Intégration n8n</CardTitle>
-                  <CardDescription>Connectez MyFitHero à n8n pour automatiser vos workflows.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleTrigger} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="webhook-url">URL du Webhook</Label>
-                      <Input
-                        id="webhook-url"
-                        placeholder="https://your-n8n-instance.com/webhook/..."
-                        value={webhookUrl}
-                        onChange={(e) => setWebhookUrl(e.target.value)}
-                      />
-                    </div>
-                  </form>
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button onClick={handleTrigger} disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Envoi...
-                      </>
-                    ) : (
-                      "Tester la connexion"
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-
-              {/* General Settings */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Paramètres généraux</CardTitle>
-                  <CardDescription>Personnalisez votre expérience avec MyFitHero.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleSaveSettings} className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="notifications" className="flex flex-col gap-1">
-                        <span>Notifications</span>
-                        <span className="font-normal text-sm text-muted-foreground">
-                          Recevez des alertes pour vos entraînements et objectifs.
-                        </span>
-                      </Label>
-                      <Switch
-                        id="notifications"
-                        checked={notificationsEnabled}
-                        onCheckedChange={setNotificationsEnabled}
-                      />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="dark-mode" className="flex flex-col gap-1">
-                        <span>Mode sombre</span>
-                        <span className="font-normal text-sm text-muted-foreground">
-                          Utilisez un thème sombre pour réduire la fatigue oculaire.
-                        </span>
-                      </Label>
-                      <Switch
-                        id="dark-mode"
-                        checked={darkModeEnabled}
-                        onCheckedChange={setDarkModeEnabled}
-                      />
-                    </div>
-                  </form>
-                </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button onClick={handleSaveSettings} disabled={isSaving}>
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Enregistrement...
-                      </>
-                    ) : (
-                      "Enregistrer"
-                    )}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="security" className="space-y-6">
-            <ConsentManagerUI 
-              onConsentChange={() => {
-                toast.success("Préférences de consentement mises à jour");
-              }}
-              showDetailedView={false}
-            />
-          </TabsContent>
-
-          <TabsContent value="data" className="space-y-6">
-            <SecurityDashboard />
-          </TabsContent>
-        </Tabs>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Paramètres</h1>
+        <p className="text-muted-foreground">Gérez vos préférences et paramètres de sécurité</p>
       </div>
-    </MainLayout>
+
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            Général
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Sécurité & Confidentialité
+          </TabsTrigger>
+          <TabsTrigger value="data" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Mes Données
+          </TabsTrigger>
+          <TabsTrigger value="admin" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Configuration
+          </TabsTrigger>
+        </TabsList>
+
+        {/* Onglet Général */}
+        <TabsContent value="general" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Profil Utilisateur</CardTitle>
+              <CardDescription>Informations de base de votre compte</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="firstName">Prénom</Label>
+                  <Input id="firstName" defaultValue="Jean" />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="lastName">Nom</Label>
+                  <Input id="lastName" defaultValue="Dupont" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={user?.email || ''} disabled />
+                <p className="text-xs text-muted-foreground">
+                  L'email ne peut pas être modifié pour des raisons de sécurité
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                Notifications
+              </CardTitle>
+              <CardDescription>Choisissez les notifications que vous souhaitez recevoir</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {Object.entries(notifications).map(([key, value]) => (
+                <div key={key} className="flex items-center justify-between">
+                  <div>
+                    <Label htmlFor={key} className="text-sm font-medium capitalize">
+                      {key === 'workouts' && 'Entraînements'}
+                      {key === 'meals' && 'Nutrition'}
+                      {key === 'sleep' && 'Sommeil'}
+                      {key === 'achievements' && 'Réussites'}
+                    </Label>
+                    <p className="text-xs text-muted-foreground">
+                      Recevoir des rappels et notifications
+                    </p>
+                  </div>
+                  <Switch
+                    id={key}
+                    checked={value}
+                    onCheckedChange={(checked) => 
+                      setNotifications(prev => ({ ...prev, [key]: checked }))
+                    }
+                  />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Préférences
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Langue</Label>
+                  <Select value={preferences.language} onValueChange={(value) => 
+                    setPreferences(prev => ({ ...prev, language: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="fr">Français</SelectItem>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Español</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Unités</Label>
+                  <Select value={preferences.units} onValueChange={(value) => 
+                    setPreferences(prev => ({ ...prev, units: value }))
+                  }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="metric">Métrique (kg, cm)</SelectItem>
+                      <SelectItem value="imperial">Impérial (lbs, ft)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-end">
+            <Button onClick={handleSaveSettings}>Sauvegarder les modifications</Button>
+          </div>
+        </TabsContent>
+
+        {/* Onglet Sécurité & Confidentialité */}
+        <TabsContent value="security" className="space-y-6">
+          <ConsentManager />
+        </TabsContent>
+
+        {/* Onglet Mes Données */}
+        <TabsContent value="data" className="space-y-6">
+          <SecurityDashboard />
+        </TabsContent>
+
+        {/* Onglet Configuration Admin */}
+        <TabsContent value="admin" className="space-y-6">
+          <SecurityConfigStatus />
+        </TabsContent>
+      </Tabs>
+    </div>
   );
 };
 

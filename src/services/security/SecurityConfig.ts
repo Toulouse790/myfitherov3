@@ -1,4 +1,6 @@
 
+import { configValidator } from './ConfigValidator';
+
 // Configuration de sécurité pour application santé - RGPD/HIPAA compliant
 export const SECURITY_CONFIG = {
   // Configuration du chiffrement
@@ -12,7 +14,7 @@ export const SECURITY_CONFIG = {
 
   // Paramètres de sécurité des sessions
   session: {
-    maxAge: 30 * 60 * 1000, // 30 minutes
+    get maxAge() { return configValidator.getSessionDuration(); },
     renewThreshold: 5 * 60 * 1000, // Renouveler 5 min avant expiration
     secureCookie: true,
     sameSite: 'strict' as const,
@@ -22,7 +24,7 @@ export const SECURITY_CONFIG = {
   api: {
     timeout: 10000, // 10 secondes
     retryAttempts: 3,
-    rateLimitPerMinute: 60,
+    get rateLimitPerMinute() { return configValidator.getConfig().rateLimitPerMinute; },
     requiredHeaders: [
       'Content-Type',
       'Authorization',
@@ -33,7 +35,7 @@ export const SECURITY_CONFIG = {
 
   // Validation des données sensibles
   dataValidation: {
-    maxFileSize: 5 * 1024 * 1024, // 5MB
+    get maxFileSize() { return configValidator.getConfig().maxFileSize * 1024 * 1024; }, // Conversion en bytes
     allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxFieldLength: 1000,
     sanitizeHtml: true,
@@ -49,17 +51,17 @@ export const SECURITY_CONFIG = {
 
   // Rétention des données (RGPD Article 5)
   dataRetention: {
-    biometricData: 90 * 24 * 60 * 60 * 1000, // 90 jours
-    locationData: 30 * 24 * 60 * 60 * 1000,  // 30 jours
+    get biometricData() { return configValidator.getRetentionDays('biometric') * 24 * 60 * 60 * 1000; },
+    get locationData() { return configValidator.getRetentionDays('location') * 24 * 60 * 60 * 1000; },
     healthData: 365 * 24 * 60 * 60 * 1000,   // 1 an
     auditLogs: 6 * 365 * 24 * 60 * 60 * 1000, // 6 ans (légal)
   },
 
   // Configuration logging sécurisé
   logging: {
-    level: import.meta.env.PROD ? 'warn' : 'debug',
+    get level() { return configValidator.isProductionMode() ? 'warn' : 'debug'; },
     sanitizePersonalData: true,
-    includeStackTrace: !import.meta.env.PROD,
+    get includeStackTrace() { return !configValidator.isProductionMode(); },
     maxLogSize: 50 * 1024 * 1024, // 50MB
   },
 
@@ -81,7 +83,7 @@ export const SECURITY_CONFIG = {
   // Headers de sécurité obligatoires
   securityHeaders: {
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-    'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
+    'Content-Security-Policy': `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ${configValidator.getConfig().apiBaseUrl}`,
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
@@ -114,21 +116,12 @@ export interface ConsentType {
 
 // Validation des environnements
 export const validateSecurityConfig = () => {
-  const requiredEnvVars = [
-    'VITE_API_BASE_URL',
-    'VITE_ENCRYPTION_KEY',
-    'VITE_SESSION_SECRET'
-  ];
-
-  const missing = requiredEnvVars.filter(key => !import.meta.env[key]);
-  
-  if (missing.length > 0) {
-    throw new SecurityError(`Variables d'environnement manquantes: ${missing.join(', ')}`);
-  }
-
-  // Vérifier que nous sommes en HTTPS en production
-  if (import.meta.env.PROD && location.protocol !== 'https:') {
-    throw new SecurityError('HTTPS requis en production pour les données de santé');
+  try {
+    configValidator.validateAndLoad();
+    console.log('✅ Configuration de sécurité validée');
+  } catch (error) {
+    console.error('❌ Erreur de configuration:', error);
+    throw error;
   }
 };
 

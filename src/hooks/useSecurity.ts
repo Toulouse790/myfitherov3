@@ -1,12 +1,16 @@
 
 import { useState, useEffect } from 'react';
-import { ConsentManager, Permission, ConsentType, SecurityLogger, EncryptionService } from '@/services/security';
+import { ConsentManager, Permission, ConsentType, SecurityLogger, EncryptionService, configValidator } from '@/services/security';
 import { toast } from '@/components/ui/sonner';
 
 export const useSecurity = () => {
   const [consents, setConsents] = useState<ConsentType[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [configStatus, setConfigStatus] = useState<{
+    isValid: boolean;
+    errors: string[];
+  }>({ isValid: false, errors: [] });
 
   useEffect(() => {
     initializeSecurity();
@@ -14,19 +18,30 @@ export const useSecurity = () => {
 
   const initializeSecurity = async () => {
     try {
-      // Initialiser le service de chiffrement
-      const encryptionKey = import.meta.env.VITE_ENCRYPTION_KEY || 'default-key-for-development';
-      await EncryptionService.initialize(encryptionKey);
+      // Valider la configuration en premier
+      const config = configValidator.validateAndLoad();
+      setConfigStatus({ isValid: true, errors: [] });
+
+      // Initialiser le service de chiffrement avec la clé de l'environnement
+      await EncryptionService.initialize(config.encryptionKey);
 
       // Charger les consentements et permissions
       setConsents(ConsentManager.getConsents());
       setPermissions(ConsentManager.getPermissions());
       
       setIsInitialized(true);
-      SecurityLogger.info('Security services initialized');
+      SecurityLogger.info('Security services initialized with environment config');
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Erreur de configuration';
+      setConfigStatus({ 
+        isValid: false, 
+        errors: [errorMessage] 
+      });
+      
       SecurityLogger.error('Failed to initialize security services', error as Error);
-      toast.error('Erreur d\'initialisation de sécurité');
+      toast.error('Erreur d\'initialisation de sécurité', {
+        description: errorMessage
+      });
     }
   };
 
@@ -106,11 +121,23 @@ export const useSecurity = () => {
     }
   };
 
+  // Nouvelles méthodes pour la gestion de configuration
+  const getConfigStatus = () => configStatus;
+  
+  const getRetentionDays = (dataType: 'biometric' | 'location'): number => {
+    return configValidator.getRetentionDays(dataType);
+  };
+
+  const getDpoEmail = (): string => {
+    return configValidator.getDpoEmail();
+  };
+
   return {
     // État
     consents,
     permissions,
     isInitialized,
+    configStatus,
     
     // Actions de consentement
     updateConsent,
@@ -125,6 +152,11 @@ export const useSecurity = () => {
     // Chiffrement
     encryptSensitiveData,
     decryptSensitiveData,
+    
+    // Configuration
+    getConfigStatus,
+    getRetentionDays,
+    getDpoEmail,
     
     // Utilitaires
     initializeSecurity
