@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserStore } from '@/stores/useUserStore';
@@ -112,7 +111,7 @@ export const useHydration = () => {
         // 3. ESTIMATION ACTIVITÉ ACTUELLE SÉCURISÉE
         const activityData = estimateCurrentActivity(profile, new Date().getHours());
 
-        // 4. VALIDATION MÉDICALE PRÉALABLE OBLIGATOIRE
+        // 4. VALIDATION MÉDICALE PRÉALABLE OBLIGATOIRE - CORRECTION ERREURS
         const medicalValidation = hydrationMedicalValidator.validateHydrationRecommendation(
           biometricProfile,
           environmentalData,
@@ -159,7 +158,7 @@ export const useHydration = () => {
           alertLevel: hydrationRecommendation.alertLevel
         });
 
-        // 6. VALIDATION CROISÉE FINALE AVEC MEDICAL VALIDATOR
+        // 6. VALIDATION CROISÉE FINALE AVEC MEDICAL VALIDATOR - CORRECTION
         const finalValidation = hydrationMedicalValidator.validateHydrationRecommendation(
           biometricProfile,
           environmentalData,
@@ -169,10 +168,11 @@ export const useHydration = () => {
         if (!finalValidation.isValid) {
           console.warn('⚠️ Validation finale échouée, application overrides sécuritaires');
           
-          // Application des limites sécuritaires
+          // Application des limites sécuritaires avec propriétés corrigées
+          const safeLimit = finalValidation.maxSafeAmount || 3000; // Utilise maxSafeAmount au lieu de maxAllowed
           hydrationRecommendation.totalDailyNeed = Math.min(
             hydrationRecommendation.totalDailyNeed,
-            finalValidation.maxAllowed || 3000
+            safeLimit
           );
           
           hydrationRecommendation.contraindications = [
@@ -180,9 +180,10 @@ export const useHydration = () => {
             ...finalValidation.contraindications
           ];
           
+          // Utilise medicalAlerts au lieu de alerts
           hydrationRecommendation.medicalAlerts = [
             ...hydrationRecommendation.medicalAlerts,
-            ...finalValidation.alerts
+            ...(finalValidation.medicalAlerts || [])
           ];
         }
 
@@ -518,7 +519,7 @@ function estimateCurrentActivity(profile: any, hour: number) {
     return {
       type: level === 'expert' ? 'light_walk' as const : 'rest' as const,
       duration: 30,
-      intensity: level === 'expert' ? 3 : 1,
+      intensity: 3,
       location: 'outdoor' as const
     };
   }
