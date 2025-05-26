@@ -19,6 +19,31 @@ interface ProgressChartProps {
 }
 
 const ProgressChart: React.FC<ProgressChartProps> = ({ title, data, dataKeys }) => {
+  // Afficher un message encourageant si aucune donnée
+  if (!data || data.length === 0 || data.every(item => 
+    dataKeys.every(key => (item[key.key] as number) === 0)
+  )) {
+    return (
+      <Card className="w-full">
+        <CardHeader>
+          <CardTitle>{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px] flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-muted-foreground mb-2">
+                📊 Vos données apparaîtront ici
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Commencez votre première séance pour voir vos progrès !
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="w-full">
       <CardHeader>

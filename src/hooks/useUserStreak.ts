@@ -20,8 +20,7 @@ export const useUserStreak = () => {
       try {
         setIsLoading(true);
         
-        // TODO: Replace with actual API call to get user's streak data
-        // For now, return zero values for new users
+        // Pour un nouvel utilisateur : pas de série commencée
         setCurrentStreak(0);
         setLongestStreak(0);
       } catch (error) {

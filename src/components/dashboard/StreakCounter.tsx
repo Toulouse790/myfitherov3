@@ -31,19 +31,23 @@ const StreakCounter: React.FC<StreakCounterProps> = ({
             <div className="text-2xl font-bold text-orange-500">
               {displayCurrentStreak} {displayCurrentStreak <= 1 ? 'jour' : 'jours'}
             </div>
-            <p className="text-xs text-muted-foreground">Série actuelle</p>
+            <p className="text-xs text-muted-foreground">
+              {displayCurrentStreak === 0 ? "Prêt à commencer ?" : "Série actuelle"}
+            </p>
           </div>
           <div>
             <div className="text-lg font-semibold">
               {displayLongestStreak} {displayLongestStreak <= 1 ? 'jour' : 'jours'}
             </div>
-            <p className="text-xs text-muted-foreground">Record personnel</p>
-          </div>
-          {displayCurrentStreak === 0 && (
-            <p className="text-xs text-muted-foreground mt-2">
-              Commencez votre première séance pour démarrer votre série !
+            <p className="text-xs text-muted-foreground">
+              {displayLongestStreak === 0 ? "Votre futur record" : "Record personnel"}
             </p>
-          )}
+          </div>
+          <div className="bg-muted/30 rounded-lg p-3 mt-3">
+            <p className="text-xs text-muted-foreground">
+              💡 Commencez votre première séance pour démarrer votre série !
+            </p>
+          </div>
         </div>
       </CardContent>
     </Card>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -31,7 +32,7 @@ export const useUserChartData = () => {
       try {
         setIsLoading(true);
         
-        // Initialize with zero values for new users
+        // Pour un nouvel utilisateur : données vides/zéro uniquement
         const emptyActivityData: ActivityData[] = [
           { name: 'Lun', séances: 0, calories: 0, sommeil: 0 },
           { name: 'Mar', séances: 0, calories: 0, sommeil: 0 },
@@ -49,12 +50,12 @@ export const useUserChartData = () => {
           { name: 'Semaine 4', force: 0, endurance: 0, récupération: 0 },
         ];
 
-        // TODO: Replace with actual API calls to get user chart data
+        // TODO: Remplacer par de vraies données utilisateur depuis la base de données
         setActivityData(emptyActivityData);
         setProgressData(emptyProgressData);
       } catch (error) {
         console.error('Error fetching chart data:', error);
-        // Keep empty data on error
+        // Garder les données vides en cas d'erreur
       } finally {
         setIsLoading(false);
       }

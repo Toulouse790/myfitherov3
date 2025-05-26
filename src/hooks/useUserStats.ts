@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -36,8 +37,7 @@ export const useUserStats = () => {
       try {
         setIsLoading(true);
         
-        // TODO: Replace with actual API calls to get user statistics
-        // For now, return zero values for new users
+        // Pour un nouvel utilisateur : tout à zéro
         const userStats: UserStats = {
           completedWorkouts: 0,
           caloriesBurned: 0,
@@ -52,7 +52,7 @@ export const useUserStats = () => {
         setStats(userStats);
       } catch (error) {
         console.error('Error fetching user stats:', error);
-        // Keep zero values on error
+        // Garder les valeurs à zéro en cas d'erreur
       } finally {
         setIsLoading(false);
       }

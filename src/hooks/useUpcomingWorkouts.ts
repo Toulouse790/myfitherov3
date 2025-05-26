@@ -25,8 +25,7 @@ export const useUpcomingWorkouts = () => {
       try {
         setIsLoading(true);
         
-        // TODO: Replace with actual API call to get user's upcoming workouts
-        // For now, return empty array for new users
+        // Pour un nouvel utilisateur : aucune séance programmée
         setWorkouts([]);
       } catch (error) {
         console.error('Error fetching upcoming workouts:', error);

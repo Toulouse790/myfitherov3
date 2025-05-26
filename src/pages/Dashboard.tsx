@@ -54,7 +54,7 @@ const Dashboard = () => {
         {/* Colonne droite: coach, météo, etc. */}
         <div className="space-y-6">
           <AICoachCard />
-          <StreakCounter currentStreak={0} longestStreak={0} />
+          <StreakCounter />
           
           {weatherRecommendations && !isLoading && (
             <WeatherRecommendations 
