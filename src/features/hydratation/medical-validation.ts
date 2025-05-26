@@ -5,8 +5,14 @@ export interface MedicalValidationResult {
   warnings: string[];
   contraindications: string[];
   riskLevel: 'low' | 'medium' | 'high' | 'critical';
-  maxSafeAmount: number;  // ← AJOUTÉ pour corriger l'erreur TypeScript
-  medicalAlerts: string[];  // ← AJOUTÉ pour corriger l'erreur TypeScript
+  maxSafeAmount: number;
+  medicalAlerts: string[];
+}
+
+export interface MedicalCondition {
+  condition: 'heart_failure' | 'kidney_disease' | 'diabetes' | 'hypertension' | 'pregnancy' | 'elderly_75plus' | 'insuffisance_cardiaque' | 'insuffisance_renale' | 'diabete' | 'grossesse';
+  severity: 'mild' | 'moderate' | 'severe';
+  medications: string[];
 }
 
 export interface BiometricProfile {
@@ -15,11 +21,7 @@ export interface BiometricProfile {
   height: number;
   sex: 'M' | 'F';
   fitnessLevel: 'sedentary' | 'light' | 'moderate' | 'intense' | 'athlete';
-  medicalConditions: Array<{
-    condition: string;
-    severity: 'mild' | 'moderate' | 'severe';
-    medications: string[];
-  }>;
+  medicalConditions: MedicalCondition[];
 }
 
 export interface EnvironmentalData {
@@ -64,7 +66,7 @@ class HydrationMedicalValidator {
 
     // 2. VALIDATION CONDITIONS MÉDICALES CRITIQUES
     profile.medicalConditions.forEach(condition => {
-      switch (condition.condition.toLowerCase()) {
+      switch (condition.condition) {
         case 'insuffisance_cardiaque':
         case 'heart_failure':
           result.riskLevel = 'critical';
@@ -134,7 +136,7 @@ class HydrationMedicalValidator {
     // Conditions urgentes nécessitant arrêt immédiat
     const criticalAge = profile.age < 5 || profile.age > 85;
     const criticalMedical = profile.medicalConditions.some(c => 
-      ['insuffisance_cardiaque', 'insuffisance_renale', 'heart_failure', 'kidney_disease'].includes(c.condition.toLowerCase())
+      ['insuffisance_cardiaque', 'insuffisance_renale', 'heart_failure', 'kidney_disease'].includes(c.condition)
     );
     const criticalEnvironment = environment.temperature > 40 || environment.heatIndex > 45;
     
@@ -155,12 +157,82 @@ class HydrationMedicalValidator {
     
     // Ajustements selon conditions médicales
     const hasCriticalCondition = profile.medicalConditions.some(c => 
-      ['insuffisance_cardiaque', 'insuffisance_renale'].includes(c.condition.toLowerCase())
+      ['insuffisance_cardiaque', 'insuffisance_renale', 'heart_failure', 'kidney_disease'].includes(c.condition)
     );
     
     if (hasCriticalCondition) baseLimit = Math.min(baseLimit, 2000);
     
     return Math.min(baseLimit, weightBasedLimit);
+  }
+
+  // Méthode pour les tests de populations vulnérables
+  testVulnerablePopulations() {
+    console.log('🧪 Tests populations vulnérables...');
+    
+    // Test profil senior 75+
+    const elderlyProfile: BiometricProfile = {
+      age: 78,
+      weight: 65,
+      height: 165,
+      sex: 'F',
+      fitnessLevel: 'light',
+      medicalConditions: [{
+        condition: 'elderly_75plus',
+        severity: 'moderate',
+        medications: ['antihypertenseur']
+      }]
+    };
+
+    // Test profil enfant
+    const childProfile: BiometricProfile = {
+      age: 8,
+      weight: 30,
+      height: 130,
+      sex: 'M',
+      fitnessLevel: 'moderate',
+      medicalConditions: []
+    };
+
+    // Test profil grossesse
+    const pregnancyProfile: BiometricProfile = {
+      age: 28,
+      weight: 70,
+      height: 165,
+      sex: 'F',
+      fitnessLevel: 'light',
+      medicalConditions: [{
+        condition: 'pregnancy',
+        severity: 'moderate',
+        medications: ['vitamines_prenatales']
+      }]
+    };
+
+    const testEnvironment: EnvironmentalData = {
+      temperature: 25,
+      humidity: 60,
+      heatIndex: 26,
+      uvIndex: 5,
+      windSpeed: 10
+    };
+
+    const elderlyResult = this.validateHydrationRecommendation(elderlyProfile, testEnvironment, 2500);
+    const childResult = this.validateHydrationRecommendation(childProfile, testEnvironment, 1800);
+    const pregnancyResult = this.validateHydrationRecommendation(pregnancyProfile, testEnvironment, 2800);
+
+    return {
+      elderly: {
+        ...elderlyResult,
+        medicalSupervisionRequired: elderlyResult.riskLevel === 'critical' || elderlyResult.riskLevel === 'high'
+      },
+      children: {
+        ...childResult,
+        medicalSupervisionRequired: childResult.riskLevel === 'critical'
+      },
+      pregnancy: {
+        ...pregnancyResult,
+        medicalSupervisionRequired: pregnancyResult.riskLevel === 'critical'
+      }
+    };
   }
 }
 

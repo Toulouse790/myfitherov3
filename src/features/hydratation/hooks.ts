@@ -1,11 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserStore } from '@/stores/useUserStore';
 import { hydrationService } from './services';
 import { HydrationEntry, HydrationCreateEntry, HydrationCreateGoal } from './types';
 import { hydrationAIExpert, HydrationRecommendation, HydrationAlert } from '@/ai/HydrationAIExpert';
-import { hydrationMedicalValidator, BiometricProfile, EnvironmentalData } from './medical-validation';
+import { hydrationMedicalValidator, BiometricProfile, EnvironmentalData, MedicalCondition } from './medical-validation';
 import { WeatherService, WeatherData } from '@/services/WeatherService';
 import { ProfileService } from '@/services/supabase/ProfileService';
 import { toast } from '@/components/ui/sonner';
@@ -112,7 +111,7 @@ export const useHydration = () => {
         // 3. ESTIMATION ACTIVITÉ ACTUELLE SÉCURISÉE
         const activityData = estimateCurrentActivity(profile, new Date().getHours());
 
-        // 4. VALIDATION MÉDICALE PRÉALABLE OBLIGATOIRE - PROPRIÉTÉS CORRIGÉES
+        // 4. VALIDATION MÉDICALE PRÉALABLE OBLIGATOIRE
         const medicalValidation = hydrationMedicalValidator.validateHydrationRecommendation(
           biometricProfile,
           environmentalData,
@@ -142,7 +141,7 @@ export const useHydration = () => {
               '🚫 Pas d\'activité intense sans avis médical'
             ],
             contraindications: medicalValidation.contraindications,
-            medicalAlerts: medicalValidation.medicalAlerts // ← PROPRIÉTÉ CORRIGÉE
+            medicalAlerts: medicalValidation.medicalAlerts
           });
           return;
         }
@@ -159,7 +158,7 @@ export const useHydration = () => {
           alertLevel: hydrationRecommendation.alertLevel
         });
 
-        // 6. VALIDATION CROISÉE FINALE AVEC MEDICAL VALIDATOR - PROPRIÉTÉS CORRIGÉES
+        // 6. VALIDATION CROISÉE FINALE AVEC MEDICAL VALIDATOR
         const finalValidation = hydrationMedicalValidator.validateHydrationRecommendation(
           biometricProfile,
           environmentalData,
@@ -169,8 +168,8 @@ export const useHydration = () => {
         if (!finalValidation.isValid) {
           console.warn('⚠️ Validation finale échouée, application overrides sécuritaires');
           
-          // Application des limites sécuritaires avec propriétés corrigées
-          const safeLimit = finalValidation.maxSafeAmount; // ← PROPRIÉTÉ CORRIGÉE
+          // Application des limites sécuritaires
+          const safeLimit = finalValidation.maxSafeAmount;
           hydrationRecommendation.totalDailyNeed = Math.min(
             hydrationRecommendation.totalDailyNeed,
             safeLimit
@@ -181,16 +180,15 @@ export const useHydration = () => {
             ...finalValidation.contraindications
           ];
           
-          // Utilise medicalAlerts - PROPRIÉTÉ CORRIGÉE
           hydrationRecommendation.medicalAlerts = [
             ...hydrationRecommendation.medicalAlerts,
-            ...finalValidation.medicalAlerts // ← PROPRIÉTÉ CORRIGÉE
+            ...finalValidation.medicalAlerts
           ];
         }
 
         setRecommendation(hydrationRecommendation);
 
-        // 7. GÉNÉRATION ALERTES CRITIQUES AUTOMATIQUES
+        // GÉNÉRATION ALERTES CRITIQUES AUTOMATIQUES
         const alertStatus = hydrationAIExpert.generateHydrationAlert(
           currentIntake,
           hydrationRecommendation.totalDailyNeed,
@@ -454,8 +452,8 @@ function mapFitnessLevelSecure(level?: string): 'sedentary' | 'light' | 'moderat
   }
 }
 
-function extractMedicalConditions(profile: any, medicalProfile: any) {
-  const conditions = [];
+function extractMedicalConditions(profile: any, medicalProfile: any): MedicalCondition[] {
+  const conditions: MedicalCondition[] = [];
   
   const age = profile.age || calculateAgeFromBirthdate(medicalProfile?.birthdate) || 30;
   
@@ -479,16 +477,42 @@ function extractMedicalConditions(profile: any, medicalProfile: any) {
   
   // CONDITIONS DÉCLARÉES
   if (medicalProfile?.medical?.conditions) {
-    medicalProfile.medical.conditions.forEach((condition: string) => {
-      conditions.push({
-        condition,
-        severity: 'moderate',
-        medications: medicalProfile.medical.medications || []
-      });
+    medicalProfile.medical.conditions.forEach((conditionName: string) => {
+      // Mapper les conditions aux types autorisés
+      const mappedCondition = mapConditionName(conditionName);
+      if (mappedCondition) {
+        conditions.push({
+          condition: mappedCondition,
+          severity: 'moderate',
+          medications: medicalProfile.medical.medications || []
+        });
+      }
     });
   }
   
   return conditions;
+}
+
+function mapConditionName(conditionName: string): MedicalCondition['condition'] | null {
+  const lowercaseName = conditionName.toLowerCase();
+  
+  if (lowercaseName.includes('heart') || lowercaseName.includes('cardiaque')) {
+    return 'heart_failure';
+  }
+  if (lowercaseName.includes('kidney') || lowercaseName.includes('renal')) {
+    return 'kidney_disease';
+  }
+  if (lowercaseName.includes('diabetes') || lowercaseName.includes('diabete')) {
+    return 'diabetes';
+  }
+  if (lowercaseName.includes('hypertension')) {
+    return 'hypertension';
+  }
+  if (lowercaseName.includes('pregnancy') || lowercaseName.includes('grossesse')) {
+    return 'pregnancy';
+  }
+  
+  return null; // Condition non reconnue
 }
 
 function estimateUVIndex(weather: any): number {
