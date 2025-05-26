@@ -3554,6 +3554,23 @@ export type Database = {
           tags: string[] | null
         }[]
       }
+      get_user_profile: {
+        Args: { p_user_id: string }
+        Returns: {
+          id: string
+          user_id: string
+          first_name: string
+          last_name: string
+          email: string
+          age: number
+          gender: string
+          height_cm: number
+          weight_kg: number
+          timezone: string
+          created_at: string
+          updated_at: string
+        }[]
+      }
       gtrgm_compress: {
         Args: { "": unknown }
         Returns: unknown
@@ -3708,6 +3725,33 @@ export type Database = {
       unaccent_init: {
         Args: { "": unknown }
         Returns: unknown
+      }
+      upsert_user_profile: {
+        Args: {
+          p_user_id: string
+          p_first_name?: string
+          p_last_name?: string
+          p_email?: string
+          p_age?: number
+          p_gender?: string
+          p_height_cm?: number
+          p_weight_kg?: number
+          p_timezone?: string
+        }
+        Returns: {
+          id: string
+          user_id: string
+          first_name: string
+          last_name: string
+          email: string
+          age: number
+          gender: string
+          height_cm: number
+          weight_kg: number
+          timezone: string
+          created_at: string
+          updated_at: string
+        }[]
       }
       vector_avg: {
         Args: { "": number[] }

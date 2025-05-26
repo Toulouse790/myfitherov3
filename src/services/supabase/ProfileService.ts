@@ -42,7 +42,7 @@ export class ProfileService extends BaseService {
    */
   static async updateUserProfile(userId: string, profileData: UserProfile): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
-      const updateData: Partial<UserProfileData> = {
+      const updateData = {
         user_id: userId,
         first_name: profileData.first_name,
         last_name: profileData.last_name,
@@ -52,26 +52,18 @@ export class ProfileService extends BaseService {
         height_cm: profileData.height_cm,
         weight_kg: profileData.weight_kg,
         timezone: profileData.timezone,
-        updated_at: new Date().toISOString()
       };
 
-      // Utiliser une requête SQL brute pour éviter les problèmes de types TypeScript
-      const { data, error } = await supabase.rpc('upsert_user_profile', {
-        p_user_id: userId,
-        p_first_name: updateData.first_name,
-        p_last_name: updateData.last_name,
-        p_email: updateData.email,
-        p_age: updateData.age,
-        p_gender: updateData.gender,
-        p_height_cm: updateData.height_cm,
-        p_weight_kg: updateData.weight_kg,
-        p_timezone: updateData.timezone
-      });
+      // Utiliser une insertion directe vers la table user_profiles
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .upsert(updateData, { onConflict: 'user_id' })
+        .select()
+        .single();
 
       if (error) {
         console.error('Erreur mise à jour profil:', error);
-        // Fallback vers une approche directe si la fonction n'existe pas
-        return await this.fallbackUpdateProfile(userId, updateData);
+        return { success: false, error: error.message };
       }
 
       // Envoyer les données à n8n après succès
@@ -80,43 +72,6 @@ export class ProfileService extends BaseService {
       return { success: true, data };
     } catch (error) {
       console.error('Erreur ProfileService:', error);
-      return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
-    }
-  }
-
-  /**
-   * Méthode de fallback utilisant une requête SQL directe
-   */
-  private static async fallbackUpdateProfile(userId: string, updateData: Partial<UserProfileData>): Promise<{ success: boolean; data?: any; error?: string }> {
-    try {
-      // Construire la requête d'upsert manuellement
-      const columns = Object.keys(updateData).filter(key => updateData[key as keyof UserProfileData] !== undefined);
-      const values = columns.map(col => updateData[col as keyof UserProfileData]);
-      
-      // Utiliser une requête SQL brute
-      const query = `
-        INSERT INTO user_profiles (user_id, ${columns.join(', ')})
-        VALUES ($1, ${columns.map((_, i) => `$${i + 2}`).join(', ')})
-        ON CONFLICT (user_id) 
-        DO UPDATE SET 
-          ${columns.map((col, i) => `${col} = $${i + 2}`).join(', ')},
-          updated_at = NOW()
-        RETURNING *;
-      `;
-
-      const { data, error } = await supabase.rpc('exec_sql', {
-        query: query,
-        params: [userId, ...values]
-      });
-
-      if (error) {
-        console.error('Erreur fallback:', error);
-        throw error;
-      }
-
-      return { success: true, data };
-    } catch (error) {
-      console.error('Erreur fallback ProfileService:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
     }
   }
@@ -134,68 +89,33 @@ export class ProfileService extends BaseService {
    */
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
-      // Utiliser une requête SQL brute pour éviter les problèmes de types
-      const { data, error } = await supabase.rpc('get_user_profile', {
-        p_user_id: userId
-      });
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .single();
 
       if (error) {
         console.error("Erreur récupération profil :", error.message);
-        // Fallback vers une approche directe
-        return await this.fallbackGetProfile(userId);
+        return null;
       }
 
-      if (!data || data.length === 0) return null;
+      if (!data) return null;
 
-      const profileData = data[0];
       return {
-        first_name: profileData.first_name || undefined,
-        last_name: profileData.last_name || undefined,
-        email: profileData.email || undefined,
-        birthdate: profileData.age ? this.ageToApproximateBirthdate(profileData.age) : undefined,
-        gender: profileData.gender || undefined,
-        age: profileData.age || undefined,
-        height_cm: profileData.height_cm || undefined,
-        weight_kg: profileData.weight_kg || undefined,
-        timezone: profileData.timezone || undefined,
+        first_name: data.first_name || undefined,
+        last_name: data.last_name || undefined,
+        email: data.email || undefined,
+        birthdate: data.age ? this.ageToApproximateBirthdate(data.age) : undefined,
+        gender: data.gender || undefined,
+        age: data.age || undefined,
+        height_cm: data.height_cm || undefined,
+        weight_kg: data.weight_kg || undefined,
+        timezone: data.timezone || undefined,
         accepted_terms: true // Assumé vrai si le profil existe
       };
     } catch (err) {
       console.error('Exception getUserProfile:', err);
-      return null;
-    }
-  }
-
-  /**
-   * Méthode de fallback pour récupérer le profil
-   */
-  private static async fallbackGetProfile(userId: string): Promise<UserProfile | null> {
-    try {
-      const { data, error } = await supabase.rpc('exec_sql', {
-        query: 'SELECT * FROM user_profiles WHERE user_id = $1',
-        params: [userId]
-      });
-
-      if (error || !data || data.length === 0) {
-        console.error("Erreur fallback récupération profil :", error?.message);
-        return null;
-      }
-
-      const profileData = data[0];
-      return {
-        first_name: profileData.first_name || undefined,
-        last_name: profileData.last_name || undefined,
-        email: profileData.email || undefined,
-        birthdate: profileData.age ? this.ageToApproximateBirthdate(profileData.age) : undefined,
-        gender: profileData.gender || undefined,
-        age: profileData.age || undefined,
-        height_cm: profileData.height_cm || undefined,
-        weight_kg: profileData.weight_kg || undefined,
-        timezone: profileData.timezone || undefined,
-        accepted_terms: true
-      };
-    } catch (err) {
-      console.error('Exception fallback getUserProfile:', err);
       return null;
     }
   }
@@ -230,13 +150,18 @@ export class ProfileService extends BaseService {
    */
   static async logInteraction(userId: string, action: string, metadata: Record<string, any> = {}): Promise<void> {
     try {
-      await supabase.rpc('exec_sql', {
-        query: `
-          INSERT INTO ai_training_data (user_id, action_type, context, created_at)
-          VALUES ($1, $2, $3, NOW())
-        `,
-        params: [userId, action, JSON.stringify(metadata)]
-      });
+      const { error } = await supabase
+        .from('ai_training_data')
+        .insert({
+          user_id: userId,
+          action_type: action,
+          context: metadata,
+          created_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.warn('Erreur log interaction:', error);
+      }
     } catch (error) {
       console.warn('Erreur log interaction:', error);
     }
