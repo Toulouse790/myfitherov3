@@ -101,9 +101,13 @@ class HydrationMedicalValidator {
     });
 
     // 3. VALIDATION ENVIRONNEMENTALE CRITIQUE
-    if (environment.temperature > 35 && environment.humidity > 80) {
+    // Ensure temperature and humidity are numbers
+    const temp = Number(environment.temperature);
+    const humidity = Number(environment.humidity);
+    
+    if (temp > 35 && humidity > 80) {
       result.riskLevel = Math.max(result.riskLevel === 'low' ? 'high' : result.riskLevel, 'high') as any;
-      result.warnings.push(`Conditions extrêmes: ${environment.temperature}°C, ${environment.humidity}% humidité`);
+      result.warnings.push(`Conditions extrêmes: ${temp}°C, ${humidity}% humidité`);
       result.medicalAlerts.push('THERMIQUE: Risque coup de chaleur élevé');
     }
 
@@ -134,7 +138,7 @@ class HydrationMedicalValidator {
     const criticalMedical = profile.medicalConditions.some(c => 
       ['heart_failure', 'kidney_disease'].includes(c.condition)
     );
-    const criticalEnvironment = environment.temperature > 40 || environment.heatIndex > 45;
+    const criticalEnvironment = Number(environment.temperature) > 40 || Number(environment.heatIndex) > 45;
     
     return criticalAge || criticalMedical || criticalEnvironment;
   }
@@ -149,7 +153,7 @@ class HydrationMedicalValidator {
     else if (profile.age > 75) baseLimit = 3000;
     
     // Ajustements selon poids (35ml/kg max)
-    const weightBasedLimit = profile.weight * 35;
+    const weightBasedLimit = Number(profile.weight) * 35;
     
     // Ajustements selon conditions médicales
     const hasCriticalCondition = profile.medicalConditions.some(c => 
