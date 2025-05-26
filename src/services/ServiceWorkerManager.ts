@@ -1,4 +1,3 @@
-
 export class ServiceWorkerManager {
   private static instance: ServiceWorkerManager;
   private registration: ServiceWorkerRegistration | null = null;
@@ -174,7 +173,8 @@ export class ServiceWorkerManager {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      await registration.sync.register('force-sync');
+      // Type assertion pour l'API Background Sync expérimentale
+      await (registration as any).sync.register('force-sync');
       console.log('🔄 Synchronisation forcée demandée');
     } catch (error) {
       console.error('❌ Erreur synchronisation:', error);
