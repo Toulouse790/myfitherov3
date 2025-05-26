@@ -10,7 +10,7 @@ export interface MedicalValidationResult {
 }
 
 export interface MedicalCondition {
-  condition: 'heart_failure' | 'kidney_disease' | 'diabetes' | 'hypertension' | 'pregnancy' | 'elderly_75plus' | 'insuffisance_cardiaque' | 'insuffisance_renale' | 'diabete' | 'grossesse';
+  condition: 'heart_failure' | 'kidney_disease' | 'diabetes' | 'hypertension' | 'pregnancy' | 'elderly_75plus';
   severity: 'mild' | 'moderate' | 'severe';
   medications: string[];
 }
@@ -67,7 +67,6 @@ class HydrationMedicalValidator {
     // 2. VALIDATION CONDITIONS MÉDICALES CRITIQUES
     profile.medicalConditions.forEach(condition => {
       switch (condition.condition) {
-        case 'insuffisance_cardiaque':
         case 'heart_failure':
           result.riskLevel = 'critical';
           result.maxSafeAmount = Math.min(2000, recommendedAmount);
@@ -75,7 +74,6 @@ class HydrationMedicalValidator {
           result.medicalAlerts.push('CARDIOLOGIE: Risque surcharge volumique');
           break;
           
-        case 'insuffisance_renale':
         case 'kidney_disease':
           result.riskLevel = 'critical';
           result.maxSafeAmount = Math.min(1500, recommendedAmount);
@@ -83,7 +81,6 @@ class HydrationMedicalValidator {
           result.medicalAlerts.push('NÉPHROLOGIE: Consultation avant modification hydratation');
           break;
           
-        case 'diabete':
         case 'diabetes':
           result.riskLevel = 'high';
           result.warnings.push('Diabète - Surveillance glycémie avec hydratation');
@@ -95,7 +92,6 @@ class HydrationMedicalValidator {
           result.warnings.push('Hypertension - Éviter surhydratation');
           break;
           
-        case 'grossesse':
         case 'pregnancy':
           result.maxSafeAmount = Math.min(3500, recommendedAmount);
           result.warnings.push('Grossesse - Besoins hydriques augmentés mais contrôlés');
@@ -136,7 +132,7 @@ class HydrationMedicalValidator {
     // Conditions urgentes nécessitant arrêt immédiat
     const criticalAge = profile.age < 5 || profile.age > 85;
     const criticalMedical = profile.medicalConditions.some(c => 
-      ['insuffisance_cardiaque', 'insuffisance_renale', 'heart_failure', 'kidney_disease'].includes(c.condition)
+      ['heart_failure', 'kidney_disease'].includes(c.condition)
     );
     const criticalEnvironment = environment.temperature > 40 || environment.heatIndex > 45;
     
@@ -157,7 +153,7 @@ class HydrationMedicalValidator {
     
     // Ajustements selon conditions médicales
     const hasCriticalCondition = profile.medicalConditions.some(c => 
-      ['insuffisance_cardiaque', 'insuffisance_renale', 'heart_failure', 'kidney_disease'].includes(c.condition)
+      ['heart_failure', 'kidney_disease'].includes(c.condition)
     );
     
     if (hasCriticalCondition) baseLimit = Math.min(baseLimit, 2000);
