@@ -11,7 +11,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-slate-50">
       <DashboardHeader />
       
-      <main className="container mx-auto px-4 max-w-6xl">
+      <main className="container mx-auto px-3 sm:px-4 max-w-6xl">
         <DashboardStatsGrid />
         <StarterSection />
         <AIAgentsSection />

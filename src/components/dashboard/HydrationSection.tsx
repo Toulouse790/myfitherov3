@@ -21,42 +21,42 @@ const HydrationSection = () => {
   };
 
   return (
-    <Card className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-xl">💧</span>
-        <h2 className="text-lg font-semibold text-slate-900">Hydratation</h2>
+    <Card className="bg-white border border-slate-200 rounded-xl p-3 sm:p-5 mb-4 sm:mb-6">
+      <div className="flex items-center gap-2 mb-3 sm:mb-4">
+        <span className="text-lg sm:text-xl">💧</span>
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900">Hydratation</h2>
       </div>
       
-      <div className="text-sm text-slate-600 mb-4">Suivi quotidien</div>
+      <div className="text-xs sm:text-sm text-slate-600 mb-3 sm:mb-4">Suivi quotidien</div>
       
-      <div className="mb-4">
-        <div className="text-lg font-semibold text-slate-900 mb-1">
+      <div className="mb-3 sm:mb-4">
+        <div className="text-base sm:text-lg font-semibold text-slate-900 mb-1">
           {remaining > 0 ? `Encore ${(remaining/1000).toFixed(1)}L à boire` : 'Objectif atteint !'}
         </div>
-        <div className="text-2xl font-bold text-red-600">
+        <div className="text-xl sm:text-2xl font-bold text-red-600">
           {currentHydration} / {dailyGoal} ml
         </div>
       </div>
       
-      <div className="w-full h-2 bg-red-100 rounded-full overflow-hidden mb-4">
+      <div className="w-full h-2 bg-red-100 rounded-full overflow-hidden mb-3 sm:mb-4">
         <div 
           className={`h-full transition-all duration-300 rounded-full ${getProgressColor()}`}
           style={{ width: `${percentage}%` }}
         ></div>
       </div>
       
-      <div className="grid grid-cols-2 gap-3 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
         <Button 
           variant="outline" 
           onClick={() => addWater(200)}
-          className="flex items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-slate-100 border-slate-200"
+          className="flex items-center justify-center gap-1 py-2 sm:py-3 bg-slate-50 hover:bg-slate-100 border-slate-200 text-xs sm:text-sm"
         >
           💧 +200ml
         </Button>
         <Button 
           variant="outline" 
           onClick={() => addWater(500)}
-          className="flex items-center justify-center gap-1 py-3 bg-slate-50 hover:bg-slate-100 border-slate-200"
+          className="flex items-center justify-center gap-1 py-2 sm:py-3 bg-slate-50 hover:bg-slate-100 border-slate-200 text-xs sm:text-sm"
         >
           💧 +500ml
         </Button>
@@ -64,7 +64,7 @@ const HydrationSection = () => {
       
       <Button 
         onClick={() => addWater(750)}
-        className="w-full bg-red-200 hover:bg-red-300 text-red-800 border-red-300 py-3 font-medium"
+        className="w-full bg-red-200 hover:bg-red-300 text-red-800 border-red-300 py-2 sm:py-3 font-medium text-xs sm:text-sm"
         variant="outline"
       >
         ⚠️ HYDRATATION URGENTE +750ml

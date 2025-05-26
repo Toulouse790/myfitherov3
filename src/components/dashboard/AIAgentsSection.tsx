@@ -40,36 +40,36 @@ const AIAgentsSection = () => {
   ];
 
   return (
-    <Card className="bg-white border border-slate-200 rounded-xl p-5 mb-6">
-      <div className="flex justify-between items-center mb-5">
-        <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
+    <Card className="bg-white border border-slate-200 rounded-xl p-3 sm:p-5 mb-4 sm:mb-6">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-3 sm:mb-5 gap-2">
+        <h2 className="text-base sm:text-lg font-semibold text-slate-900 flex items-center gap-2">
           🤖 Agents IA Spécialisés
         </h2>
-        <Button variant="outline" size="sm" className="text-xs px-3 py-1">
+        <Button variant="outline" size="sm" className="text-xs px-2 sm:px-3 py-1 w-fit self-start sm:self-auto">
           ⚙️ Gérer
         </Button>
       </div>
 
-      <div className="space-y-3 mb-4">
+      <div className="space-y-2 sm:space-y-3 mb-3 sm:mb-4">
         {agents.map((agent, index) => (
-          <div key={index} className="flex justify-between items-center p-4 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-md ${agent.bgColor} ${agent.iconColor} flex items-center justify-center text-base`}>
+          <div key={index} className="flex flex-col sm:flex-row justify-between sm:items-center p-3 sm:p-4 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors gap-2 sm:gap-0">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-md ${agent.bgColor} ${agent.iconColor} flex items-center justify-center text-sm sm:text-base`}>
                 {agent.icon}
               </div>
               <div>
-                <h4 className="text-sm font-medium text-slate-900">{agent.title}</h4>
+                <h4 className="text-xs sm:text-sm font-medium text-slate-900">{agent.title}</h4>
                 <p className="text-xs text-slate-600">{agent.description}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 self-start sm:self-auto">
               <div className={`w-2 h-2 rounded-full ${agent.status === 'online' ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
               <span className="text-xs text-slate-600">
                 {agent.status === 'online' ? 'En ligne' : 'Standby'}
               </span>
               <Button 
                 size="sm" 
-                className={`text-xs px-3 py-1 ${
+                className={`text-xs px-2 sm:px-3 py-1 ${
                   agent.status === 'online' 
                     ? 'bg-blue-500 hover:bg-blue-600 text-white' 
                     : 'bg-green-500 hover:bg-green-600 text-white'
@@ -82,11 +82,11 @@ const AIAgentsSection = () => {
         ))}
       </div>
 
-      <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl p-5">
+      <div className="bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-xl p-4 sm:p-5">
         <div className="mb-2">
-          <div className="text-base font-medium">Performance Collective</div>
-          <div className="text-3xl font-bold">92%</div>
-          <div className="text-sm opacity-90 mb-3">précision</div>
+          <div className="text-sm sm:text-base font-medium">Performance Collective</div>
+          <div className="text-2xl sm:text-3xl font-bold">92%</div>
+          <div className="text-xs sm:text-sm opacity-90 mb-2 sm:mb-3">précision</div>
         </div>
         <div className="w-full h-1 bg-white/30 rounded-full overflow-hidden mb-2">
           <div className="h-full bg-white w-[92%] rounded-full"></div>
