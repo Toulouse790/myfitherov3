@@ -1,30 +1,15 @@
 
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarHeader } from "@/components/ui/sidebar";
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
-import { Link, useLocation } from 'react-router-dom';
-import { Home, Dumbbell, AppleIcon, Moon, MessageSquare, BarChart3, User, Settings } from 'lucide-react';
-import { cn } from "@/lib/utils";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import ThemeToggle from "@/components/layout/ThemeToggle";
+import Navigation from "@/components/layout/Navigation";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
-  const location = useLocation();
-
-  const menuItems = [
-    { title: "Accueil", path: "/", icon: Home },
-    { title: "Musculation", path: "/workout", icon: Dumbbell },
-    { title: "Nutrition", path: "/nutrition", icon: AppleIcon },
-    { title: "Sommeil", path: "/sleep", icon: Moon },
-    { title: "Coach IA", path: "/coach", icon: MessageSquare },
-    { title: "Tableau de bord", path: "/dashboard", icon: BarChart3 },
-    { title: "Profil", path: "/profile", icon: User },
-    { title: "Paramètres", path: "/settings", icon: Settings },
-  ];
-
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full bg-background overflow-hidden">
@@ -40,26 +25,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           
           <SidebarContent>
             <SidebarGroup>
-              <SidebarMenu>
-                {menuItems.map((item) => (
-                  <SidebarMenuItem key={item.path}>
-                    <SidebarMenuButton asChild>
-                      <Link 
-                        to={item.path}
-                        className={cn(
-                          "flex items-center space-x-2 px-3 py-2 rounded-md transition-colors",
-                          location.pathname === item.path 
-                            ? "bg-primary text-primary-foreground" 
-                            : "hover:bg-muted"
-                        )}
-                      >
-                        <item.icon size={20} />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
+              <Navigation />
             </SidebarGroup>
           </SidebarContent>
           
