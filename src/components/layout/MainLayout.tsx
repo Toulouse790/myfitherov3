@@ -2,7 +2,6 @@
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
-import { EmergencyFloatingButton } from '@/components/emergency/EmergencyFloatingButton';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
@@ -21,9 +20,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
             {children || <Outlet />}
           </main>
         </SidebarInset>
-        
-        {/* Bouton urgence flottant toujours visible */}
-        <EmergencyFloatingButton />
       </div>
     </SidebarProvider>
   );

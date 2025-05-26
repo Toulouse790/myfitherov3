@@ -9,13 +9,6 @@ export * from './medical-validation';
 export { HydrationSafetyCard } from '@/components/hydration/HydrationSafetyCard';
 export { HydrationDashboardCard } from '@/components/dashboard/HydrationDashboardCard';
 
-// Exportation des composants d'urgence - SYSTÈME COMPLET 4 DOMAINES
-export { EmergencyFloatingButton } from '@/components/emergency/EmergencyFloatingButton';
-export { EmergencyHydrationModal } from '@/components/emergency/EmergencyHydrationModal';
-export { EmergencySportModal } from '@/components/emergency/EmergencySportModal';
-export { EmergencyNutritionModal } from '@/components/emergency/EmergencyNutritionModal';
-export { EmergencySleepModal } from '@/components/emergency/EmergencySleepModal';
-
 // Exportation des services de sécurité
 export { hydrationMedicalValidator } from './medical-validation';
 
