@@ -1,7 +1,8 @@
 
 // Module IA - Exports principaux
 export * from './HydrationAIExpert';
-export * from './SportAIExpert';
+export { SportAIExpert } from './SportAIExpert';
+export type { UserProfile as SportUserProfile } from './SportAIExpert';
 export * from './CrossDomainValidator';
 export * from './types/CrossDomainTypes';
 
