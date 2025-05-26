@@ -1,7 +1,6 @@
 
 import { Capacitor } from '@capacitor/core';
 import { Geolocation } from '@capacitor/geolocation';
-import { DeviceMotion } from '@capacitor/device-motion';
 import { PushNotifications } from '@capacitor/push-notifications';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { Preferences } from '@capacitor/preferences';
@@ -62,40 +61,50 @@ export class CapacitorService {
     this.storeSecureData('location_history', JSON.stringify(locationData));
   }
 
-  // Capteurs de mouvement pour analyse d'activité
+  // Simulation des capteurs de mouvement (pour le web, utilise DeviceMotionEvent)
   async startMotionTracking(): Promise<void> {
-    if (!this.isNative) return;
+    if (!this.isNative) {
+      // Utilise l'API Web pour les capteurs de mouvement
+      if (typeof DeviceMotionEvent !== 'undefined') {
+        window.addEventListener('devicemotion', (event) => {
+          this.analyzeWebMotion(event);
+        });
+        console.log('Capteurs web de mouvement activés');
+      }
+      return;
+    }
 
     try {
-      await DeviceMotion.requestPermissions();
-      
-      // Détection de mouvement avec accéléromètre
-      const watchId = await DeviceMotion.watchAcceleration(
-        { frequency: 1000 }, // 1 mesure par seconde
-        (acceleration) => {
-          this.analyzeMovement(acceleration);
-        }
-      );
-      console.log('Capteurs de mouvement activés, ID:', watchId);
+      // Pour les plateformes natives, on utilise l'API Web DeviceMotion
+      if (typeof DeviceMotionEvent !== 'undefined') {
+        window.addEventListener('devicemotion', (event) => {
+          this.analyzeWebMotion(event);
+        });
+        console.log('Capteurs de mouvement natifs activés');
+      }
     } catch (error) {
       console.error('Erreur capteurs mouvement:', error);
     }
   }
 
-  private analyzeMovement(acceleration: any) {
-    // Calcul de l'intensité du mouvement
-    const intensity = Math.sqrt(
-      acceleration.x ** 2 + acceleration.y ** 2 + acceleration.z ** 2
-    );
-    
-    // Détection d'activité (seuil à ajuster)
-    if (intensity > 1.2) {
-      console.log('Activité détectée, intensité:', intensity);
-      // Stocker les données de mouvement
-      this.storeSecureData('motion_data', JSON.stringify({
-        intensity,
-        timestamp: new Date().toISOString()
-      }));
+  private analyzeWebMotion(event: DeviceMotionEvent) {
+    if (event.acceleration) {
+      // Calcul de l'intensité du mouvement
+      const intensity = Math.sqrt(
+        (event.acceleration.x || 0) ** 2 + 
+        (event.acceleration.y || 0) ** 2 + 
+        (event.acceleration.z || 0) ** 2
+      );
+      
+      // Détection d'activité (seuil à ajuster)
+      if (intensity > 1.2) {
+        console.log('Activité détectée, intensité:', intensity);
+        // Stocker les données de mouvement
+        this.storeSecureData('motion_data', JSON.stringify({
+          intensity,
+          timestamp: new Date().toISOString()
+        }));
+      }
     }
   }
 
