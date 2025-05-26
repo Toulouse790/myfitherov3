@@ -2,6 +2,7 @@
 import { useCallback, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { NavigationCacheService } from '@/services/NavigationCacheService';
+import { bundleOptimizer } from '@/services/BundleOptimizer';
 
 export const useSmartNavigation = () => {
   const navigate = useNavigate();
@@ -25,6 +26,8 @@ export const useSmartNavigation = () => {
       console.log(`📍 Navigation vers: ${currentModule}`);
       // Précharge les modules suivants probables
       cacheService.preloadAdjacentModules(currentModule);
+      // Utilise aussi le bundle optimizer pour le préchargement contextuel
+      bundleOptimizer.preloadContextual(currentModule);
     }
   }, [location.pathname, cacheService]);
 
@@ -32,11 +35,11 @@ export const useSmartNavigation = () => {
   const smartNavigate = useCallback((path: string) => {
     const targetModule = path.split('/')[1];
     
-    // Log pour le debugging
-    if (cacheService.isModulePreloaded(targetModule)) {
-      console.log(`⚡ Navigation instantanée vers ${targetModule} (déjà en cache)`);
+    // Log pour le debugging avec informations enrichies
+    if (bundleOptimizer.isModuleLoaded(targetModule)) {
+      console.log(`⚡ Navigation instantanée vers ${targetModule} (optimisé & en cache)`);
     } else {
-      console.log(`🔄 Navigation vers ${targetModule} (chargement à la demande)`);
+      console.log(`🔄 Navigation vers ${targetModule} (chargement optimisé à la demande)`);
     }
 
     navigate(path);
@@ -48,27 +51,33 @@ export const useSmartNavigation = () => {
     });
   }, [navigate, location.pathname, cacheService]);
 
-  // Navigation avec préchargement manuel
+  // Navigation avec préchargement manuel optimisé
   const preloadAndNavigate = useCallback(async (path: string) => {
     const targetModule = path.split('/')[1];
     
-    // Si pas encore préchargé, on le fait maintenant
-    if (!cacheService.isModulePreloaded(targetModule)) {
-      console.log(`🔄 Préchargement forcé de ${targetModule}...`);
+    // Si pas encore optimisé, on le fait maintenant
+    if (!bundleOptimizer.isModuleLoaded(targetModule)) {
+      console.log(`🔄 Préchargement optimisé forcé de ${targetModule}...`);
       try {
-        await import(`@/pages/${targetModule.charAt(0).toUpperCase() + targetModule.slice(1)}`);
-        console.log(`✅ ${targetModule} préchargé avec succès`);
+        await bundleOptimizer.loadModuleOptimized(targetModule);
+        console.log(`✅ ${targetModule} optimisé et préchargé avec succès`);
       } catch (error) {
-        console.warn(`❌ Échec du préchargement de ${targetModule}:`, error);
+        console.warn(`❌ Échec du préchargement optimisé de ${targetModule}:`, error);
       }
     }
     
     smartNavigate(path);
-  }, [smartNavigate, cacheService]);
+  }, [smartNavigate]);
+
+  // Nouvelle méthode pour vérifier si un module est optimisé
+  const isModuleOptimized = useCallback((moduleName: string) => {
+    return bundleOptimizer.isModuleLoaded(moduleName);
+  }, []);
 
   return { 
     smartNavigate, 
     preloadAndNavigate,
-    isModulePreloaded: cacheService.isModulePreloaded.bind(cacheService)
+    isModulePreloaded: cacheService.isModulePreloaded.bind(cacheService),
+    isModuleOptimized
   };
 };

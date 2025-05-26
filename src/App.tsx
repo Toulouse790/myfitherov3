@@ -9,30 +9,44 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { ConversationProvider } from "@/contexts/ConversationContext";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
 import { advancedCache } from "@/services/AdvancedCacheService";
+import { bundleOptimizer } from "@/services/BundleOptimizer";
 import AppRoutes from "@/routes";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-// Composant pour initialiser le monitoring et le cache
+// Composant pour initialiser le monitoring, cache et optimiseur
 const PerformanceWrapper = ({ children }: { children: React.ReactNode }) => {
   const { getQuickStats } = usePerformanceMonitor();
 
   useEffect(() => {
-    // Initialise le cache avancé
-    const initializeCache = async () => {
+    // Initialise tous les services de performance
+    const initializeServices = async () => {
+      console.log('🚀 Initialisation des services de performance...');
+      
+      // Cache avancé
       await advancedCache.init();
       console.log('📊 Cache Stats:', advancedCache.getStats());
+
+      // Optimiseur de bundle - préchargement intelligent
+      await bundleOptimizer.preloadByPriority();
+      console.log('📦 Bundle Stats:', bundleOptimizer.getModuleStats());
     };
 
-    initializeCache();
+    initializeServices();
 
     // Log des stats de performance toutes les minutes en mode dev
     if (import.meta.env.DEV) {
       const interval = setInterval(() => {
-        const stats = getQuickStats();
+        const performanceStats = getQuickStats();
         const cacheStats = advancedCache.getStats();
-        console.log('📊 Performance Stats:', { ...stats, cache: cacheStats });
+        const bundleStats = bundleOptimizer.getModuleStats();
+        
+        console.log('📊 Performance Dashboard:', { 
+          performance: performanceStats, 
+          cache: cacheStats,
+          bundle: bundleStats
+        });
       }, 60000);
 
       return () => clearInterval(interval);
