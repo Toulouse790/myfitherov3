@@ -4,3 +4,4 @@ export { useAuth } from './useAuth';
 export * from './useLocalStorage';
 export * from './useDebounce';
 export * from './useAsync';
+export * from './useSmartNavigation';
