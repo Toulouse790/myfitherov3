@@ -1,17 +1,21 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import WorkoutCard, { WorkoutProps } from '@/components/workout/WorkoutCard';
+import WeatherRecommendations from '@/components/ui/WeatherRecommendations';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Sliders, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { useWeatherRecommendations } from '@/hooks/useWeatherRecommendations';
 
 const Workout = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Hook pour les recommandations météo
+  const { data: weatherData, isLoading: weatherLoading } = useWeatherRecommendations('sport');
 
   const workouts: WorkoutProps[] = [
     {
@@ -130,6 +134,13 @@ const Workout = () => {
           <h1 className="text-3xl font-bold mb-2">Musculation</h1>
           <p className="text-muted-foreground">Découvrez des plans d'entraînement personnalisés adaptés à votre niveau et à vos objectifs</p>
         </div>
+
+        {/* Recommandations météo */}
+        <WeatherRecommendations
+          recommendations={weatherData?.recommendations || []}
+          weather={weatherData?.weather}
+          isLoading={weatherLoading}
+        />
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative flex-1">

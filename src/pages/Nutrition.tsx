@@ -1,17 +1,21 @@
-
 import React, { useState } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import MealPlanCard, { MealPlanProps } from '@/components/nutrition/MealPlanCard';
+import WeatherRecommendations from '@/components/ui/WeatherRecommendations';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Sliders, Loader2 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { useWeatherRecommendations } from '@/hooks/useWeatherRecommendations';
 
 const Nutrition = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Hook pour les recommandations météo nutrition
+  const { data: weatherData, isLoading: weatherLoading } = useWeatherRecommendations('nutrition');
   
   const mealPlans: MealPlanProps[] = [
     {
@@ -112,6 +116,13 @@ const Nutrition = () => {
           <h1 className="text-3xl font-bold mb-2">Nutrition</h1>
           <p className="text-muted-foreground">Des plans nutritionnels adaptés à vos objectifs avec calcul précis des macronutriments</p>
         </div>
+
+        {/* Recommandations météo nutrition */}
+        <WeatherRecommendations
+          recommendations={weatherData?.recommendations || []}
+          weather={weatherData?.weather}
+          isLoading={weatherLoading}
+        />
 
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <div className="relative flex-1">
