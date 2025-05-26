@@ -2,14 +2,17 @@
 // Service pour la gestion des profils utilisateur
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from './BaseService';
+import { ApiService } from '@/services/api';
 
 export interface UserProfile {
   first_name?: string;
   last_name?: string;
+  email?: string;
   birthdate?: string;
   gender?: string;
-  country?: string;
-  language?: string;
+  age?: number;
+  height_cm?: number;
+  weight_kg?: number;
   timezone?: string;
   experience_level?: string;
   frequency?: string;
@@ -26,9 +29,8 @@ interface UserProfileData {
   email?: string;
   age?: number;
   gender?: string;
-  experience_level?: string;
-  frequency?: string;
-  main_goal?: string;
+  height_cm?: number;
+  weight_kg?: number;
   timezone?: string;
   created_at?: string;
   updated_at?: string;
@@ -36,87 +38,59 @@ interface UserProfileData {
 
 export class ProfileService extends BaseService {
   /**
-   * Sauvegarde le profil utilisateur
+   * Met à jour le profil utilisateur avec les données d'onboarding
+   */
+  static async updateUserProfile(userId: string, profileData: UserProfile): Promise<{ success: boolean; data?: any; error?: string }> {
+    try {
+      const updateData: Partial<UserProfileData> = {
+        user_id: userId,
+        first_name: profileData.first_name,
+        last_name: profileData.last_name,
+        email: profileData.email,
+        age: profileData.age || (profileData.birthdate ? this.calculateAge(profileData.birthdate) : undefined),
+        gender: profileData.gender,
+        height_cm: profileData.height_cm,
+        weight_kg: profileData.weight_kg,
+        timezone: profileData.timezone,
+        updated_at: new Date().toISOString()
+      };
+
+      const { data, error } = await supabase
+        .from('user_profiles')
+        .upsert(updateData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Erreur mise à jour profil:', error);
+        throw error;
+      }
+
+      // Envoyer les données à n8n après succès
+      await this.sendToN8N(data);
+
+      return { success: true, data };
+    } catch (error) {
+      console.error('Erreur ProfileService:', error);
+      return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
+    }
+  }
+
+  /**
+   * Sauvegarde le profil utilisateur (alias pour compatibilité)
    */
   static async saveUserProfile(userId: string, profile: UserProfile): Promise<boolean> {
-    try {
-      // Préparer les données pour la table user_profiles
-      const profileData: Partial<UserProfileData> = {
-        user_id: userId,
-        first_name: profile.first_name,
-        last_name: profile.last_name,
-        email: '', // Sera rempli par l'auth
-        age: profile.birthdate ? this.calculateAge(profile.birthdate) : null,
-        gender: profile.gender,
-        experience_level: profile.experience_level,
-        frequency: profile.frequency,
-        main_goal: profile.main_goal,
-        timezone: profile.timezone,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-
-      // Utiliser upsert pour gérer les doublons éventuels
-      const { error } = await supabase
-        .from('user_profiles' as any)
-        .upsert([profileData], { onConflict: 'user_id' });
-
-      if (error) {
-        console.error("Erreur enregistrement profil :", error.message);
-        return false;
-      }
-
-      console.log("Profil utilisateur enregistré avec succès !");
-      return true;
-    } catch (err) {
-      console.error('Exception saveUserProfile:', err);
-      return false;
-    }
+    const result = await this.updateUserProfile(userId, profile);
+    return result.success;
   }
 
   /**
-   * Met à jour le profil utilisateur
-   */
-  static async updateUserProfile(userId: string, profile: Partial<UserProfile>): Promise<boolean> {
-    try {
-      const updateData: any = {
-        updated_at: new Date().toISOString()
-      };
-
-      if (profile.first_name) updateData.first_name = profile.first_name;
-      if (profile.last_name) updateData.last_name = profile.last_name;
-      if (profile.birthdate) updateData.age = this.calculateAge(profile.birthdate);
-      if (profile.gender) updateData.gender = profile.gender;
-      if (profile.experience_level) updateData.experience_level = profile.experience_level;
-      if (profile.frequency) updateData.frequency = profile.frequency;
-      if (profile.main_goal) updateData.main_goal = profile.main_goal;
-      if (profile.timezone) updateData.timezone = profile.timezone;
-
-      const { error } = await supabase
-        .from('user_profiles' as any)
-        .update(updateData)
-        .eq('user_id', userId);
-
-      if (error) {
-        console.error("Erreur mise à jour profil :", error.message);
-        return false;
-      }
-
-      console.log("Profil utilisateur mis à jour avec succès !");
-      return true;
-    } catch (err) {
-      console.error('Exception updateUserProfile:', err);
-      return false;
-    }
-  }
-
-  /**
-   * Récupère le profil utilisateur
+   * Récupère le profil utilisateur complet
    */
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
       const { data, error } = await supabase
-        .from('user_profiles' as any)
+        .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
@@ -129,21 +103,65 @@ export class ProfileService extends BaseService {
       if (!data) return null;
 
       // Mapper les données vers UserProfile
-      const profileData = data as any;
+      const profileData = data as UserProfileData;
       return {
         first_name: profileData.first_name || undefined,
         last_name: profileData.last_name || undefined,
+        email: profileData.email || undefined,
         birthdate: profileData.age ? this.ageToApproximateBirthdate(profileData.age) : undefined,
         gender: profileData.gender || undefined,
-        experience_level: profileData.experience_level || undefined,
-        frequency: profileData.frequency || undefined,
-        main_goal: profileData.main_goal || undefined,
+        age: profileData.age || undefined,
+        height_cm: profileData.height_cm || undefined,
+        weight_kg: profileData.weight_kg || undefined,
         timezone: profileData.timezone || undefined,
         accepted_terms: true // Assumé vrai si le profil existe
       };
     } catch (err) {
       console.error('Exception getUserProfile:', err);
       return null;
+    }
+  }
+
+  /**
+   * Envoie les données vers n8n
+   */
+  private static async sendToN8N(profileData: UserProfileData): Promise<void> {
+    try {
+      const payload = {
+        type: 'profile_updated',
+        userId: profileData.user_id,
+        data: profileData,
+        timestamp: new Date().toISOString()
+      };
+
+      const response = await ApiService.sendToN8n(payload);
+
+      if (response.success) {
+        console.log('✅ Profil envoyé vers n8n avec succès');
+      } else {
+        console.warn('Échec envoi vers n8n:', response.error);
+      }
+    } catch (error) {
+      console.warn('Erreur envoi n8n:', error);
+      // Ne pas faire échouer la mise à jour du profil si n8n échoue
+    }
+  }
+
+  /**
+   * Log d'interaction utilisateur
+   */
+  static async logInteraction(userId: string, action: string, metadata: Record<string, any> = {}): Promise<void> {
+    try {
+      await supabase
+        .from('ai_training_data')
+        .insert({
+          user_id: userId,
+          action_type: action,
+          context: metadata,
+          created_at: new Date().toISOString()
+        });
+    } catch (error) {
+      console.warn('Erreur log interaction:', error);
     }
   }
 
