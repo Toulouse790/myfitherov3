@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
-import { ConsentManager } from '@/components/security/ConsentManager';
+import { ConsentManagerUI } from '@/components/security/ConsentManager';
 import { SecurityDashboard } from '@/components/security/SecurityDashboard';
 import { SecurityConfigStatus } from '@/components/admin/SecurityConfigStatus';
 import { User, Shield, Database, Bell, Palette, Globe, Trash2 } from 'lucide-react';
@@ -176,7 +176,7 @@ const Settings = () => {
 
         {/* Onglet Sécurité & Confidentialité */}
         <TabsContent value="security" className="space-y-6">
-          <ConsentManager />
+          <ConsentManagerUI />
         </TabsContent>
 
         {/* Onglet Mes Données */}
