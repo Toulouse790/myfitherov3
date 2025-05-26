@@ -1,24 +1,19 @@
 
 import React from 'react';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import { useUserChartData } from '@/hooks/useUserChartData';
 
 const DashboardCharts = () => {
-  const activityData = [
-    { name: 'Lun', séances: 1, calories: 450, sommeil: 7.2 },
-    { name: 'Mar', séances: 0, calories: 200, sommeil: 6.8 },
-    { name: 'Mer', séances: 1, calories: 520, sommeil: 8.1 },
-    { name: 'Jeu', séances: 1, calories: 380, sommeil: 7.5 },
-    { name: 'Ven', séances: 0, calories: 180, sommeil: 7.0 },
-    { name: 'Sam', séances: 1, calories: 600, sommeil: 8.3 },
-    { name: 'Dim', séances: 0, calories: 220, sommeil: 8.5 },
-  ];
+  const { activityData, progressData, isLoading } = useUserChartData();
 
-  const progressData = [
-    { name: 'Semaine 1', force: 85, endurance: 60, récupération: 70 },
-    { name: 'Semaine 2', force: 87, endurance: 65, récupération: 72 },
-    { name: 'Semaine 3', force: 90, endurance: 68, récupération: 75 },
-    { name: 'Semaine 4', force: 88, endurance: 72, récupération: 80 },
-  ];
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="h-64 bg-gray-100 rounded-lg animate-pulse"></div>
+        <div className="h-64 bg-gray-100 rounded-lg animate-pulse"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

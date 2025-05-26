@@ -1,61 +1,50 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Flame, Award } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Flame } from 'lucide-react';
+import { useUserStreak } from '@/hooks/useUserStreak';
 
 interface StreakCounterProps {
-  currentStreak: number;
-  longestStreak: number;
-  title?: string;
+  currentStreak?: number;
+  longestStreak?: number;
 }
 
-const StreakCounter = ({ currentStreak, longestStreak, title = "Série actuelle" }: StreakCounterProps) => {
-  const showFireAnimation = currentStreak >= 5;
+const StreakCounter: React.FC<StreakCounterProps> = ({ 
+  currentStreak: propCurrentStreak, 
+  longestStreak: propLongestStreak 
+}) => {
+  const { currentStreak, longestStreak, isLoading } = useUserStreak();
   
+  // Use props as fallback if hook data is not available
+  const displayCurrentStreak = isLoading ? 0 : (currentStreak ?? propCurrentStreak ?? 0);
+  const displayLongestStreak = isLoading ? 0 : (longestStreak ?? propLongestStreak ?? 0);
+
   return (
-    <Card className="overflow-hidden bg-gradient-to-br from-orange-50 to-red-50 border-orange-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center">
-          <Flame className={cn(
-            "mr-2 text-orange-500",
-            showFireAnimation && "animate-pulse"
-          )} size={20} />
-          {title}
-        </CardTitle>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium">Séries d'entraînement</CardTitle>
+        <Flame className="h-4 w-4 text-orange-500" />
       </CardHeader>
       <CardContent>
-        <div className="flex items-center justify-between">
+        <div className="space-y-3">
           <div>
-            <div className={cn(
-              "text-4xl font-bold text-orange-600 transition-all duration-500",
-              showFireAnimation && "animate-bounce"
-            )}>
-              {currentStreak}
+            <div className="text-2xl font-bold text-orange-500">
+              {displayCurrentStreak} {displayCurrentStreak <= 1 ? 'jour' : 'jours'}
             </div>
-            <p className="text-sm text-orange-500 font-medium">
-              {currentStreak === 1 ? 'jour' : 'jours'}
+            <p className="text-xs text-muted-foreground">Série actuelle</p>
+          </div>
+          <div>
+            <div className="text-lg font-semibold">
+              {displayLongestStreak} {displayLongestStreak <= 1 ? 'jour' : 'jours'}
+            </div>
+            <p className="text-xs text-muted-foreground">Record personnel</p>
+          </div>
+          {displayCurrentStreak === 0 && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Commencez votre première séance pour démarrer votre série !
             </p>
-          </div>
-          
-          <div className="text-right">
-            <div className="flex items-center text-muted-foreground">
-              <Award size={16} className="mr-1" />
-              <span className="text-sm">Record</span>
-            </div>
-            <div className="text-2xl font-bold text-orange-400">
-              {longestStreak}
-            </div>
-          </div>
+          )}
         </div>
-        
-        {showFireAnimation && (
-          <div className="mt-3 p-2 bg-orange-100 rounded-lg text-center">
-            <p className="text-xs font-medium text-orange-700">
-              🔥 Série de feu ! Continuez comme ça !
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
