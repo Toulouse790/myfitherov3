@@ -22,3 +22,12 @@ export interface HydrationStats {
   percentage_complete: number;
   entries_count: number;
 }
+
+export interface BiometricsProfile {
+  age: number;
+  weight: number;
+  height: number;
+  gender: 'male' | 'female' | 'other';
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+  medicalConditions?: string[];
+}
