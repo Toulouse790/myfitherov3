@@ -32,33 +32,35 @@ const StatCard = ({
 }: StatCardProps) => {
   return (
     <Card className={cn(
-      "transition-all duration-300 hover:scale-105 hover:shadow-lg group",
-      "border-2 hover:border-primary/20",
+      "transition-all duration-300 hover:scale-102 hover:shadow-md group",
+      "border hover:border-primary/20 h-[140px]", // Hauteur fixe réduite
       className
     )}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3"> {/* Padding réduit */}
+        <CardTitle className="text-xs font-medium text-muted-foreground leading-tight">
           {title}
         </CardTitle>
         <div className={cn(
-          "p-2 rounded-full transition-all duration-300 group-hover:scale-110",
+          "p-1.5 rounded-full transition-all duration-300 group-hover:scale-105", // Taille d'icône réduite
           iconBackground
         )}>
-          {icon}
+          <div className="w-3 h-3"> {/* Icône plus petite */}
+            {React.cloneElement(icon as React.ReactElement, { size: 12 })}
+          </div>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold mb-1 transition-colors duration-300 group-hover:text-primary">
+      <CardContent className="p-3 pt-0"> {/* Padding réduit */}
+        <div className="text-lg font-bold mb-0.5 transition-colors duration-300 group-hover:text-primary"> {/* Taille de police réduite */}
           {value}
         </div>
-        <p className="text-xs text-muted-foreground mb-2">{description}</p>
+        <p className="text-xs text-muted-foreground mb-1 leading-tight">{description}</p> {/* Texte plus petit */}
         
         {trend && (
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 mb-1">
             {trend > 0 ? (
-              <TrendingUp className="w-4 h-4 text-green-500" />
+              <TrendingUp className="w-3 h-3 text-green-500" />
             ) : (
-              <TrendingDown className="w-4 h-4 text-red-500" />
+              <TrendingDown className="w-3 h-3 text-red-500" />
             )}
             <span className={cn(
               "text-xs font-medium",
@@ -77,7 +79,7 @@ const StatCard = ({
             variant="ghost" 
             size="sm" 
             onClick={onClick}
-            className="mt-2 w-full h-8 text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+            className="mt-1 w-full h-6 text-xs py-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           >
             {actionLabel}
           </Button>

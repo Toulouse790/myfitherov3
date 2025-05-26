@@ -20,31 +20,31 @@ const StreakCounter: React.FC<StreakCounterProps> = ({
   const displayLongestStreak = isLoading ? 0 : (longestStreak ?? propLongestStreak ?? 0);
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">Séries d'entraînement</CardTitle>
-        <Flame className="h-4 w-4 text-orange-500" />
+    <Card className="h-[140px]"> {/* Hauteur fixe réduite */}
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 p-3"> {/* Padding réduit */}
+        <CardTitle className="text-xs font-medium">Séries d'entraînement</CardTitle> {/* Titre plus petit */}
+        <Flame className="h-3 w-3 text-orange-500" /> {/* Icône plus petite */}
       </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
+      <CardContent className="p-3 pt-0"> {/* Padding réduit */}
+        <div className="space-y-2"> {/* Espacement réduit */}
           <div>
-            <div className="text-2xl font-bold text-orange-500">
+            <div className="text-lg font-bold text-orange-500"> {/* Taille réduite */}
               {displayCurrentStreak} {displayCurrentStreak <= 1 ? 'jour' : 'jours'}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-tight">
               {displayCurrentStreak === 0 ? "Prêt à commencer ?" : "Série actuelle"}
             </p>
           </div>
           <div>
-            <div className="text-lg font-semibold">
+            <div className="text-sm font-semibold"> {/* Taille réduite */}
               {displayLongestStreak} {displayLongestStreak <= 1 ? 'jour' : 'jours'}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground leading-tight">
               {displayLongestStreak === 0 ? "Votre futur record" : "Record personnel"}
             </p>
           </div>
-          <div className="bg-muted/30 rounded-lg p-3 mt-3">
-            <p className="text-xs text-muted-foreground">
+          <div className="bg-muted/30 rounded-lg p-2 mt-2"> {/* Padding et margin réduits */}
+            <p className="text-xs text-muted-foreground leading-tight">
               💡 Commencez votre première séance pour démarrer votre série !
             </p>
           </div>

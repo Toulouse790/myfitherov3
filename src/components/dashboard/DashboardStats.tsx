@@ -10,12 +10,12 @@ const DashboardStats = () => {
   const { stats, isLoading } = useUserStats();
   
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3"> {/* 2 cartes par ligne sur mobile, gap réduit */}
       <StatCard 
         title="Séances complétées"
         value={isLoading ? "..." : stats.completedWorkouts.toString()}
         description={stats.completedWorkouts === 0 ? "Prêt à commencer ?" : "cette semaine"}
-        icon={<Dumbbell size={20} className="text-primary" />}
+        icon={<Dumbbell className="text-primary" />}
         trend={stats.workoutTrend}
         trendLabel={stats.completedWorkouts > 0 ? "vs semaine dernière" : ""}
         onClick={() => navigate('/workout')}
@@ -26,7 +26,7 @@ const DashboardStats = () => {
         title="Calories brûlées"
         value={isLoading ? "..." : stats.caloriesBurned.toLocaleString()}
         description={stats.caloriesBurned === 0 ? "Vos efforts compteront ici" : "cette semaine"}
-        icon={<Flame size={20} className="text-fitness-orange" />}
+        icon={<Flame className="text-fitness-orange" />}
         trend={stats.caloriesTrend}
         trendLabel={stats.caloriesBurned > 0 ? "vs semaine dernière" : ""}
         iconBackground="bg-fitness-orange/10"
@@ -38,7 +38,7 @@ const DashboardStats = () => {
         title="Temps d'entraînement"
         value={isLoading ? "..." : `${Math.floor(stats.workoutTime / 60)}h ${stats.workoutTime % 60}m`}
         description={stats.workoutTime === 0 ? "Chaque minute compte" : "cette semaine"}
-        icon={<Timer size={20} className="text-fitness-blue" />}
+        icon={<Timer className="text-fitness-blue" />}
         trend={stats.timeTrend}
         trendLabel={stats.workoutTime > 0 ? "vs semaine dernière" : ""}
         iconBackground="bg-fitness-blue/10"
@@ -50,7 +50,7 @@ const DashboardStats = () => {
         title="Qualité du sommeil"
         value={isLoading ? "..." : `${stats.sleepQuality}%`}
         description={stats.sleepQuality === 0 ? "Suivez votre récupération" : "moyenne"}
-        icon={<Heart size={20} className="text-fitness-purple" />}
+        icon={<Heart className="text-fitness-purple" />}
         trend={stats.sleepTrend}
         trendLabel={stats.sleepQuality > 0 ? "vs semaine dernière" : ""}
         iconBackground="bg-fitness-purple/10"
