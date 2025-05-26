@@ -146,24 +146,32 @@ export class ProfileService extends BaseService {
   }
 
   /**
-   * Log d'interaction utilisateur
+   * Log d'interaction utilisateur dans la table ai_training_data
    */
   static async logInteraction(userId: string, action: string, metadata: Record<string, any> = {}): Promise<void> {
     try {
+      console.log('📝 Logging interaction:', { userId, action, metadata });
+
       const { error } = await supabase
         .from('ai_training_data')
         .insert({
           user_id: userId,
           action_type: action,
           context: metadata,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          // Ajout de champs optionnels si présents dans les métadonnées
+          model_name: metadata.agent_utilise || 'onboarding_system',
+          response_time_ms: metadata.duree_traitement ? Math.round(metadata.duree_traitement * 1000) : null,
+          feedback: null // sera défini plus tard si nécessaire
         });
 
       if (error) {
-        console.warn('Erreur log interaction:', error);
+        console.warn('⚠️ Erreur log interaction:', error);
+      } else {
+        console.log('✅ Interaction loggée avec succès dans ai_training_data');
       }
     } catch (error) {
-      console.warn('Erreur log interaction:', error);
+      console.warn('⚠️ Exception log interaction:', error);
     }
   }
 

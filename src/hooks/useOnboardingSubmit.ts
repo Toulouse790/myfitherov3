@@ -50,7 +50,10 @@ export const useOnboardingSubmit = () => {
         ...userData,
         age,
         calculatedAt: new Date().toISOString(),
-        platform: navigator.userAgent
+        platform: navigator.userAgent,
+        onboarding_completed: true,
+        terms_accepted: true,
+        privacy_accepted: true
       };
 
       // Sauvegarder localement
@@ -80,11 +83,16 @@ export const useOnboardingSubmit = () => {
         const result = await ProfileService.updateUserProfile(user.id, profileData);
 
         if (result.success) {
-          // Logger la completion de l'onboarding
+          // Logger la completion de l'onboarding avec les flags corrects
           await ProfileService.logInteraction(user.id, 'onboarding_completed', {
             steps_completed: 4,
             profile_data: profileData,
-            completion_time: new Date().toISOString()
+            completion_time: new Date().toISOString(),
+            onboarding_completed: true,
+            terms_accepted: true,
+            privacy_accepted: true,
+            platform: navigator.userAgent,
+            user_agent: navigator.userAgent
           });
 
           toast({
