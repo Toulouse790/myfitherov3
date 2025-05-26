@@ -3,6 +3,7 @@ import React from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserData } from './types';
 
 interface Step1Props {
@@ -11,6 +12,28 @@ interface Step1Props {
 }
 
 const Step1PersonalInfo: React.FC<Step1Props> = ({ userData, handleInputChange }) => {
+  // Générer la liste des fuseaux horaires les plus courants
+  const commonTimezones = [
+    { value: 'Europe/Paris', label: 'Europe/Paris (UTC+1)' },
+    { value: 'Europe/London', label: 'Europe/London (UTC+0)' },
+    { value: 'Europe/Berlin', label: 'Europe/Berlin (UTC+1)' },
+    { value: 'Europe/Rome', label: 'Europe/Rome (UTC+1)' },
+    { value: 'Europe/Madrid', label: 'Europe/Madrid (UTC+1)' },
+    { value: 'America/New_York', label: 'America/New_York (UTC-5)' },
+    { value: 'America/Los_Angeles', label: 'America/Los_Angeles (UTC-8)' },
+    { value: 'America/Montreal', label: 'America/Montreal (UTC-5)' },
+    { value: 'Asia/Tokyo', label: 'Asia/Tokyo (UTC+9)' },
+    { value: 'Australia/Sydney', label: 'Australia/Sydney (UTC+10)' },
+  ];
+
+  // Détecter automatiquement le fuseau horaire
+  React.useEffect(() => {
+    if (!userData.timezone) {
+      const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      handleInputChange('timezone', detectedTimezone);
+    }
+  }, [userData.timezone, handleInputChange]);
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Informations personnelles</h3>
@@ -93,6 +116,30 @@ const Step1PersonalInfo: React.FC<Step1Props> = ({ userData, handleInputChange }
             <Label htmlFor="other">Autre</Label>
           </div>
         </RadioGroup>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="timezone">Fuseau horaire</Label>
+        <Select 
+          value={userData.timezone} 
+          onValueChange={(value) => handleInputChange('timezone', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Sélectionnez votre fuseau horaire" />
+          </SelectTrigger>
+          <SelectContent>
+            {commonTimezones.map((tz) => (
+              <SelectItem key={tz.value} value={tz.value}>
+                {tz.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {userData.timezone && !commonTimezones.find(tz => tz.value === userData.timezone) && (
+          <p className="text-xs text-muted-foreground">
+            Fuseau détecté automatiquement : {userData.timezone}
+          </p>
+        )}
       </div>
     </div>
   );

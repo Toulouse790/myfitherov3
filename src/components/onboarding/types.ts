@@ -7,6 +7,7 @@ export interface UserData {
   birthdate: string;
   gender: string;
   pseudo: string;
+  timezone: string; // Ajout du fuseau horaire
   // Step 2: Measurements and Level
   height: string;
   weight: string;

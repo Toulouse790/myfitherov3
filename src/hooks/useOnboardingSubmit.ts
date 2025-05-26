@@ -12,6 +12,7 @@ interface OnboardingData {
   email: string;
   birthdate: string;
   gender: string;
+  timezone: string; // Ajout du timezone
   height: string;
   weight: string;
   experienceLevel: string;
@@ -63,20 +64,16 @@ export const useOnboardingSubmit = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user?.id) {
-        // Préparer les données du profil
+        // Préparer les données du profil - MAPPING COMPLET vers user_profiles
         const profileData = {
           first_name: userData.firstName,
           last_name: userData.lastName,
           email: userData.email,
-          birthdate: userData.birthdate,
-          gender: userData.gender,
           age: age,
+          gender: userData.gender,
+          timezone: userData.timezone, // Nouveau champ mappé
           height_cm: parseInt(userData.height) || undefined,
           weight_kg: parseFloat(userData.weight) || undefined,
-          experience_level: userData.experienceLevel,
-          frequency: userData.frequency,
-          main_goal: userData.mainGoal,
-          accepted_terms: true
         };
 
         // Sauvegarder le profil dans Supabase
@@ -92,7 +89,11 @@ export const useOnboardingSubmit = () => {
             terms_accepted: true,
             privacy_accepted: true,
             platform: navigator.userAgent,
-            user_agent: navigator.userAgent
+            user_agent: navigator.userAgent,
+            // Métadonnées additionnelles pour l'onboarding
+            experience_level: userData.experienceLevel,
+            frequency: userData.frequency,
+            main_goal: userData.mainGoal
           });
 
           toast({

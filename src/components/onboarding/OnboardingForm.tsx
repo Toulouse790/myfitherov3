@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,6 +21,7 @@ const OnboardingForm: React.FC<OnboardingFormProps> = ({ initialStep = 1 }) => {
     birthdate: "",
     gender: "male",
     pseudo: "",
+    timezone: "", // Initialisé vide, sera détecté automatiquement
     height: "",
     weight: "",
     experienceLevel: "intermediate",
