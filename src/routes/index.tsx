@@ -1,29 +1,46 @@
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import PrivateRoute from '@/components/auth/PrivateRoute';
+import ModuleLoader from '@/components/ui/ModuleLoader';
+import { ModuleErrorBoundary } from '@/components/ui/ErrorBoundary';
+
+// Pages chargées immédiatement (critiques)
 import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Index from '@/pages/Index';
-import Dashboard from '@/pages/Dashboard';
-import Workout from '@/pages/Workout';
-import WorkoutDetail from '@/pages/WorkoutDetail';
-import WorkoutSession from '@/pages/WorkoutSession';
-import Nutrition from '@/pages/Nutrition';
-import NutritionDetail from '@/pages/NutritionDetail';
-import Sleep from '@/pages/Sleep';
-import Coach from '@/pages/Coach';
-import Onboarding from '@/pages/Onboarding';
-import Settings from '@/pages/Settings';
-import Profile from '@/pages/Profile';
-import AdminDashboard from '@/pages/AdminDashboard';
-import Achievements from '@/pages/Achievements';
 import NotFound from '@/pages/NotFound';
+
+// Lazy loading des modules principaux
+const Dashboard = lazy(() => import('@/pages/Dashboard'));
+const Workout = lazy(() => import('@/pages/Workout'));
+const WorkoutDetail = lazy(() => import('@/pages/WorkoutDetail'));
+const WorkoutSession = lazy(() => import('@/pages/WorkoutSession'));
+const Nutrition = lazy(() => import('@/pages/Nutrition'));
+const NutritionDetail = lazy(() => import('@/pages/NutritionDetail'));
+const Sleep = lazy(() => import('@/pages/Sleep'));
+const Coach = lazy(() => import('@/pages/Coach'));
+
+// Pages secondaires en lazy loading
+const Onboarding = lazy(() => import('@/pages/Onboarding'));
+const Settings = lazy(() => import('@/pages/Settings'));
+const Profile = lazy(() => import('@/pages/Profile'));
+const AdminDashboard = lazy(() => import('@/pages/AdminDashboard'));
+const Achievements = lazy(() => import('@/pages/Achievements'));
+
+// Composant wrapper pour les routes lazy
+const LazyRoute = ({ children }: { children: React.ReactNode }) => (
+  <ModuleErrorBoundary>
+    <Suspense fallback={<ModuleLoader />}>
+      {children}
+    </Suspense>
+  </ModuleErrorBoundary>
+);
 
 const AppRoutes = () => {
   return (
     <Routes>
-      {/* Routes publiques */}
+      {/* Routes publiques - chargement immédiat */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       
@@ -33,76 +50,118 @@ const AppRoutes = () => {
           <Index />
         </PrivateRoute>
       } />
+      
+      {/* Routes avec lazy loading */}
       <Route path="/dashboard" element={
         <PrivateRoute>
-          <Dashboard />
+          <LazyRoute>
+            <Dashboard />
+          </LazyRoute>
         </PrivateRoute>
       } />
+      
+      {/* Module Sport/Workout */}
       <Route path="/workout" element={
         <PrivateRoute>
-          <Workout />
+          <LazyRoute>
+            <Workout />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/workout/:id" element={
         <PrivateRoute>
-          <WorkoutDetail />
+          <LazyRoute>
+            <WorkoutDetail />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/workout/:id/preview" element={
         <PrivateRoute>
-          <WorkoutDetail />
+          <LazyRoute>
+            <WorkoutDetail />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/workout/:id/session" element={
         <PrivateRoute>
-          <WorkoutSession />
+          <LazyRoute>
+            <WorkoutSession />
+          </LazyRoute>
         </PrivateRoute>
       } />
+      
+      {/* Module Nutrition */}
       <Route path="/nutrition" element={
         <PrivateRoute>
-          <Nutrition />
+          <LazyRoute>
+            <Nutrition />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/nutrition/:id" element={
         <PrivateRoute>
-          <NutritionDetail />
+          <LazyRoute>
+            <NutritionDetail />
+          </LazyRoute>
         </PrivateRoute>
       } />
+      
+      {/* Module Sommeil */}
       <Route path="/sleep" element={
         <PrivateRoute>
-          <Sleep />
+          <LazyRoute>
+            <Sleep />
+          </LazyRoute>
         </PrivateRoute>
       } />
+      
+      {/* Module Coach IA */}
       <Route path="/coach" element={
         <PrivateRoute>
-          <Coach />
+          <LazyRoute>
+            <Coach />
+          </LazyRoute>
         </PrivateRoute>
       } />
+      
+      {/* Pages secondaires */}
       <Route path="/settings" element={
         <PrivateRoute>
-          <Settings />
+          <LazyRoute>
+            <Settings />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/profile" element={
         <PrivateRoute>
-          <Profile />
+          <LazyRoute>
+            <Profile />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/onboarding" element={
         <PrivateRoute>
-          <Onboarding />
+          <LazyRoute>
+            <Onboarding />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/admin" element={
         <PrivateRoute>
-          <AdminDashboard />
+          <LazyRoute>
+            <AdminDashboard />
+          </LazyRoute>
         </PrivateRoute>
       } />
       <Route path="/achievements" element={
         <PrivateRoute>
-          <Achievements />
+          <LazyRoute>
+            <Achievements />
+          </LazyRoute>
         </PrivateRoute>
       } />
+      
+      {/* Page 404 - chargement immédiat */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
