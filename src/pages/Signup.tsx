@@ -20,18 +20,30 @@ const Signup = () => {
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   // Rediriger si déjà connecté
   if (user && !authLoading) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/onboarding" replace />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setSuccess(false);
 
     if (!acceptedPrivacy) {
       setError('Vous devez accepter la politique de confidentialité pour continuer.');
+      return;
+    }
+
+    if (!formData.email || !formData.password || !formData.firstName || !formData.lastName) {
+      setError('Veuillez remplir tous les champs obligatoires.');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.');
       return;
     }
 
@@ -42,12 +54,38 @@ const Signup = () => {
         first_name: formData.firstName,
         last_name: formData.lastName
       });
+      setSuccess(true);
     } catch (err: any) {
-      setError(err.message);
+      console.error('Erreur inscription:', err);
+      setError(err.message || 'Une erreur est survenue lors de l\'inscription.');
     } finally {
       setLoading(false);
     }
   };
+
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-bold text-green-600 mb-2">
+              Inscription réussie ! 🎉
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-muted-foreground mb-4">
+              Votre compte a été créé avec succès. Vous pouvez maintenant vous connecter.
+            </p>
+            <Link to="/login">
+              <Button className="w-full">
+                Se connecter
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center p-4">
@@ -63,7 +101,7 @@ const Signup = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">Prénom</Label>
+                <Label htmlFor="firstName">Prénom *</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <Input
@@ -79,7 +117,7 @@ const Signup = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="lastName">Nom</Label>
+                <Label htmlFor="lastName">Nom *</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <Input
@@ -96,7 +134,7 @@ const Signup = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">Email *</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <Input
@@ -112,7 +150,7 @@ const Signup = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">Mot de passe *</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                 <Input
@@ -172,7 +210,7 @@ const Signup = () => {
               className="w-full"
             >
               {loading ? (
-                'Création...'
+                'Création du compte...'
               ) : (
                 <>
                   <UserPlus size={20} className="mr-2" />

@@ -23,6 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // Récupérer la session actuelle
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Session initiale:', session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -30,6 +31,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Changement auth:', _event, session);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -39,22 +41,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    console.log('Tentative de connexion pour:', email);
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
+      console.error('Erreur connexion:', error);
       throw new Error(error.message);
     }
 
+    console.log('Connexion réussie:', data);
     toast.success('Connexion réussie', {
       description: 'Bienvenue dans MyFitHero !'
     });
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    const { error } = await supabase.auth.signUp({
+    console.log('Tentative d\'inscription pour:', email, 'avec metadata:', metadata);
+    
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -63,11 +70,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) {
+      console.error('Erreur inscription:', error);
       throw new Error(error.message);
     }
 
+    console.log('Inscription réussie:', data);
     toast.success('Inscription réussie', {
-      description: 'Vérifiez votre email pour confirmer votre compte'
+      description: 'Votre compte a été créé avec succès !'
     });
   };
 
