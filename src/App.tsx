@@ -8,21 +8,31 @@ import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ConversationProvider } from "@/contexts/ConversationContext";
 import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
+import { advancedCache } from "@/services/AdvancedCacheService";
 import AppRoutes from "@/routes";
 import { useEffect } from "react";
 
 const queryClient = new QueryClient();
 
-// Composant pour initialiser le monitoring
+// Composant pour initialiser le monitoring et le cache
 const PerformanceWrapper = ({ children }: { children: React.ReactNode }) => {
   const { getQuickStats } = usePerformanceMonitor();
 
   useEffect(() => {
+    // Initialise le cache avancé
+    const initializeCache = async () => {
+      await advancedCache.init();
+      console.log('📊 Cache Stats:', advancedCache.getStats());
+    };
+
+    initializeCache();
+
     // Log des stats de performance toutes les minutes en mode dev
     if (import.meta.env.DEV) {
       const interval = setInterval(() => {
         const stats = getQuickStats();
-        console.log('📊 Performance Stats:', stats);
+        const cacheStats = advancedCache.getStats();
+        console.log('📊 Performance Stats:', { ...stats, cache: cacheStats });
       }, 60000);
 
       return () => clearInterval(interval);
