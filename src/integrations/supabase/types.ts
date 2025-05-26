@@ -1089,6 +1089,60 @@ export type Database = {
           },
         ]
       }
+      hydration_entries: {
+        Row: {
+          amount_ml: number
+          created_at: string
+          drink_type: string
+          id: string
+          recorded_at: string
+          user_id: string
+        }
+        Insert: {
+          amount_ml: number
+          created_at?: string
+          drink_type: string
+          id?: string
+          recorded_at?: string
+          user_id: string
+        }
+        Update: {
+          amount_ml?: number
+          created_at?: string
+          drink_type?: string
+          id?: string
+          recorded_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      hydration_goals: {
+        Row: {
+          created_at: string
+          daily_target_ml: number
+          id: string
+          is_active: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          daily_target_ml?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          daily_target_ml?: number
+          id?: string
+          is_active?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       meal_plans: {
         Row: {
           created_at: string

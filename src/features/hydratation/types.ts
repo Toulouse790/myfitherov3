@@ -6,6 +6,7 @@ export interface HydrationEntry {
   amount_ml: number;
   drink_type: 'water' | 'coffee' | 'tea' | 'juice' | 'other';
   recorded_at: string;
+  created_at?: string;
 }
 
 export interface HydrationGoal {
@@ -14,13 +15,14 @@ export interface HydrationGoal {
   daily_target_ml: number;
   is_active: boolean;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface HydrationStats {
-  daily_intake_ml: number;
-  daily_target_ml: number;
-  percentage_complete: number;
-  entries_count: number;
+  dailyIntake: number;
+  dailyTarget: number;
+  percentageComplete: number;
+  entriesCount: number;
 }
 
 export interface BiometricsProfile {
@@ -30,4 +32,18 @@ export interface BiometricsProfile {
   gender: 'male' | 'female' | 'other';
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
   medicalConditions?: string[];
+}
+
+// Types pour l'interface avec l'IA Hydratation
+export interface HydrationCreateEntry {
+  user_id: string;
+  amount_ml: number;
+  drink_type: 'water' | 'coffee' | 'tea' | 'juice' | 'other';
+  recorded_at: string;
+}
+
+export interface HydrationCreateGoal {
+  user_id: string;
+  daily_target_ml: number;
+  is_active: boolean;
 }

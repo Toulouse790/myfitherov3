@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserStore } from '@/stores/useUserStore';
 import { hydrationService } from './services';
-import { HydrationEntry, HydrationGoal } from './types';
+import { HydrationEntry, HydrationCreateEntry, HydrationCreateGoal } from './types';
 import { hydrationAIExpert, HydrationRecommendation, HydrationAlert } from '@/ai/HydrationAIExpert';
 import { WeatherService, WeatherData } from '@/services/WeatherService';
 import { toast } from '@/components/ui/sonner';
@@ -61,9 +61,9 @@ export const useHydration = () => {
       // Convertir les données du profil utilisateur
       const biometricProfile = {
         age: profile.age || 30,
-        weight: profile.weight || 70,
-        height: profile.height || 170,
-        sex: profile.gender === 'female' ? 'F' : 'M',
+        weight: profile.weight_kg || 70,
+        height: profile.height_cm || 170,
+        sex: profile.gender === 'female' ? 'F' as const : 'M' as const,
         fitnessLevel: mapFitnessLevel(profile.experience_level),
         medicalConditions: getMedicalConditions(profile)
       };
@@ -73,10 +73,10 @@ export const useHydration = () => {
 
       // Estimer l'activité de l'utilisateur (à personnaliser)
       const activityData = {
-        type: 'moderate_exercise',
+        type: 'moderate_exercise' as const,
         duration: 60, // minutes par défaut
         intensity: 5, // niveau moyen
-        location: 'outdoor'
+        location: 'outdoor' as const
       };
 
       // Générer la recommandation
@@ -137,12 +137,14 @@ export const useHydration = () => {
     if (!profile?.id) return false;
     
     try {
-      await hydrationService.addEntry({
+      const entry: HydrationCreateEntry = {
         user_id: profile.id,
         amount_ml: amount,
         drink_type: drinkType,
         recorded_at: new Date().toISOString()
-      });
+      };
+      
+      await hydrationService.addEntry(entry);
       
       refetchEntries();
       
@@ -161,11 +163,13 @@ export const useHydration = () => {
     if (!profile?.id) return false;
     
     try {
-      await hydrationService.setUserGoal({
+      const goal: HydrationCreateGoal = {
         user_id: profile.id,
         daily_target_ml: target,
         is_active: true
-      });
+      };
+      
+      await hydrationService.setUserGoal(goal);
       
       return true;
     } catch (error) {

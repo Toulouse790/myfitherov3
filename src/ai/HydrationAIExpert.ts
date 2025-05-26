@@ -72,8 +72,6 @@ export class HydrationAIExpert {
     activity: ActivityData
   ): HydrationRecommendation {
     
-    console.log('🧮 Calcul besoins hydratation sécurisés...');
-    
     // 1. BESOINS DE BASE (seuils conservateurs)
     const baseNeed = this.calculateBaseHydrationNeed(profile);
     
@@ -91,8 +89,6 @@ export class HydrationAIExpert {
     
     // 6. VALIDATION LIMITES ABSOLUES
     const finalNeed = this.enforceAbsoluteLimits(totalNeed, profile);
-    
-    console.log(`💧 Besoins calculés: ${finalNeed}ml (base: ${baseNeed}ml, env: +${environmentalAdjustment}ml, activité: +${activityAdjustment}ml)`);
     
     return {
       totalDailyNeed: finalNeed,

@@ -7,7 +7,7 @@ interface DashboardHeaderProps {
   userName?: string;
 }
 
-const DashboardHeader = ({ userName = "Thomas" }: DashboardHeaderProps) => {
+export const DashboardHeader = ({ userName = "Thomas" }: DashboardHeaderProps) => {
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div>

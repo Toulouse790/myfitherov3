@@ -1,30 +1,22 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { HydrationEntry, HydrationGoal, HydrationStats } from './types';
-import { encryptHealthData, decryptHealthData } from '@/services/security';
+import { HydrationEntry, HydrationGoal, HydrationStats, HydrationCreateEntry, HydrationCreateGoal } from './types';
 
 class HydrationService {
   /**
    * Ajouter une nouvelle entrée d'hydratation
    */
-  async addEntry(entry: HydrationEntry): Promise<HydrationEntry> {
+  async addEntry(entry: HydrationCreateEntry): Promise<HydrationEntry> {
     try {
-      // Chiffrement des données sensibles
-      const encryptedEntry = {
-        ...entry,
-        amount_ml: encryptHealthData(entry.amount_ml.toString()),
-        drink_type: encryptHealthData(entry.drink_type)
-      };
-      
       const { data, error } = await supabase
         .from('hydration_entries')
-        .insert([encryptedEntry])
+        .insert([entry])
         .select()
         .single();
         
       if (error) throw error;
       
-      return this.decryptEntry(data);
+      return data;
     } catch (error) {
       console.error('Erreur ajout hydratation:', error);
       throw error;
@@ -44,8 +36,7 @@ class HydrationService {
         
       if (error) throw error;
       
-      // Déchiffrer chaque entrée
-      return data ? data.map(this.decryptEntry) : [];
+      return data || [];
     } catch (error) {
       console.error('Erreur récupération hydratation:', error);
       return [];
@@ -70,8 +61,7 @@ class HydrationService {
         
       if (error) throw error;
       
-      // Déchiffrer chaque entrée
-      return data ? data.map(this.decryptEntry) : [];
+      return data || [];
     } catch (error) {
       console.error('Erreur récupération hydratation quotidienne:', error);
       return [];
@@ -81,18 +71,12 @@ class HydrationService {
   /**
    * Définir ou mettre à jour l'objectif d'hydratation
    */
-  async setUserGoal(goal: HydrationGoal): Promise<void> {
+  async setUserGoal(goal: HydrationCreateGoal): Promise<void> {
     try {
-      // Chiffrer les données sensibles
-      const encryptedGoal = {
-        ...goal,
-        daily_target_ml: encryptHealthData(goal.daily_target_ml.toString())
-      };
-      
       // Utiliser upsert pour créer ou mettre à jour
       const { error } = await supabase
         .from('hydration_goals')
-        .upsert(encryptedGoal, {
+        .upsert(goal, {
           onConflict: 'user_id'
         });
         
@@ -123,15 +107,7 @@ class HydrationService {
         throw error;
       }
       
-      // Déchiffrer l'objectif
-      if (data) {
-        return {
-          ...data,
-          daily_target_ml: parseInt(decryptHealthData(data.daily_target_ml)) || 2500
-        };
-      }
-      
-      return null;
+      return data;
     } catch (error) {
       console.error('Erreur récupération objectif hydratation:', error);
       return null;
@@ -160,33 +136,20 @@ class HydrationService {
       const percentageComplete = Math.min(100, Math.round((dailyIntake / dailyTarget) * 100));
       
       return {
-        daily_intake_ml: dailyIntake,
-        daily_target_ml: dailyTarget,
-        percentage_complete: percentageComplete,
-        entries_count: entries.length
+        dailyIntake,
+        dailyTarget,
+        percentageComplete,
+        entriesCount: entries.length
       };
     } catch (error) {
       console.error('Erreur calcul statistiques hydratation:', error);
       return {
-        daily_intake_ml: 0,
-        daily_target_ml: 2500,
-        percentage_complete: 0,
-        entries_count: 0
+        dailyIntake: 0,
+        dailyTarget: 2500,
+        percentageComplete: 0,
+        entriesCount: 0
       };
     }
-  }
-  
-  /**
-   * Déchiffrer une entrée d'hydratation
-   */
-  private decryptEntry(entry: any): HydrationEntry {
-    if (!entry) return entry;
-    
-    return {
-      ...entry,
-      amount_ml: parseInt(decryptHealthData(entry.amount_ml)) || 0,
-      drink_type: decryptHealthData(entry.drink_type) as HydrationEntry['drink_type']
-    };
   }
 }
 
