@@ -1,10 +1,11 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useUserStore } from '@/stores/useUserStore';
 import { hydrationService } from './services';
 import { HydrationEntry, HydrationCreateEntry, HydrationCreateGoal } from './types';
 import { hydrationAIExpert, HydrationRecommendation, HydrationAlert } from '@/ai/HydrationAIExpert';
-import { hydrationMedicalValidator } from './medical-validation';
+import { hydrationMedicalValidator, BiometricProfile, EnvironmentalData } from './medical-validation';
 import { WeatherService, WeatherData } from '@/services/WeatherService';
 import { ProfileService } from '@/services/supabase/ProfileService';
 import { toast } from '@/components/ui/sonner';
@@ -78,7 +79,7 @@ export const useHydration = () => {
         console.log('🏥 Démarrage HydrationAIExpert sécurisé...');
         
         // 1. CONSTRUCTION PROFIL BIOMÉTRIQUE SÉCURISÉ
-        const biometricProfile = {
+        const biometricProfile: BiometricProfile = {
           age: profile.age || calculateAgeFromBirthdate(medicalProfile.birthdate) || 30,
           weight: profile.weight_kg || estimateWeightFromProfile(profile) || 70,
           height: profile.height_cm || 170,
@@ -94,7 +95,7 @@ export const useHydration = () => {
         });
 
         // 2. CONVERSION DONNÉES ENVIRONNEMENTALES SÉCURISÉES
-        const environmentalData = {
+        const environmentalData: EnvironmentalData = {
           temperature: weatherData.main.temp,
           humidity: weatherData.main.humidity,
           uvIndex: estimateUVIndex(weatherData),
@@ -111,7 +112,7 @@ export const useHydration = () => {
         // 3. ESTIMATION ACTIVITÉ ACTUELLE SÉCURISÉE
         const activityData = estimateCurrentActivity(profile, new Date().getHours());
 
-        // 4. VALIDATION MÉDICALE PRÉALABLE OBLIGATOIRE - CORRECTION ERREURS
+        // 4. VALIDATION MÉDICALE PRÉALABLE OBLIGATOIRE - PROPRIÉTÉS CORRIGÉES
         const medicalValidation = hydrationMedicalValidator.validateHydrationRecommendation(
           biometricProfile,
           environmentalData,
@@ -141,7 +142,7 @@ export const useHydration = () => {
               '🚫 Pas d\'activité intense sans avis médical'
             ],
             contraindications: medicalValidation.contraindications,
-            medicalAlerts: ['SYSTÈME EN MODE SÉCURITAIRE - Consultation médicale requise']
+            medicalAlerts: medicalValidation.medicalAlerts // ← PROPRIÉTÉ CORRIGÉE
           });
           return;
         }
@@ -158,7 +159,7 @@ export const useHydration = () => {
           alertLevel: hydrationRecommendation.alertLevel
         });
 
-        // 6. VALIDATION CROISÉE FINALE AVEC MEDICAL VALIDATOR - CORRECTION
+        // 6. VALIDATION CROISÉE FINALE AVEC MEDICAL VALIDATOR - PROPRIÉTÉS CORRIGÉES
         const finalValidation = hydrationMedicalValidator.validateHydrationRecommendation(
           biometricProfile,
           environmentalData,
@@ -169,7 +170,7 @@ export const useHydration = () => {
           console.warn('⚠️ Validation finale échouée, application overrides sécuritaires');
           
           // Application des limites sécuritaires avec propriétés corrigées
-          const safeLimit = finalValidation.maxSafeAmount || 3000; // Utilise maxSafeAmount au lieu de maxAllowed
+          const safeLimit = finalValidation.maxSafeAmount; // ← PROPRIÉTÉ CORRIGÉE
           hydrationRecommendation.totalDailyNeed = Math.min(
             hydrationRecommendation.totalDailyNeed,
             safeLimit
@@ -180,10 +181,10 @@ export const useHydration = () => {
             ...finalValidation.contraindications
           ];
           
-          // Utilise medicalAlerts au lieu de alerts
+          // Utilise medicalAlerts - PROPRIÉTÉ CORRIGÉE
           hydrationRecommendation.medicalAlerts = [
             ...hydrationRecommendation.medicalAlerts,
-            ...(finalValidation.medicalAlerts || [])
+            ...finalValidation.medicalAlerts // ← PROPRIÉTÉ CORRIGÉE
           ];
         }
 

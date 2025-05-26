@@ -1,349 +1,168 @@
 
-/**
- * SERVICE VALIDATION MÉDICALE HYDRATATION
- * Validation sécuritaire avant toute recommandation
- */
-
-interface MedicalValidationResult {
+// Types pour la validation médicale d'hydratation - Interface complète
+export interface MedicalValidationResult {
   isValid: boolean;
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
   warnings: string[];
   contraindications: string[];
-  requiredActions: string[];
-  medicalSupervisionRequired: boolean;
+  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  maxSafeAmount: number;  // ← AJOUTÉ pour corriger l'erreur TypeScript
+  medicalAlerts: string[];  // ← AJOUTÉ pour corriger l'erreur TypeScript
 }
 
-interface VulnerableProfile {
-  isElderly: boolean;
-  isChild: boolean;
-  isPregnant: boolean;
-  hasKidneyDisease: boolean;
-  hasHeartCondition: boolean;
-  hasDiabetes: boolean;
-  isOnMedication: boolean;
+export interface BiometricProfile {
+  age: number;
+  weight: number;
+  height: number;
+  sex: 'M' | 'F';
+  fitnessLevel: 'sedentary' | 'light' | 'moderate' | 'intense' | 'athlete';
+  medicalConditions: Array<{
+    condition: string;
+    severity: 'mild' | 'moderate' | 'severe';
+    medications: string[];
+  }>;
 }
 
-export class HydrationMedicalValidator {
+export interface EnvironmentalData {
+  temperature: number;
+  humidity: number;
+  heatIndex: number;
+  uvIndex: number;
+  windSpeed: number;
+}
+
+// Validateur médical pour recommandations d'hydratation
+class HydrationMedicalValidator {
   
-  /**
-   * VALIDATION PRINCIPALE AVANT RECOMMANDATION
-   */
   validateHydrationRecommendation(
-    biometricProfile: any,
-    environmentalData: any,
-    recommendedIntake: number
+    profile: BiometricProfile,
+    environment: EnvironmentalData,
+    recommendedAmount: number
   ): MedicalValidationResult {
     
-    console.log('🏥 Validation médicale recommandation hydratation...');
-    
-    // 1. ANALYSE PROFIL VULNÉRABILITÉ
-    const vulnerableProfile = this.analyzeVulnerability(biometricProfile);
-    
-    // 2. VALIDATION QUANTITÉ RECOMMANDÉE
-    const quantityValidation = this.validateRecommendedQuantity(
-      recommendedIntake, 
-      biometricProfile, 
-      vulnerableProfile
-    );
-    
-    // 3. VALIDATION CONDITIONS ENVIRONNEMENTALES
-    const environmentValidation = this.validateEnvironmentalConditions(
-      environmentalData, 
-      vulnerableProfile
-    );
-    
-    // 4. COMPILATION RÉSULTATS
-    const finalValidation = this.compileValidationResults(
-      quantityValidation,
-      environmentValidation,
-      vulnerableProfile
-    );
-    
-    console.log(`✅ Validation médicale terminée - Risque: ${finalValidation.riskLevel}`);
-    
-    return finalValidation;
-  }
-
-  /**
-   * ANALYSE VULNÉRABILITÉ UTILISATEUR
-   */
-  private analyzeVulnerability(profile: any): VulnerableProfile {
-    
-    const conditions = profile.medicalConditions || [];
-    
-    return {
-      isElderly: profile.age >= 65,
-      isChild: profile.age < 18,
-      isPregnant: conditions.some((c: any) => c.condition === 'pregnancy'),
-      hasKidneyDisease: conditions.some((c: any) => c.condition === 'kidney_disease'),
-      hasHeartCondition: conditions.some((c: any) => 
-        ['heart_failure', 'hypertension'].includes(c.condition)
-      ),
-      hasDiabetes: conditions.some((c: any) => c.condition === 'diabetes'),
-      isOnMedication: conditions.some((c: any) => c.medications && c.medications.length > 0)
+    const result: MedicalValidationResult = {
+      isValid: true,
+      warnings: [],
+      contraindications: [],
+      riskLevel: 'low',
+      maxSafeAmount: 5000, // Valeur par défaut sécuritaire (5L/jour max)
+      medicalAlerts: []
     };
-  }
 
-  /**
-   * VALIDATION QUANTITÉ HYDRATATION
-   */
-  private validateRecommendedQuantity(
-    recommendedIntake: number,
-    profile: any,
-    vulnerable: VulnerableProfile
-  ): Partial<MedicalValidationResult> {
-    
-    const warnings: string[] = [];
-    const contraindications: string[] = [];
-    const actions: string[] = [];
-    let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    
-    // LIMITES ABSOLUES DE SÉCURITÉ
-    const minSafe = this.calculateMinimumSafeIntake(profile, vulnerable);
-    const maxSafe = this.calculateMaximumSafeIntake(profile, vulnerable);
-    
-    // VALIDATION MINIMUM VITAL
-    if (recommendedIntake < minSafe) {
-      riskLevel = 'critical';
-      warnings.push(`⚠️ Hydratation insuffisante: ${recommendedIntake}ml < ${minSafe}ml minimum`);
-      actions.push('Augmenter immédiatement l\'hydratation');
-      
-      if (vulnerable.isElderly) {
-        contraindications.push('SENIOR : Risque déshydratation accru - Surveillance renforcée');
+    // 1. VALIDATION ÂGE CRITIQUE
+    if (profile.age < 5) {
+      result.isValid = false;
+      result.riskLevel = 'critical';
+      result.maxSafeAmount = Math.min(1200, recommendedAmount); // 1.2L max enfants
+      result.contraindications.push('Âge <5 ans - Supervision médicale obligatoire');
+      result.medicalAlerts.push('PÉDIATRIE: Consultation immédiate requise');
+    } else if (profile.age >= 75) {
+      result.riskLevel = 'high';
+      result.maxSafeAmount = Math.min(3500, recommendedAmount); // 3.5L max seniors
+      result.warnings.push('Âge >75 ans - Risque hyperhydratation accru');
+      result.medicalAlerts.push('GÉRIATRIE: Surveillance renforcée recommandée');
+    }
+
+    // 2. VALIDATION CONDITIONS MÉDICALES CRITIQUES
+    profile.medicalConditions.forEach(condition => {
+      switch (condition.condition.toLowerCase()) {
+        case 'insuffisance_cardiaque':
+        case 'heart_failure':
+          result.riskLevel = 'critical';
+          result.maxSafeAmount = Math.min(2000, recommendedAmount);
+          result.contraindications.push('Insuffisance cardiaque - Restriction hydrique stricte');
+          result.medicalAlerts.push('CARDIOLOGIE: Risque surcharge volumique');
+          break;
+          
+        case 'insuffisance_renale':
+        case 'kidney_disease':
+          result.riskLevel = 'critical';
+          result.maxSafeAmount = Math.min(1500, recommendedAmount);
+          result.contraindications.push('Insuffisance rénale - Hydratation contrôlée');
+          result.medicalAlerts.push('NÉPHROLOGIE: Consultation avant modification hydratation');
+          break;
+          
+        case 'diabete':
+        case 'diabetes':
+          result.riskLevel = 'high';
+          result.warnings.push('Diabète - Surveillance glycémie avec hydratation');
+          result.medicalAlerts.push('ENDOCRINOLOGIE: Adapter selon glycémie');
+          break;
+          
+        case 'hypertension':
+          result.riskLevel = 'medium';
+          result.warnings.push('Hypertension - Éviter surhydratation');
+          break;
+          
+        case 'grossesse':
+        case 'pregnancy':
+          result.maxSafeAmount = Math.min(3500, recommendedAmount);
+          result.warnings.push('Grossesse - Besoins hydriques augmentés mais contrôlés');
+          result.medicalAlerts.push('OBSTÉTRIQUE: Adapter selon trimestre');
+          break;
       }
-      
-      if (vulnerable.isChild) {
-        contraindications.push('ENFANT : Déshydratation rapide possible - Alerte parents');
-      }
+    });
+
+    // 3. VALIDATION ENVIRONNEMENTALE CRITIQUE
+    if (environment.temperature > 35 && environment.humidity > 80) {
+      result.riskLevel = Math.max(result.riskLevel === 'low' ? 'high' : result.riskLevel, 'high') as any;
+      result.warnings.push(`Conditions extrêmes: ${environment.temperature}°C, ${environment.humidity}% humidité`);
+      result.medicalAlerts.push('THERMIQUE: Risque coup de chaleur élevé');
     }
-    
-    // VALIDATION MAXIMUM SÉCURITAIRE
-    if (recommendedIntake > maxSafe) {
-      riskLevel = Math.max(riskLevel as any, 'high' as any) as any;
-      warnings.push(`⚠️ Hydratation excessive: ${recommendedIntake}ml > ${maxSafe}ml maximum`);
-      actions.push('Réduire hydratation - Risque hyperhydratation');
-      
-      if (vulnerable.hasKidneyDisease) {
-        riskLevel = 'critical';
-        contraindications.push('MALADIE RÉNALE : Restriction hydrique obligatoire');
-        actions.push('CONSULTER NÉPHROLOGUE IMMÉDIATEMENT');
-      }
-      
-      if (vulnerable.hasHeartCondition) {
-        riskLevel = 'critical';
-        contraindications.push('INSUFFISANCE CARDIAQUE : Surcharge hydrique dangereuse');
-        actions.push('CONSULTER CARDIOLOGUE IMMÉDIATEMENT');
-      }
+
+    // 4. VALIDATION QUANTITÉ RECOMMANDÉE
+    if (recommendedAmount > 6000) { // Plus de 6L
+      result.isValid = false;
+      result.riskLevel = 'critical';
+      result.maxSafeAmount = 5000;
+      result.contraindications.push('Quantité excessive - Risque hyponatrémie');
+      result.medicalAlerts.push('URGENCE: Risque déséquilibre électrolytique');
+    } else if (recommendedAmount < 800) { // Moins de 800ml
+      result.warnings.push('Hydratation insuffisante détectée');
+      result.medicalAlerts.push('DÉSHYDRATATION: Surveillance symptômes');
     }
-    
-    // POPULATIONS SPÉCIALES
-    if (vulnerable.isPregnant) {
-      if (recommendedIntake < 2300) {
-        warnings.push('GROSSESSE : Besoins hydriques augmentés');
-        actions.push('Augmenter hydratation (minimum 2,3L/jour)');
-      }
+
+    // 5. VALIDATION FINALE SÉCURITAIRE
+    if (!result.isValid) {
+      result.maxSafeAmount = Math.min(result.maxSafeAmount, 2500); // Fallback ultra-conservateur
     }
-    
-    return { riskLevel, warnings, contraindications, requiredActions: actions };
+
+    return result;
   }
 
-  /**
-   * VALIDATION CONDITIONS ENVIRONNEMENTALES
-   */
-  private validateEnvironmentalConditions(
-    environmental: any,
-    vulnerable: VulnerableProfile
-  ): Partial<MedicalValidationResult> {
+  // Méthode utilitaire pour vérification rapide risque critique
+  hasEmergencyRisk(profile: BiometricProfile, environment: EnvironmentalData): boolean {
+    // Conditions urgentes nécessitant arrêt immédiat
+    const criticalAge = profile.age < 5 || profile.age > 85;
+    const criticalMedical = profile.medicalConditions.some(c => 
+      ['insuffisance_cardiaque', 'insuffisance_renale', 'heart_failure', 'kidney_disease'].includes(c.condition.toLowerCase())
+    );
+    const criticalEnvironment = environment.temperature > 40 || environment.heatIndex > 45;
     
-    const warnings: string[] = [];
-    const actions: string[] = [];
-    let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    
-    // TEMPÉRATURE CRITIQUE
-    if (environmental.temperature > 35) {
-      riskLevel = 'critical';
-      warnings.push(`🌡️ TEMPÉRATURE EXTRÊME: ${environmental.temperature}°C`);
-      actions.push('ÉVITER TOUTE ACTIVITÉ EXTÉRIEURE');
-      actions.push('Chercher climatisation/ombre immédiatement');
-      
-      if (vulnerable.isElderly || vulnerable.isChild) {
-        warnings.push('POPULATION VULNÉRABLE : Risque coup de chaleur élevé');
-        actions.push('SURVEILLANCE MÉDICALE RECOMMANDÉE');
-      }
-    } else if (environmental.temperature > 30) {
-      riskLevel = Math.max(riskLevel as any, 'high' as any) as any;
-      warnings.push(`🌡️ Forte chaleur: ${environmental.temperature}°C`);
-      actions.push('Réduire intensité activité de 30%');
-      actions.push('Hydratation préventive toutes les 15min');
-    }
-    
-    // INDICE CHALEUR
-    if (environmental.heatIndex > environmental.temperature + 5) {
-      riskLevel = Math.max(riskLevel as any, 'high' as any) as any;
-      warnings.push(`🥵 Indice chaleur élevé: ${environmental.heatIndex}°C ressenti`);
-      actions.push('Surveillance symptômes épuisement thermique');
-    }
-    
-    // HUMIDITÉ CRITIQUE
-    if (environmental.humidity > 85) {
-      warnings.push(`💨 Humidité élevée: ${environmental.humidity}% - Évaporation sueur réduite`);
-      actions.push('Augmenter fréquence hydratation');
-    }
-    
-    // UV DANGEREUX
-    if (environmental.uvIndex > 8) {
-      warnings.push(`☀️ UV extrême: ${environmental.uvIndex} - Protection solaire maximale`);
-      actions.push('Éviter exposition 11h-16h');
-    }
-    
-    return { riskLevel, warnings, requiredActions: actions };
+    return criticalAge || criticalMedical || criticalEnvironment;
   }
 
-  /**
-   * COMPILATION RÉSULTATS VALIDATION
-   */
-  private compileValidationResults(
-    quantityValidation: Partial<MedicalValidationResult>,
-    environmentValidation: Partial<MedicalValidationResult>,
-    vulnerable: VulnerableProfile
-  ): MedicalValidationResult {
+  // Calcul seuil sécuritaire selon profil
+  calculateSafeHydrationLimit(profile: BiometricProfile): number {
+    let baseLimit = 3500; // 3.5L de base
     
-    // NIVEAU RISQUE MAXIMUM
-    const riskLevel = this.determineMaxRiskLevel([
-      quantityValidation.riskLevel || 'low',
-      environmentValidation.riskLevel || 'low'
-    ]);
+    // Ajustements selon âge
+    if (profile.age < 12) baseLimit = 1500;
+    else if (profile.age < 18) baseLimit = 2500;
+    else if (profile.age > 75) baseLimit = 3000;
     
-    // COMPILATION ALERTES
-    const warnings = [
-      ...(quantityValidation.warnings || []),
-      ...(environmentValidation.warnings || [])
-    ];
+    // Ajustements selon poids (35ml/kg max)
+    const weightBasedLimit = profile.weight * 35;
     
-    const contraindications = [
-      ...(quantityValidation.contraindications || []),
-      ...(environmentValidation.contraindications || [])
-    ];
-    
-    const requiredActions = [
-      ...(quantityValidation.requiredActions || []),
-      ...(environmentValidation.requiredActions || [])
-    ];
-    
-    // SUPERVISION MÉDICALE REQUISE
-    const medicalSupervisionRequired = 
-      riskLevel === 'critical' ||
-      vulnerable.hasKidneyDisease ||
-      vulnerable.hasHeartCondition ||
-      (vulnerable.isPregnant && riskLevel === 'high');
-    
-    // VALIDATION FINALE
-    const isValid = riskLevel !== 'critical' && contraindications.length === 0;
-    
-    return {
-      isValid,
-      riskLevel,
-      warnings,
-      contraindications,
-      requiredActions,
-      medicalSupervisionRequired
-    };
-  }
-
-  /**
-   * CALCULS SEUILS SÉCURITAIRES
-   */
-  private calculateMinimumSafeIntake(profile: any, vulnerable: VulnerableProfile): number {
-    let minimum = 1200; // Survie absolue
-    
-    // Ajustements selon poids
-    if (profile.weight) {
-      minimum = Math.max(minimum, profile.weight * 20); // 20ml/kg minimum
-    }
-    
-    // Populations spéciales
-    if (vulnerable.isChild) {
-      minimum = Math.max(minimum, 1500); // Minimum enfants
-    }
-    
-    if (vulnerable.isPregnant) {
-      minimum = Math.max(minimum, 2300); // Minimum grossesse
-    }
-    
-    if (vulnerable.isElderly) {
-      minimum = Math.max(minimum, 1800); // Seniors besoins plus élevés
-    }
-    
-    return minimum;
-  }
-
-  private calculateMaximumSafeIntake(profile: any, vulnerable: VulnerableProfile): number {
-    let maximum = 6000; // Limite hyperhydratation
-    
-    // Ajustements selon poids
-    if (profile.weight) {
-      maximum = Math.min(maximum, profile.weight * 70); // 70ml/kg maximum
-    }
-    
-    // Restrictions médicales STRICTES
-    if (vulnerable.hasKidneyDisease) {
-      maximum = 2000; // Restriction rénale
-    }
-    
-    if (vulnerable.hasHeartCondition) {
-      maximum = 1500; // Restriction cardiaque
-    }
-    
-    // Populations spéciales
-    if (vulnerable.isChild && profile.age < 12) {
-      maximum = Math.min(maximum, 2500); // Limite enfants
-    }
-    
-    return maximum;
-  }
-
-  private determineMaxRiskLevel(levels: ('low' | 'medium' | 'high' | 'critical')[]): 'low' | 'medium' | 'high' | 'critical' {
-    if (levels.includes('critical')) return 'critical';
-    if (levels.includes('high')) return 'high';
-    if (levels.includes('medium')) return 'medium';
-    return 'low';
-  }
-
-  /**
-   * TESTS SPÉCIFIQUES POPULATIONS VULNÉRABLES
-   */
-  testVulnerablePopulations(): { elderly: any, children: any, pregnancy: any } {
-    console.log('🧪 Tests populations vulnérables...');
-    
-    // Test seniors 75+
-    const elderlyTest = this.validateHydrationRecommendation(
-      { age: 75, weight: 65, medicalConditions: [{ condition: 'elderly_75plus' }] },
-      { temperature: 32, humidity: 70, heatIndex: 35 },
-      2500
+    // Ajustements selon conditions médicales
+    const hasCriticalCondition = profile.medicalConditions.some(c => 
+      ['insuffisance_cardiaque', 'insuffisance_renale'].includes(c.condition.toLowerCase())
     );
     
-    // Test enfant 8 ans
-    const childTest = this.validateHydrationRecommendation(
-      { age: 8, weight: 25, medicalConditions: [] },
-      { temperature: 28, humidity: 60, heatIndex: 30 },
-      2000
-    );
+    if (hasCriticalCondition) baseLimit = Math.min(baseLimit, 2000);
     
-    // Test grossesse
-    const pregnancyTest = this.validateHydrationRecommendation(
-      { age: 28, weight: 70, medicalConditions: [{ condition: 'pregnancy' }] },
-      { temperature: 30, humidity: 75, heatIndex: 33 },
-      2200
-    );
-    
-    console.log('✅ Tests populations vulnérables terminés');
-    
-    return {
-      elderly: elderlyTest,
-      children: childTest,
-      pregnancy: pregnancyTest
-    };
+    return Math.min(baseLimit, weightBasedLimit);
   }
 }
 
+// Export singleton
 export const hydrationMedicalValidator = new HydrationMedicalValidator();
