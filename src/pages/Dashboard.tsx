@@ -1,19 +1,26 @@
 
 import React from 'react';
-import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
-import { DashboardCharts } from '@/components/dashboard/DashboardCharts';
-import { DashboardStats } from '@/components/dashboard/DashboardStats';
-import { UpcomingWorkouts } from '@/components/dashboard/UpcomingWorkouts';
-import { RecentAchievements } from '@/components/dashboard/RecentAchievements';
-import { WeatherRecommendations } from '@/components/ui/WeatherRecommendations';
-import { StreakCounter } from '@/components/dashboard/StreakCounter';
-import { AICoachCard } from '@/components/coach/AICoachCard';
+import DashboardHeader from '@/components/dashboard/DashboardHeader';
+import DashboardCharts from '@/components/dashboard/DashboardCharts';
+import DashboardStats from '@/components/dashboard/DashboardStats';
+import UpcomingWorkouts from '@/components/dashboard/UpcomingWorkouts';
+import RecentAchievements from '@/components/dashboard/RecentAchievements';
+import WeatherRecommendations from '@/components/ui/WeatherRecommendations';
+import StreakCounter from '@/components/dashboard/StreakCounter';
+import AICoachCard from '@/components/coach/AICoachCard';
 import { useWeatherRecommendations } from '@/hooks/useWeatherRecommendations';
 import { HydrationDashboardCard } from '@/components/dashboard/HydrationDashboardCard';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const Dashboard = () => {
   const { data: weatherRecommendations, isLoading } = useWeatherRecommendations();
+  
+  // Mock data for upcoming workouts
+  const upcomingWorkouts = [
+    { id: 1, name: "Push Upper Body", time: "Demain 9h00", duration: "45min" },
+    { id: 2, name: "Cardio HIIT", time: "Vendredi 18h30", duration: "30min" },
+    { id: 3, name: "Full Body Strength", time: "Dimanche 10h00", duration: "60min" }
+  ];
   
   return (
     <div className="container mx-auto p-4 max-w-7xl">
@@ -31,7 +38,7 @@ const Dashboard = () => {
             </TabsList>
             <TabsContent value="activity" className="space-y-4 pt-2">
               <DashboardCharts />
-              <UpcomingWorkouts />
+              <UpcomingWorkouts workouts={upcomingWorkouts} />
             </TabsContent>
             <TabsContent value="nutrition" className="space-y-4 pt-2">
               {/* Cartes Nutrition */}
@@ -52,7 +59,7 @@ const Dashboard = () => {
         {/* Colonne droite: coach, météo, etc. */}
         <div className="space-y-6">
           <AICoachCard />
-          <StreakCounter />
+          <StreakCounter currentStreak={5} longestStreak={12} />
           
           {weatherRecommendations && !isLoading && (
             <WeatherRecommendations 

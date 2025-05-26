@@ -16,7 +16,7 @@ class HydrationService {
         
       if (error) throw error;
       
-      return data;
+      return data as HydrationEntry;
     } catch (error) {
       console.error('Erreur ajout hydratation:', error);
       throw error;
@@ -36,7 +36,7 @@ class HydrationService {
         
       if (error) throw error;
       
-      return data || [];
+      return (data || []) as HydrationEntry[];
     } catch (error) {
       console.error('Erreur récupération hydratation:', error);
       return [];
@@ -61,7 +61,7 @@ class HydrationService {
         
       if (error) throw error;
       
-      return data || [];
+      return (data || []) as HydrationEntry[];
     } catch (error) {
       console.error('Erreur récupération hydratation quotidienne:', error);
       return [];
@@ -107,7 +107,7 @@ class HydrationService {
         throw error;
       }
       
-      return data;
+      return data as HydrationGoal;
     } catch (error) {
       console.error('Erreur récupération objectif hydratation:', error);
       return null;
