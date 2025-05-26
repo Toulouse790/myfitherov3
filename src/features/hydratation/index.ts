@@ -9,6 +9,10 @@ export * from './medical-validation';
 export { HydrationSafetyCard } from '@/components/hydration/HydrationSafetyCard';
 export { HydrationDashboardCard } from '@/components/dashboard/HydrationDashboardCard';
 
+// Exportation des composants d'urgence
+export { EmergencyFloatingButton } from '@/components/emergency/EmergencyFloatingButton';
+export { EmergencyHydrationModal } from '@/components/emergency/EmergencyHydrationModal';
+
 // Exportation des services de sécurité
 export { hydrationMedicalValidator } from './medical-validation';
 
