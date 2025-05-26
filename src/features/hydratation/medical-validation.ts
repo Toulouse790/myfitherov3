@@ -35,6 +35,18 @@ export interface EnvironmentalData {
 // Validateur médical pour recommandations d'hydratation
 class HydrationMedicalValidator {
   
+  // Helper function to escalate risk level
+  private escalateRiskLevel(current: 'low' | 'medium' | 'high' | 'critical', target: 'low' | 'medium' | 'high' | 'critical'): 'low' | 'medium' | 'high' | 'critical' {
+    const levels = { low: 1, medium: 2, high: 3, critical: 4 };
+    const currentLevel = levels[current];
+    const targetLevel = levels[target];
+    
+    if (targetLevel > currentLevel) {
+      return target;
+    }
+    return current;
+  }
+
   validateHydrationRecommendation(
     profile: BiometricProfile,
     environment: EnvironmentalData,
@@ -106,7 +118,7 @@ class HydrationMedicalValidator {
     const humidity = Number(environment.humidity);
     
     if (temp > 35 && humidity > 80) {
-      result.riskLevel = Math.max(result.riskLevel === 'low' ? 'high' : result.riskLevel, 'high') as any;
+      result.riskLevel = this.escalateRiskLevel(result.riskLevel, 'high');
       result.warnings.push(`Conditions extrêmes: ${temp}°C, ${humidity}% humidité`);
       result.medicalAlerts.push('THERMIQUE: Risque coup de chaleur élevé');
     }
