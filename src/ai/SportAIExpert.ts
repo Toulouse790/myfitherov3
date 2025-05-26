@@ -15,10 +15,9 @@ export interface Recommendation {
   action?: string;
   alternatives?: string[];
   icon?: string;
-  // Ajout pour validation croisée
+  // Ajout pour validation croisée (sans emergency)
   priority?: 'low' | 'medium' | 'high';
   contraindications?: string[];
-  medicalAlerts?: string[];
   riskLevel?: 'safe' | 'caution' | 'warning';
 }
 
@@ -49,7 +48,7 @@ export class SportAIExpert {
     const environmentalContext = this.convertWeatherToEnvironmentalContext(weather);
     const crossDomainUserProfile = this.convertUserProfile(userProfile);
     
-    // 3. VALIDATION CROISÉE
+    // 3. VALIDATION CROISÉE (sans alertes d'urgence)
     try {
       const validationResult = crossDomainValidator.validateRecommendations(
         sportAIRecommendations,
@@ -109,35 +108,55 @@ export class SportAIExpert {
     const humidity = weather.main?.humidity || 50;
     const windSpeed = weather.wind?.speed || 0;
 
-    // Analyse de la température
-    if (temp > 30) {
+    // Analyse de la température (sans alertes d'urgence)
+    if (temp > 35) {
       recommendations.push({
         type: 'warning',
-        title: '🌡️ Forte chaleur détectée',
-        message: `Il fait ${temp}°C ! Réduisez l'intensité et hydratez-vous davantage.`,
-        action: 'adjust_intensity',
-        icon: '🥵',
+        title: '🌡️ Conditions chaudes',
+        message: `Il fait ${temp}°C. Privilégiez un entraînement en intérieur avec climatisation.`,
+        alternatives: ['Salle de sport', 'Yoga à la maison', 'Natation en piscine couverte'],
+        icon: '🏠',
         priority: 'high',
         riskLevel: 'warning'
+      });
+    } else if (temp > 30) {
+      recommendations.push({
+        type: 'info',
+        title: '☀️ Temps chaud',
+        message: `Il fait ${temp}°C. Réduisez l'intensité et hydratez-vous davantage.`,
+        action: 'adjust_intensity',
+        icon: '💧',
+        priority: 'medium',
+        riskLevel: 'caution'
       });
     } else if (temp > 25) {
       recommendations.push({
         type: 'tip',
-        title: '☀️ Temps chaud idéal',
+        title: '☀️ Temps agréable',
         message: `Parfait pour l'entraînement ! Pensez à vous hydrater régulièrement.`,
         icon: '💧',
+        priority: 'low',
+        riskLevel: 'safe'
+      });
+    } else if (temp < 0) {
+      recommendations.push({
+        type: 'info',
+        title: '🥶 Conditions froides',
+        message: `Il fait ${temp}°C. Privilégiez un entraînement en intérieur aujourd'hui.`,
+        alternatives: ['Salle de sport', 'Fitness à domicile', 'Yoga'],
+        icon: '🏠',
         priority: 'medium',
         riskLevel: 'caution'
       });
     } else if (temp < 5) {
       recommendations.push({
-        type: 'info',
-        title: '🥶 Température froide',
+        type: 'tip',
+        title: '❄️ Température froide',
         message: `Il fait ${temp}°C. Prolongez votre échauffement de 5-10 minutes.`,
         action: 'extend_warmup',
         icon: '🔥',
         priority: 'medium',
-        riskLevel: 'caution'
+        riskLevel: 'safe'
       });
     }
 
@@ -156,9 +175,9 @@ export class SportAIExpert {
       recommendations.push({
         type: 'warning',
         title: '⛈️ Orage en cours',
-        message: 'Évitez les activités extérieures. Restez en sécurité !',
-        alternatives: ['Méditation', 'Étirements', 'Exercices de respiration'],
-        icon: '⚠️',
+        message: 'Évitez les activités extérieures. Privilégiez un entraînement en intérieur.',
+        alternatives: ['Méditation', 'Étirements', 'Exercices de respiration', 'Yoga'],
+        icon: '🏠',
         priority: 'high',
         riskLevel: 'warning'
       });
@@ -175,12 +194,12 @@ export class SportAIExpert {
     }
 
     // Analyse de l'humidité
-    if (humidity > 80) {
+    if (humidity > 85) {
       recommendations.push({
         type: 'tip',
         title: '💨 Humidité élevée',
-        message: `Humidité à ${humidity}%. Réduisez l'intensité et aérez-vous davantage.`,
-        action: 'increase_ventilation',
+        message: `Humidité à ${humidity}%. Réduisez l'intensité et prenez des pauses plus fréquentes.`,
+        action: 'reduce_intensity',
         icon: '🌫️',
         priority: 'medium',
         riskLevel: 'caution'
@@ -188,13 +207,13 @@ export class SportAIExpert {
     }
 
     // Analyse du vent
-    if (windSpeed > 15) {
+    if (windSpeed > 20) {
       recommendations.push({
         type: 'info',
         title: '💨 Vent fort',
-        message: `Vent à ${windSpeed} km/h. Adaptez vos exercices en extérieur.`,
-        alternatives: ['Exercices au sol', 'Entraînement en intérieur'],
-        icon: '🌪️',
+        message: `Vent à ${windSpeed} km/h. Considérez un entraînement en intérieur.`,
+        alternatives: ['Salle de sport', 'Exercices à domicile'],
+        icon: '🏠',
         priority: 'medium',
         riskLevel: 'caution'
       });
@@ -276,7 +295,7 @@ export class SportAIExpert {
       priority: rec.priority || 'medium',
       recommendation: rec.message,
       contraindications: rec.contraindications || [],
-      medicalAlerts: rec.medicalAlerts || [],
+      medicalAlerts: [],
       environmentalFactors: [rec.title],
       timeframe: {
         start: new Date(),
@@ -331,11 +350,11 @@ export class SportAIExpert {
           if (conflict.description.toLowerCase().includes(rec.title.toLowerCase())) {
             return {
               ...rec,
-              type: 'warning',
-              title: `⚠️ ${rec.title} (Modifié)`,
-              message: `${rec.message}\n\n🔒 Attention: Recommandation ajustée pour votre sécurité.`,
-              priority: 'high',
-              riskLevel: 'warning'
+              type: 'info',
+              title: `🔧 ${rec.title} (Modifié)`,
+              message: `${rec.message}\n\nRecommandation ajustée pour optimiser votre sécurité.`,
+              priority: 'medium',
+              riskLevel: 'caution'
             };
           }
           return rec;
@@ -354,7 +373,7 @@ export class SportAIExpert {
       enrichedRecommendations.unshift({
         type: 'info',
         title: '🔒 Validation Sécurité',
-        message: `Recommandations vérifiées pour votre sécurité.`,
+        message: `Recommandations vérifiées et adaptées.`,
         icon: '🛡️',
         priority: 'medium',
         riskLevel: validationResult.finalRiskLevel
