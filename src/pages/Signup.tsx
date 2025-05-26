@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const Signup = () => {
   const { signUp, user, loading: authLoading } = useAuth();
@@ -16,6 +17,7 @@ const Signup = () => {
     firstName: '',
     lastName: ''
   });
+  const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -27,6 +29,12 @@ const Signup = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!acceptedPrivacy) {
+      setError('Vous devez accepter la politique de confidentialité pour continuer.');
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -121,6 +129,37 @@ const Signup = () => {
               <p className="text-xs text-muted-foreground">Minimum 6 caractères</p>
             </div>
 
+            {/* Privacy Policy Acceptance */}
+            <div className="space-y-3">
+              <div className="flex items-start space-x-2">
+                <Checkbox
+                  id="privacy"
+                  checked={acceptedPrivacy}
+                  onCheckedChange={(checked) => setAcceptedPrivacy(checked as boolean)}
+                  required
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <Label
+                    htmlFor="privacy"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    J'accepte la politique de confidentialité *
+                  </Label>
+                  <p className="text-xs text-muted-foreground">
+                    En créant un compte, vous acceptez notre{' '}
+                    <Link 
+                      to="/privacy" 
+                      target="_blank"
+                      className="text-primary hover:underline font-medium"
+                    >
+                      politique de confidentialité
+                    </Link>
+                    {' '}conforme au RGPD pour la protection de vos données de santé.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
                 {error}
@@ -129,7 +168,7 @@ const Signup = () => {
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || !acceptedPrivacy}
               className="w-full"
             >
               {loading ? (

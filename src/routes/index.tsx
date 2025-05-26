@@ -10,6 +10,7 @@ import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Index from '@/pages/Index';
 import NotFound from '@/pages/NotFound';
+import Privacy from '@/pages/Privacy';
 
 // Lazy loading des modules principaux
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -43,6 +44,7 @@ const AppRoutes = () => {
       {/* Routes publiques - chargement immédiat */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/privacy" element={<Privacy />} />
       
       {/* Routes protégées */}
       <Route path="/" element={
