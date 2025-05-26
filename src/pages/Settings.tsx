@@ -6,16 +6,17 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/components/ui/sonner';
 import { ApiService } from '@/services/api';
 import { useNavigate } from 'react-router-dom';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Shield, Settings as SettingsIcon, Database } from 'lucide-react';
+import { ConsentManagerUI } from '@/components/security/ConsentManager';
+import { SecurityDashboard } from '@/components/security/SecurityDashboard';
 
 const Settings = () => {
   const navigate = useNavigate();
-  // Utiliser une variable d'environnement par défaut si disponible
-  const defaultWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || 
-    "";
+  const defaultWebhookUrl = import.meta.env.VITE_N8N_WEBHOOK_URL || "";
   
   const [webhookUrl, setWebhookUrl] = useState<string>(defaultWebhookUrl);
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(true);
@@ -37,7 +38,6 @@ const Settings = () => {
     console.log("Test de connexion au webhook n8n:", webhookUrl);
 
     try {
-      // Utiliser notre service API pour le test
       const response = await ApiService.testWebhook(webhookUrl, {
         timestamp: new Date().toISOString(),
         triggered_from: window.location.origin,
@@ -45,7 +45,6 @@ const Settings = () => {
         action: "test_connection"
       });
 
-      // Comme nous utilisons no-cors, nous affichons un message informatif
       toast("Requête envoyée", {
         description: "La requête a été envoyée à n8n. Veuillez vérifier l'historique de votre workflow pour confirmer son déclenchement."
       });
@@ -64,7 +63,6 @@ const Settings = () => {
     setIsSaving(true);
     
     try {
-      // Simuler une opération d'enregistrement
       await new Promise(resolve => setTimeout(resolve, 800));
       
       toast("Paramètres enregistrés", {
@@ -85,7 +83,7 @@ const Settings = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold">Paramètres</h1>
-            <p className="text-muted-foreground">Gérez vos préférences et intégrations.</p>
+            <p className="text-muted-foreground">Gérez vos préférences, sécurité et intégrations.</p>
           </div>
           
           <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
@@ -93,90 +91,122 @@ const Settings = () => {
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* N8n Webhook Integration */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Intégration n8n</CardTitle>
-              <CardDescription>Connectez MyFitHero à n8n pour automatiser vos workflows.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleTrigger} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="webhook-url">URL du Webhook</Label>
-                  <Input
-                    id="webhook-url"
-                    placeholder="https://your-n8n-instance.com/webhook/..."
-                    value={webhookUrl}
-                    onChange={(e) => setWebhookUrl(e.target.value)}
-                  />
-                </div>
-              </form>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button onClick={handleTrigger} disabled={isLoading}>
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Envoi...
-                  </>
-                ) : (
-                  "Tester la connexion"
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
+        <Tabs defaultValue="general" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <SettingsIcon className="h-4 w-4" />
+              Général
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <Shield className="h-4 w-4" />
+              Sécurité & Confidentialité
+            </TabsTrigger>
+            <TabsTrigger value="data" className="flex items-center gap-2">
+              <Database className="h-4 w-4" />
+              Mes Données
+            </TabsTrigger>
+          </TabsList>
 
-          {/* General Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Paramètres généraux</CardTitle>
-              <CardDescription>Personnalisez votre expérience avec MyFitHero.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSaveSettings} className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="notifications" className="flex flex-col gap-1">
-                    <span>Notifications</span>
-                    <span className="font-normal text-sm text-muted-foreground">
-                      Recevez des alertes pour vos entraînements et objectifs.
-                    </span>
-                  </Label>
-                  <Switch
-                    id="notifications"
-                    checked={notificationsEnabled}
-                    onCheckedChange={setNotificationsEnabled}
-                  />
-                </div>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="dark-mode" className="flex flex-col gap-1">
-                    <span>Mode sombre</span>
-                    <span className="font-normal text-sm text-muted-foreground">
-                      Utilisez un thème sombre pour réduire la fatigue oculaire.
-                    </span>
-                  </Label>
-                  <Switch
-                    id="dark-mode"
-                    checked={darkModeEnabled}
-                    onCheckedChange={setDarkModeEnabled}
-                  />
-                </div>
-              </form>
-            </CardContent>
-            <CardFooter className="flex justify-end">
-              <Button onClick={handleSaveSettings} disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Enregistrement...
-                  </>
-                ) : (
-                  "Enregistrer"
-                )}
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+          <TabsContent value="general" className="space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
+              {/* N8n Webhook Integration */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Intégration n8n</CardTitle>
+                  <CardDescription>Connectez MyFitHero à n8n pour automatiser vos workflows.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleTrigger} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="webhook-url">URL du Webhook</Label>
+                      <Input
+                        id="webhook-url"
+                        placeholder="https://your-n8n-instance.com/webhook/..."
+                        value={webhookUrl}
+                        onChange={(e) => setWebhookUrl(e.target.value)}
+                      />
+                    </div>
+                  </form>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button onClick={handleTrigger} disabled={isLoading}>
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Envoi...
+                      </>
+                    ) : (
+                      "Tester la connexion"
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+
+              {/* General Settings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Paramètres généraux</CardTitle>
+                  <CardDescription>Personnalisez votre expérience avec MyFitHero.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSaveSettings} className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="notifications" className="flex flex-col gap-1">
+                        <span>Notifications</span>
+                        <span className="font-normal text-sm text-muted-foreground">
+                          Recevez des alertes pour vos entraînements et objectifs.
+                        </span>
+                      </Label>
+                      <Switch
+                        id="notifications"
+                        checked={notificationsEnabled}
+                        onCheckedChange={setNotificationsEnabled}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="dark-mode" className="flex flex-col gap-1">
+                        <span>Mode sombre</span>
+                        <span className="font-normal text-sm text-muted-foreground">
+                          Utilisez un thème sombre pour réduire la fatigue oculaire.
+                        </span>
+                      </Label>
+                      <Switch
+                        id="dark-mode"
+                        checked={darkModeEnabled}
+                        onCheckedChange={setDarkModeEnabled}
+                      />
+                    </div>
+                  </form>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button onClick={handleSaveSettings} disabled={isSaving}>
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Enregistrement...
+                      </>
+                    ) : (
+                      "Enregistrer"
+                    )}
+                  </Button>
+                </CardFooter>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="security" className="space-y-6">
+            <ConsentManagerUI 
+              onConsentChange={() => {
+                toast.success("Préférences de consentement mises à jour");
+              }}
+              showDetailedView={false}
+            />
+          </TabsContent>
+
+          <TabsContent value="data" className="space-y-6">
+            <SecurityDashboard />
+          </TabsContent>
+        </Tabs>
       </div>
     </MainLayout>
   );
