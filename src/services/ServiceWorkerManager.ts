@@ -167,13 +167,14 @@ export class ServiceWorkerManager {
 
   // Force une synchronisation
   async forceSync(): Promise<void> {
-    if (!this.registration?.sync) {
+    if (!('serviceWorker' in navigator) || !('sync' in window.ServiceWorkerRegistration.prototype)) {
       console.warn('⚠️ Background Sync non supporté');
       return;
     }
 
     try {
-      await this.registration.sync.register('force-sync');
+      const registration = await navigator.serviceWorker.ready;
+      await registration.sync.register('force-sync');
       console.log('🔄 Synchronisation forcée demandée');
     } catch (error) {
       console.error('❌ Erreur synchronisation:', error);
