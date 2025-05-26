@@ -25,7 +25,7 @@ export class DataAnonymizer {
 
     // Supprimer les identifiants personnels
     if (SECURITY_CONFIG.aiIntegration.removePersonalIdentifiers) {
-      anonymized = this.removePersonalIdentifiers(anonymized);
+      return this.removePersonalIdentifiers(anonymized);
     }
 
     return anonymized;
@@ -35,7 +35,7 @@ export class DataAnonymizer {
    * Supprime les identifiants personnels du texte
    */
   private static removePersonalIdentifiers(data: Record<string, any>): Record<string, any> {
-    const anonymized = { ...data };
+    let anonymized = { ...data };
 
     Object.keys(anonymized).forEach(key => {
       if (typeof anonymized[key] === 'string') {
