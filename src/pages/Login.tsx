@@ -36,26 +36,26 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-pink-600 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold mb-2">
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="text-center px-4 sm:px-6">
+          <CardTitle className="text-2xl sm:text-3xl font-bold mb-2">
             MyFitHero 🦸‍♂️
           </CardTitle>
-          <p className="text-muted-foreground">Connectez-vous à votre compte</p>
+          <p className="text-sm sm:text-base text-muted-foreground">Connectez-vous à votre compte</p>
         </CardHeader>
         
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+        <CardContent className="px-4 sm:px-6">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-10 sm:h-12 text-sm sm:text-base"
                   placeholder="vous@exemple.com"
                   required
                 />
@@ -63,15 +63,15 @@ const Login = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password" className="text-sm sm:text-base">Mot de passe</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
                   id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 h-10 sm:h-12 text-sm sm:text-base"
                   placeholder="••••••••"
                   required
                 />
@@ -79,7 +79,7 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm border border-red-200">
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-xs sm:text-sm border border-red-200">
                 {error}
               </div>
             )}
@@ -87,21 +87,21 @@ const Login = () => {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full"
+              className="w-full h-10 sm:h-12 text-sm sm:text-base"
             >
               {loading ? (
                 'Connexion...'
               ) : (
                 <>
-                  <LogIn size={20} className="mr-2" />
+                  <LogIn size={18} className="mr-2" />
                   Se connecter
                 </>
               )}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-muted-foreground">
+          <div className="mt-4 sm:mt-6 text-center">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               Pas encore de compte ?{' '}
               <Link to="/signup" className="text-primary hover:underline font-medium">
                 Inscrivez-vous
