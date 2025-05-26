@@ -3,14 +3,14 @@ import React from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-interface DataPoint {
+interface BaseDataPoint {
   name: string;
   [key: string]: string | number;
 }
 
 interface ProgressChartProps {
   title: string;
-  data: DataPoint[];
+  data: BaseDataPoint[];
   dataKeys: {
     key: string;
     color: string;

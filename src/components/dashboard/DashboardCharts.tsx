@@ -15,11 +15,26 @@ const DashboardCharts = () => {
     );
   }
 
+  // Convertir les données pour qu'elles correspondent au type BaseDataPoint
+  const convertedActivityData = activityData.map(item => ({
+    name: item.name,
+    séances: item.séances,
+    calories: item.calories,
+    sommeil: item.sommeil
+  }));
+
+  const convertedProgressData = progressData.map(item => ({
+    name: item.name,
+    force: item.force,
+    endurance: item.endurance,
+    récupération: item.récupération
+  }));
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <ProgressChart 
         title="Activité quotidienne"
-        data={activityData}
+        data={convertedActivityData}
         dataKeys={[
           { key: 'séances', color: '#1E40AF', name: 'Séances' },
           { key: 'calories', color: '#EA580C', name: 'Calories (x10)' },
@@ -28,7 +43,7 @@ const DashboardCharts = () => {
       />
       <ProgressChart 
         title="Progression mensuelle"
-        data={progressData}
+        data={convertedProgressData}
         dataKeys={[
           { key: 'force', color: '#1E40AF', name: 'Force' },
           { key: 'endurance', color: '#059669', name: 'Endurance' },
