@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,7 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { ConsentManagerUI } from '@/components/security/ConsentManager';
 import { SecurityDashboard } from '@/components/security/SecurityDashboard';
 import { SecurityConfigStatus } from '@/components/admin/SecurityConfigStatus';
-import { User, Shield, Database, Bell, Palette, Globe, Trash2 } from 'lucide-react';
+import { MobileFeatures } from '@/components/mobile/MobileFeatures';
+import { User, Shield, Database, Bell, Palette, Globe, Trash2, Smartphone } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 
 const Settings = () => {
@@ -45,10 +45,14 @@ const Settings = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             Général
+          </TabsTrigger>
+          <TabsTrigger value="mobile" className="flex items-center gap-2">
+            <Smartphone className="h-4 w-4" />
+            Mobile
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -172,6 +176,11 @@ const Settings = () => {
           <div className="flex justify-end">
             <Button onClick={handleSaveSettings}>Sauvegarder les modifications</Button>
           </div>
+        </TabsContent>
+
+        {/* Nouvel Onglet Mobile */}
+        <TabsContent value="mobile" className="space-y-6">
+          <MobileFeatures />
         </TabsContent>
 
         {/* Onglet Sécurité & Confidentialité */}
