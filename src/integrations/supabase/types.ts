@@ -2801,6 +2801,51 @@ export type Database = {
           },
         ]
       }
+      user_profiles: {
+        Row: {
+          age: number | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          gender: string | null
+          height_cm: number | null
+          id: string
+          last_name: string | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+          weight_kg: number | null
+        }
+        Insert: {
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          gender?: string | null
+          height_cm?: number | null
+          id?: string
+          last_name?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+          weight_kg?: number | null
+        }
+        Update: {
+          age?: number | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          gender?: string | null
+          height_cm?: number | null
+          id?: string
+          last_name?: string | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
       user_progression: {
         Row: {
           achievements_count: number | null
