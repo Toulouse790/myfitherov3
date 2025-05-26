@@ -5,8 +5,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Utiliser l'URL du webhook depuis les variables d'environnement ou la requête
-    const webhookUrl = process.env.N8N_WEBHOOK_URL;
+    // Utiliser l'URL du webhook depuis les variables d'environnement Vite
+    const webhookUrl = process.env.VITE_N8N_WEBHOOK_URL;
     
     if (!webhookUrl) {
       return res.status(500).json({ success: false, message: "Configuration de webhook manquante" });
