@@ -2,12 +2,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Droplet, Sun } from 'lucide-react';
+import { Droplet } from 'lucide-react';
 import { useHydration } from '@/features/hydratation/hooks';
-import { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
 
-export function HydrationDashboardCard() {
+export function SimpleHydrationCard() {
   const { stats, addHydration } = useHydration();
   
   const percentage = Math.min(100, stats.percentageComplete);
@@ -16,29 +15,20 @@ export function HydrationDashboardCard() {
   const quickAddWater = async (amount: number) => {
     const success = await addHydration(amount);
     if (success) {
-      if (percentage >= 100) {
-        toast.success(`🎯 Objectif dépassé ! +${amount}ml`, {
-          description: 'Vous êtes au top de votre forme !'
-        });
-      } else {
-        toast.success(`💧 +${amount}ml ajoutés`, {
-          description: `Plus que ${Math.round((remaining - amount) / 100) * 100}ml pour votre objectif`
-        });
-      }
+      toast.success(`Bien joué ! +${amount}ml ajoutés 💧`);
     }
   };
 
   const getMessage = () => {
-    if (percentage >= 100) return "🎉 Objectif atteint ! Bravo !";
-    if (percentage >= 80) return "🔥 Presque au but, continuez !";
-    if (percentage >= 60) return "💪 Bon rythme, restez motivé !";
-    if (percentage >= 40) return "⭐ En bonne voie, continuez !";
-    return `💧 Plus que ${Math.round(remaining/1000*10)/10}L à boire aujourd'hui`;
+    if (percentage >= 100) return "Objectif atteint ! Bravo ! 🎉";
+    if (percentage >= 80) return "Presque au but, continuez !";
+    if (percentage >= 50) return "Bon rythme, restez motivé !";
+    return `Plus que ${Math.round(remaining/1000*10)/10}L, vous pouvez le faire !`;
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader className="pb-2">
+    <Card>
+      <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Droplet className="h-5 w-5 text-blue-500" />
           Hydratation
@@ -63,7 +53,6 @@ export function HydrationDashboardCard() {
             onClick={() => quickAddWater(200)} 
             variant="outline" 
             size="sm"
-            className="hover:bg-blue-50"
           >
             <Droplet className="h-4 w-4 mr-1 text-blue-500" />
             +200ml
@@ -72,21 +61,16 @@ export function HydrationDashboardCard() {
             onClick={() => quickAddWater(500)} 
             variant="outline" 
             size="sm"
-            className="hover:bg-blue-50"
           >
             <Droplet className="h-4 w-4 mr-1 text-blue-500" />
             +500ml
           </Button>
         </div>
         
-        {percentage < 40 && (
-          <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
-            <Sun className="h-5 w-5 text-blue-500 mx-auto mb-2" />
-            <p className="text-sm text-blue-700 font-medium">
-              Pensez à vous hydrater régulièrement
-            </p>
-            <p className="text-xs text-blue-600 mt-1">
-              Votre corps vous remerciera !
+        {percentage < 30 && (
+          <div className="text-center p-3 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-700">
+              💡 Petit rappel : votre corps a besoin d'eau pour bien fonctionner !
             </p>
           </div>
         )}

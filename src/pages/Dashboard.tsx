@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Calendar, Droplet, Dumbbell, Flame, Timer, Heart, Settings } from 'lucide-react';
+import { HydrationDashboardCard } from '@/components/dashboard/HydrationDashboardCard';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -126,49 +126,8 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
-          {/* Hydratation */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Droplet className="h-5 w-5 text-blue-500" />
-                Hydratation
-              </CardTitle>
-              <CardDescription>Suivi quotidien</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span>
-                    {remaining > 0 
-                      ? `Encore ${(remaining/1000).toFixed(1)}L à boire` 
-                      : 'Objectif atteint !'
-                    }
-                  </span>
-                  <span className="font-medium">{currentHydration} / {dailyGoal} ml</span>
-                </div>
-                <Progress value={hydrationPercentage} className="h-2" />
-              </div>
-              
-              <div className="grid grid-cols-2 gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => addWater(200)}
-                  className="flex items-center gap-1"
-                >
-                  <Droplet size={14} />
-                  +200ml
-                </Button>
-                <Button 
-                  variant="outline" 
-                  onClick={() => addWater(500)}
-                  className="flex items-center gap-1"
-                >
-                  <Droplet size={14} />
-                  +500ml
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Hydratation - Version simplifiée */}
+          <HydrationDashboardCard />
 
           {/* Agents IA */}
           <Card>
