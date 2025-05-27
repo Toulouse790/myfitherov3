@@ -5,16 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { 
-  activity, 
-  dumbbell, 
-  clock, 
-  chart-line, 
-  stopwatch,
-  arrow-up,
-  arrow-down
+  Activity, 
+  Dumbbell, 
+  Clock, 
+  TrendingUp, 
+  Timer,
+  ArrowUp
 } from 'lucide-react';
 import { useSportStats, useCurrentWorkout, useSportTracking } from '@/features/sport/tracking/hooks';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 
 const SportDashboard = () => {
   const { data: stats, isLoading: statsLoading } = useSportStats();
@@ -78,11 +77,11 @@ const SportDashboard = () => {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1">
-                  <clock className="h-4 w-4" />
+                  <Clock className="h-4 w-4" />
                   <span className="text-sm">{Math.floor(currentWorkout.duration)} min</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <activity className="h-4 w-4" />
+                  <Activity className="h-4 w-4" />
                   <span className="text-sm">{currentWorkout.caloriesBurned} cal</span>
                 </div>
               </div>
@@ -111,12 +110,12 @@ const SportDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Séances totales</CardTitle>
-            <dumbbell className="h-4 w-4 text-muted-foreground" />
+            <Dumbbell className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalWorkouts || 0}</div>
             <div className="flex items-center text-xs text-muted-foreground">
-              <arrow-up className="h-3 w-3 mr-1" />
+              <ArrowUp className="h-3 w-3 mr-1" />
               +{stats?.currentStreak || 0} cette semaine
             </div>
           </CardContent>
@@ -125,7 +124,7 @@ const SportDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Temps total</CardTitle>
-            <stopwatch className="h-4 w-4 text-muted-foreground" />
+            <Timer className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{Math.floor((stats?.totalDuration || 0) / 60)}h</div>
@@ -138,7 +137,7 @@ const SportDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Calories brûlées</CardTitle>
-            <activity className="h-4 w-4 text-muted-foreground" />
+            <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalCalories || 0}</div>
@@ -151,7 +150,7 @@ const SportDashboard = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Streak actuel</CardTitle>
-            <chart-line className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.currentStreak || 0} jours</div>
