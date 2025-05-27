@@ -110,6 +110,10 @@
     content: '';
   }
 
+  .hover-grow {
+    @apply hover:scale-105 transition-transform duration-300;
+  }
+
   /* Couleurs thématiques */
   .fitness-primary {
     @apply text-fitness-primary border-fitness-primary/20 bg-fitness-primary/5;
