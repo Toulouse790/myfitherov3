@@ -52,11 +52,19 @@ export function BottomNavigation() {
   const location = useLocation();
 
   const handleNavigation = (path: string) => {
-    // Feedback tactile pour mobile
-    if (navigator.vibrate) {
-      navigator.vibrate(30);
+    // Feedback tactile optimisé pour performance
+    if (navigator.vibrate && 'vibrate' in navigator) {
+      try {
+        navigator.vibrate(30);
+      } catch (e) {
+        // Ignore errors silencieusement
+      }
     }
-    navigate(path);
+    
+    // Navigation optimisée avec transition
+    requestAnimationFrame(() => {
+      navigate(path);
+    });
   };
 
   const isActive = (path: string) => {
@@ -75,12 +83,15 @@ export function BottomNavigation() {
               key={item.id}
               onClick={() => handleNavigation(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center min-w-0 flex-1 px-3 py-3 text-xs rounded-2xl transition-all duration-300 min-h-[64px] relative overflow-hidden",
-                "active:scale-95", // Feedback tactile
+                "flex flex-col items-center justify-center min-w-0 flex-1 px-3 py-3 text-xs rounded-2xl transition-all duration-200 min-h-[64px] relative overflow-hidden touch-manipulation",
+                "active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2", 
                 active 
-                  ? `${item.gradient} text-white shadow-lg scale-105` 
-                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/80"
+                  ? `${item.gradient} text-white shadow-lg scale-105 focus:ring-white` 
+                  : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/80 focus:ring-gray-300"
               )}
+              aria-label={item.label}
+              role="tab"
+              aria-selected={active}
             >
               {active && (
                 <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent" />
@@ -90,7 +101,7 @@ export function BottomNavigation() {
                 <Icon 
                   size={22} 
                   className={cn(
-                    "transition-all duration-300",
+                    "transition-all duration-200",
                     active ? "scale-110 drop-shadow-sm" : "scale-100"
                   )} 
                 />
@@ -100,7 +111,7 @@ export function BottomNavigation() {
               </div>
               
               <span className={cn(
-                "font-medium transition-all duration-300 text-xs z-10 relative",
+                "font-medium transition-all duration-200 text-xs z-10 relative",
                 active ? "text-white font-semibold" : "text-gray-600"
               )}>
                 {item.label}

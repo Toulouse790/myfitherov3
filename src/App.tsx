@@ -1,88 +1,82 @@
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from "next-themes";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/hooks/useAuth";
-import { ConversationProvider } from "@/contexts/ConversationContext";
-import { usePerformanceMonitor } from "@/hooks/usePerformanceMonitor";
-import { useServiceWorker } from "@/hooks/useServiceWorker";
-import { advancedCache } from "@/services/AdvancedCacheService";
-import { bundleOptimizer } from "@/services/BundleOptimizer";
-import AppRoutes from "@/routes";
-import { useEffect } from "react";
+import React, { Suspense, useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from '@/components/ui/sonner';
+import { AppRoutes } from '@/routes';
+import { PerformanceOptimizer } from '@/components/ui/PerformanceOptimizer';
+import { offlineManager } from '@/services/OfflineManager';
+import { bundleOptimizer } from '@/services/BundleOptimizer';
 
-const queryClient = new QueryClient();
+// Configuration optimisée du QueryClient
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000,   // 10 minutes (was cacheTime)
+      retry: (failureCount, error) => {
+        // Pas de retry si offline
+        if (!navigator.onLine) return false;
+        return failureCount < 2;
+      },
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: 'always'
+    }
+  }
+});
 
-// Composant pour initialiser tous les services de performance
-const PerformanceWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { getQuickStats } = usePerformanceMonitor();
-  const { isRegistered, isOnline, cacheStats } = useServiceWorker();
+// Composant de chargement optimisé
+const OptimizedLoader = () => (
+  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="flex flex-col items-center space-y-4">
+      <div className="w-8 h-8 border-4 border-fitness-primary border-t-transparent rounded-full animate-spin"></div>
+      <p className="text-gray-600 text-sm">Chargement optimisé...</p>
+    </div>
+  </div>
+);
 
+function App() {
   useEffect(() => {
-    // Initialise tous les services de performance
-    const initializeServices = async () => {
-      console.log('🚀 Initialisation des services de performance...');
+    // Initialisation des optimisations au démarrage
+    const initOptimizations = async () => {
+      console.log('🚀 Initialisation des optimisations...');
       
-      // Cache avancé
-      await advancedCache.init();
-      console.log('📊 Cache Stats:', advancedCache.getStats());
-
-      // Optimiseur de bundle - préchargement intelligent
-      await bundleOptimizer.preloadByPriority();
-      console.log('📦 Bundle Stats:', bundleOptimizer.getModuleStats());
-
-      // Service Worker automatiquement géré par useServiceWorker
-      if (isRegistered) {
-        console.log('🔧 Service Worker actif et opérationnel');
+      // Démarre le préchargement intelligent
+      try {
+        await bundleOptimizer.preloadByPriority();
+      } catch (error) {
+        console.warn('Erreur préchargement:', error);
       }
+      
+      // Nettoie les anciennes données offline
+      offlineManager.cleanupOldData();
+      
+      console.log('✅ Optimisations initialisées');
     };
 
-    initializeServices();
+    // Lance les optimisations avec un délai pour ne pas bloquer le rendu
+    const timer = setTimeout(initOptimizations, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
-    // Log des stats de performance toutes les minutes en mode dev
-    if (import.meta.env.DEV) {
-      const interval = setInterval(() => {
-        const performanceStats = getQuickStats();
-        const cacheStatsAdv = advancedCache.getStats();
-        const bundleStats = bundleOptimizer.getModuleStats();
-        
-        console.log('📊 Performance Dashboard:', { 
-          performance: performanceStats, 
-          advancedCache: cacheStatsAdv,
-          bundle: bundleStats,
-          serviceWorker: {
-            registered: isRegistered,
-            online: isOnline,
-            cacheEntries: cacheStats?.cacheCount || 0
-          }
-        });
-      }, 60000);
-
-      return () => clearInterval(interval);
-    }
-  }, [getQuickStats, isRegistered, isOnline, cacheStats]);
-
-  return <>{children}</>;
-};
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AuthProvider>
-          <ConversationProvider>
-            <PerformanceWrapper>
-              <AppRoutes />
-            </PerformanceWrapper>
-          </ConversationProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </ThemeProvider>
-  </QueryClientProvider>
-);
+  return (
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <Suspense fallback={<OptimizedLoader />}>
+          <PerformanceOptimizer />
+          <AppRoutes />
+          <Toaster 
+            position="top-center" 
+            expand={false}
+            richColors
+            closeButton
+            duration={3000}
+          />
+        </Suspense>
+      </Router>
+    </QueryClientProvider>
+  );
+}
 
 export default App;

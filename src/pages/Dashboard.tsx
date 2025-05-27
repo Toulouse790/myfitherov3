@@ -7,6 +7,8 @@ import { NutritionDashboardCard } from '@/components/dashboard/NutritionDashboar
 import { SleepDashboardCard } from '@/components/dashboard/SleepDashboardCard';
 import { AIDashboardCard } from '@/components/dashboard/AIDashboardCard';
 import { QuickActionsDashboardCard } from '@/components/dashboard/QuickActionsDashboardCard';
+import { ResponsiveContainer } from '@/components/layout/ResponsiveContainer';
+import { PerformanceOptimizer } from '@/components/ui/PerformanceOptimizer';
 import { SimpleAI, UserContext } from '@/services/SimpleAI';
 
 const Dashboard = () => {
@@ -32,23 +34,28 @@ const Dashboard = () => {
   const mainRecommendation = aiRecommendations[0];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <DashboardHeader />
+    <>
+      <PerformanceOptimizer />
+      <div className="min-h-screen bg-gray-50">
+        <DashboardHeader />
 
-      <main className="max-w-4xl mx-auto px-4 space-y-6 pb-6">
-        <SportDashboardCard stats={{ workout: todayStats.workout }} />
-        
-        <HydrationDashboardCard />
-        
-        <NutritionDashboardCard stats={{ nutrition: todayStats.nutrition }} />
-        
-        <SleepDashboardCard stats={{ sleep: todayStats.sleep }} />
-        
-        <AIDashboardCard recommendation={mainRecommendation} />
-        
-        <QuickActionsDashboardCard />
-      </main>
-    </div>
+        <ResponsiveContainer maxWidth="lg" padding="md">
+          <main className="space-y-6 pb-6">
+            <SportDashboardCard stats={{ workout: todayStats.workout }} />
+            
+            <HydrationDashboardCard />
+            
+            <NutritionDashboardCard stats={{ nutrition: todayStats.nutrition }} />
+            
+            <SleepDashboardCard stats={{ sleep: todayStats.sleep }} />
+            
+            <AIDashboardCard recommendation={mainRecommendation} />
+            
+            <QuickActionsDashboardCard />
+          </main>
+        </ResponsiveContainer>
+      </div>
+    </>
   );
 };
 
