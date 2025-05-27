@@ -3,7 +3,8 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Droplet, Plus, Minus, Target } from 'lucide-react';
+import { Droplet, Plus, Minus, Target, TrendingUp } from 'lucide-react';
+import { toast } from '@/components/ui/sonner';
 
 const HydrationModule = () => {
   const [currentHydration, setCurrentHydration] = useState(1800);
@@ -12,116 +13,159 @@ const HydrationModule = () => {
 
   const addWater = (amount: number) => {
     setCurrentHydration(prev => Math.min(prev + amount, targetHydration + 500));
+    
+    // Feedback visuel immédiat avec toast
+    toast.success(`💧 +${amount}ml ajoutés !`, {
+      description: `Total: ${((currentHydration + amount) / 1000).toFixed(1)}L`,
+      duration: 2000
+    });
   };
 
   const removeWater = (amount: number) => {
     setCurrentHydration(prev => Math.max(prev - amount, 0));
+    
+    toast.success(`Correction: -${amount}ml`, {
+      description: `Total: ${((currentHydration - amount) / 1000).toFixed(1)}L`,
+      duration: 2000
+    });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200 px-4 py-4 mb-6">
+    <div className="min-h-screen bg-gray-50 pb-safe">
+      <header className="bg-white border-b border-gray-200 px-4 py-4 mb-4 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-            💧 Module Hydratation
+          <h1 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            💧 Hydratation
           </h1>
-          <p className="text-sm text-gray-600">Suivez votre consommation d'eau quotidienne</p>
+          <p className="text-sm text-gray-600">Objectif quotidien</p>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 space-y-6">
-        {/* Hydratation principale */}
+      <main className="max-w-md mx-auto px-4 space-y-4">
+        {/* Hydratation principale - Mobile optimized */}
         <Card className="border-blue-200 bg-blue-50/50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Droplet className="h-6 w-6 text-blue-500" />
-              Hydratation du jour
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center">
-              <div className="text-4xl font-bold text-blue-600 mb-2">
+          <CardContent className="pt-6">
+            <div className="text-center mb-6">
+              <div className="text-5xl font-bold text-blue-600 mb-2">
                 {(currentHydration / 1000).toFixed(1)}L
               </div>
-              <div className="text-gray-600">
+              <div className="text-gray-600 text-lg">
                 / {(targetHydration / 1000).toFixed(1)}L objectif
               </div>
             </div>
             
-            <Progress value={progressPercentage} className="h-3" />
+            <Progress value={progressPercentage} className="h-4 mb-4" />
             
-            <div className="text-center text-sm text-gray-600">
+            <div className="text-center text-lg font-medium text-gray-700 mb-6">
               {progressPercentage >= 100 ? "🎉 Objectif atteint !" : `${Math.round(100 - progressPercentage)}% restant`}
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Actions rapides */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Actions rapides</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-medium">Ajouter</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" onClick={() => addWater(250)} className="flex-col h-auto py-3">
-                    <Plus size={16} />
-                    <span className="text-xs">250ml</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => addWater(500)} className="flex-col h-auto py-3">
-                    <Plus size={16} />
-                    <span className="text-xs">500ml</span>
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="font-medium">Retirer</h4>
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" onClick={() => removeWater(250)} className="flex-col h-auto py-3">
-                    <Minus size={16} />
-                    <span className="text-xs">250ml</span>
-                  </Button>
-                  <Button variant="outline" onClick={() => removeWater(500)} className="flex-col h-auto py-3">
-                    <Minus size={16} />
-                    <span className="text-xs">500ml</span>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Conseils */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Target className="h-5 w-5" />
-              Conseils hydratation
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            {/* Actions rapides - Boutons larges pour mobile */}
             <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                <span className="text-2xl">💡</span>
-                <div>
-                  <div className="font-medium">Buvez régulièrement</div>
-                  <div className="text-sm text-gray-600">Répartissez votre consommation tout au long de la journée</div>
-                </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  onClick={() => addWater(250)} 
+                  size="lg"
+                  className="h-16 text-lg font-semibold bg-blue-500 hover:bg-blue-600 active:scale-95 transition-all duration-150"
+                >
+                  <Plus size={24} className="mr-2" />
+                  250ml
+                </Button>
+                <Button 
+                  onClick={() => addWater(500)} 
+                  size="lg"
+                  className="h-16 text-lg font-semibold bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all duration-150"
+                >
+                  <Plus size={24} className="mr-2" />
+                  500ml
+                </Button>
               </div>
               
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                <span className="text-2xl">🏃‍♂️</span>
-                <div>
-                  <div className="font-medium">Après l'effort</div>
-                  <div className="text-sm text-gray-600">Hydratez-vous davantage après un entraînement</div>
-                </div>
+              <Button 
+                onClick={() => addWater(200)} 
+                variant="outline" 
+                size="lg"
+                className="w-full h-14 text-lg border-2 border-blue-300 hover:bg-blue-50 active:scale-95 transition-all duration-150"
+              >
+                <Droplet size={20} className="mr-2 text-blue-500" />
+                Verre d'eau (200ml)
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Actions de correction */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg">Correction rapide</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 gap-3">
+              <Button 
+                variant="outline" 
+                onClick={() => removeWater(250)} 
+                size="lg"
+                className="h-12 border-red-200 hover:bg-red-50 active:scale-95 transition-all duration-150"
+              >
+                <Minus size={20} className="mr-1 text-red-500" />
+                -250ml
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => removeWater(500)} 
+                size="lg"
+                className="h-12 border-red-200 hover:bg-red-50 active:scale-95 transition-all duration-150"
+              >
+                <Minus size={20} className="mr-1 text-red-500" />
+                -500ml
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Motivation mobile-friendly */}
+        <Card className="bg-gradient-to-r from-blue-50 to-cyan-50 border-blue-200">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-3xl mb-3">
+                {progressPercentage >= 100 ? "🏆" : progressPercentage >= 75 ? "🔥" : "💪"}
+              </div>
+              <div className="font-medium text-blue-800 text-lg mb-2">
+                {progressPercentage >= 100 
+                  ? "Bravo ! Objectif atteint !" 
+                  : progressPercentage >= 75 
+                  ? "Excellent rythme !"
+                  : "Continuez, vous y êtes presque !"}
+              </div>
+              <div className="text-sm text-blue-600">
+                Votre corps vous remerciera
               </div>
             </div>
           </CardContent>
         </Card>
+
+        {/* Conseils tactiles */}
+        <div className="grid grid-cols-1 gap-3">
+          <div className="bg-white rounded-xl p-4 border border-gray-200 active:bg-gray-50 transition-colors">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">💡</span>
+              <div>
+                <div className="font-medium text-gray-900">Rappel intelligent</div>
+                <div className="text-sm text-gray-600">Buvez toutes les heures</div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl p-4 border border-gray-200 active:bg-gray-50 transition-colors">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🏃‍♂️</span>
+              <div>
+                <div className="font-medium text-gray-900">Après l'effort</div>
+                <div className="text-sm text-gray-600">+500ml recommandés</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );

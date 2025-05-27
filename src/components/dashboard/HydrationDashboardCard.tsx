@@ -16,13 +16,20 @@ export function HydrationDashboardCard() {
   const quickAddWater = async (amount: number) => {
     const success = await addHydration(amount);
     if (success) {
+      // Feedback tactile et visuel immédiat
+      if (navigator.vibrate) {
+        navigator.vibrate(50); // Vibration légère
+      }
+      
       if (percentage >= 100) {
         toast.success(`🎯 Objectif dépassé ! +${amount}ml`, {
-          description: 'Vous êtes au top de votre forme !'
+          description: 'Vous êtes au top de votre forme !',
+          duration: 3000
         });
       } else {
         toast.success(`💧 +${amount}ml ajoutés`, {
-          description: `Plus que ${Math.round((remaining - amount) / 100) * 100}ml pour votre objectif`
+          description: `Plus que ${Math.round((remaining - amount) / 100) * 100}ml pour votre objectif`,
+          duration: 2000
         });
       }
     }
@@ -37,7 +44,7 @@ export function HydrationDashboardCard() {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-all duration-200 active:scale-[0.98]">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2">
           <Droplet className="h-5 w-5 text-blue-500" />
@@ -49,8 +56,8 @@ export function HydrationDashboardCard() {
       <CardContent className="space-y-4">
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
-            <span>{getMessage()}</span>
-            <span className="font-medium">
+            <span className="font-medium">{getMessage()}</span>
+            <span className="font-bold text-blue-600">
               {stats.dailyIntake} / {stats.dailyTarget} ml
             </span>
           </div>
@@ -58,34 +65,33 @@ export function HydrationDashboardCard() {
           <Progress value={percentage} className="h-3" />
         </div>
         
-        <div className="grid grid-cols-2 gap-2">
+        {/* Boutons tactiles optimisés */}
+        <div className="grid grid-cols-2 gap-3">
           <Button 
             onClick={() => quickAddWater(200)} 
-            variant="outline" 
-            size="sm"
-            className="hover:bg-blue-50"
+            size="lg"
+            className="h-12 bg-blue-500 hover:bg-blue-600 active:scale-95 transition-all duration-150 font-semibold"
           >
-            <Droplet className="h-4 w-4 mr-1 text-blue-500" />
+            <Droplet className="h-5 w-5 mr-2" />
             +200ml
           </Button>
           <Button 
             onClick={() => quickAddWater(500)} 
-            variant="outline" 
-            size="sm"
-            className="hover:bg-blue-50"
+            size="lg"
+            className="h-12 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all duration-150 font-semibold"
           >
-            <Droplet className="h-4 w-4 mr-1 text-blue-500" />
+            <Droplet className="h-5 w-5 mr-2" />
             +500ml
           </Button>
         </div>
         
         {percentage < 40 && (
-          <div className="text-center p-3 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-lg border border-blue-100">
-            <Sun className="h-5 w-5 text-blue-500 mx-auto mb-2" />
-            <p className="text-sm text-blue-700 font-medium">
+          <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
+            <Sun className="h-6 w-6 text-blue-500 mx-auto mb-2" />
+            <p className="text-sm text-blue-700 font-medium mb-1">
               Pensez à vous hydrater régulièrement
             </p>
-            <p className="text-xs text-blue-600 mt-1">
+            <p className="text-xs text-blue-600">
               Votre corps vous remerciera !
             </p>
           </div>

@@ -47,6 +47,10 @@ export function BottomNavigation() {
   const location = useLocation();
 
   const handleNavigation = (path: string) => {
+    // Feedback tactile pour mobile
+    if (navigator.vibrate) {
+      navigator.vibrate(30);
+    }
     navigate(path);
   };
 
@@ -66,27 +70,28 @@ export function BottomNavigation() {
               key={item.id}
               onClick={() => handleNavigation(item.path)}
               className={cn(
-                "flex flex-col items-center justify-center min-w-0 flex-1 px-1 py-2 text-xs rounded-lg transition-all duration-200",
+                "flex flex-col items-center justify-center min-w-0 flex-1 px-2 py-3 text-xs rounded-xl transition-all duration-200 min-h-[56px]",
+                "active:scale-95 active:bg-gray-100", // Feedback tactile
                 active 
-                  ? "text-primary bg-primary/10" 
+                  ? "text-primary bg-primary/10 scale-105" 
                   : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
               )}
             >
               <div className="relative mb-1">
                 <Icon 
-                  size={20} 
+                  size={22} 
                   className={cn(
                     "transition-all duration-200",
                     active ? "scale-110" : "scale-100"
                   )} 
                 />
                 {active && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-primary rounded-full" />
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
                 )}
               </div>
               <span className={cn(
-                "font-medium transition-all duration-200",
-                active ? "text-primary" : "text-gray-600"
+                "font-medium transition-all duration-200 text-xs",
+                active ? "text-primary font-semibold" : "text-gray-600"
               )}>
                 {item.label}
               </span>
