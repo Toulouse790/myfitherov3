@@ -22,8 +22,8 @@ export class ValidationUtils {
   }
 
   static calculateConfidence(rec: Recommendation): number {
-    if (rec.riskLevel === 'warning') return 85;
-    if (rec.riskLevel === 'caution') return 75;
+    if (rec.priority === 'high') return 85;
+    if (rec.priority === 'medium') return 75;
     return 70;
   }
 }

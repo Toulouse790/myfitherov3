@@ -31,13 +31,12 @@ export class SportRecommendationGenerator {
 
     if (temperature > 35) {
       recommendations.push({
-        type: 'warning',
+        type: 'info',
         title: '🌡️ Conditions chaudes',
         message: `Il fait ${temperature}°C. Privilégiez un entraînement en intérieur avec climatisation.`,
         alternatives: ['Salle de sport', 'Yoga à la maison', 'Natation en piscine couverte'],
         icon: '🏠',
-        priority: 'high',
-        riskLevel: 'warning'
+        priority: 'high'
       });
     } else if (temperature > 30) {
       recommendations.push({
@@ -46,8 +45,7 @@ export class SportRecommendationGenerator {
         message: `Il fait ${temperature}°C. Réduisez l'intensité et hydratez-vous davantage.`,
         action: 'adjust_intensity',
         icon: '💧',
-        priority: 'medium',
-        riskLevel: 'caution'
+        priority: 'medium'
       });
     } else if (temperature > 25) {
       recommendations.push({
@@ -55,8 +53,7 @@ export class SportRecommendationGenerator {
         title: '☀️ Temps agréable',
         message: 'Parfait pour l\'entraînement ! Pensez à vous hydrater régulièrement.',
         icon: '💧',
-        priority: 'low',
-        riskLevel: 'safe'
+        priority: 'low'
       });
     } else if (temperature < 0) {
       recommendations.push({
@@ -65,8 +62,7 @@ export class SportRecommendationGenerator {
         message: `Il fait ${temperature}°C. Privilégiez un entraînement en intérieur aujourd'hui.`,
         alternatives: ['Salle de sport', 'Fitness à domicile', 'Yoga'],
         icon: '🏠',
-        priority: 'medium',
-        riskLevel: 'caution'
+        priority: 'medium'
       });
     } else if (temperature < 5) {
       recommendations.push({
@@ -75,8 +71,7 @@ export class SportRecommendationGenerator {
         message: `Il fait ${temperature}°C. Prolongez votre échauffement de 5-10 minutes.`,
         action: 'extend_warmup',
         icon: '🔥',
-        priority: 'medium',
-        riskLevel: 'safe'
+        priority: 'medium'
       });
     }
 
@@ -94,18 +89,16 @@ export class SportRecommendationGenerator {
         message: 'Privilégiez un entraînement en intérieur aujourd\'hui.',
         alternatives: ['Yoga', 'Pilates', 'Musculation', 'Cardio indoor'],
         icon: '🏠',
-        priority: 'medium',
-        riskLevel: 'safe'
+        priority: 'medium'
       });
     } else if (condition === 'Thunderstorm') {
       recommendations.push({
-        type: 'warning',
+        type: 'info',
         title: '⛈️ Orage en cours',
         message: 'Évitez les activités extérieures. Privilégiez un entraînement en intérieur.',
         alternatives: ['Méditation', 'Étirements', 'Exercices de respiration', 'Yoga'],
         icon: '🏠',
-        priority: 'high',
-        riskLevel: 'warning'
+        priority: 'high'
       });
     } else if (condition === 'Clear' && temperature >= 15 && temperature <= 25) {
       recommendations.push({
@@ -114,8 +107,7 @@ export class SportRecommendationGenerator {
         message: 'Temps idéal pour l\'entraînement en extérieur !',
         alternatives: ['Course à pied', 'Vélo', 'Randonnée', 'Exercices au parc'],
         icon: '🌟',
-        priority: 'low',
-        riskLevel: 'safe'
+        priority: 'low'
       });
     }
 
@@ -133,8 +125,7 @@ export class SportRecommendationGenerator {
         message: `Humidité à ${humidity}%. Réduisez l'intensité et prenez des pauses plus fréquentes.`,
         action: 'reduce_intensity',
         icon: '🌫️',
-        priority: 'medium',
-        riskLevel: 'caution'
+        priority: 'medium'
       });
     }
 
@@ -145,8 +136,7 @@ export class SportRecommendationGenerator {
         message: `Vent à ${windSpeed} km/h. Considérez un entraînement en intérieur.`,
         alternatives: ['Salle de sport', 'Exercices à domicile'],
         icon: '🏠',
-        priority: 'medium',
-        riskLevel: 'caution'
+        priority: 'medium'
       });
     }
 
@@ -162,8 +152,7 @@ export class SportRecommendationGenerator {
         title: '🎯 Conseil débutant',
         message: 'Commencez doucement et écoutez votre corps.',
         icon: '💡',
-        priority: 'medium',
-        riskLevel: 'safe'
+        priority: 'medium'
       });
     }
 

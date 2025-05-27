@@ -16,8 +16,7 @@ export class NutritionRecommendationGenerator {
         message: 'Augmentez votre consommation d\'eau par temps chaud.',
         alternatives: ['Eau citronnée', 'Thé glacé', 'Fruits gorgés d\'eau'],
         icon: '💧',
-        priority: 'medium',
-        riskLevel: 'safe'
+        priority: 'medium'
       });
 
       recommendations.push({
@@ -26,8 +25,7 @@ export class NutritionRecommendationGenerator {
         message: 'Privilégiez les aliments frais et légers.',
         alternatives: ['Salades', 'Fruits frais', 'Smoothies', 'Yaourts'],
         icon: '🌿',
-        priority: 'low',
-        riskLevel: 'safe'
+        priority: 'low'
       });
     } else if (temp < 10) {
       recommendations.push({
@@ -36,8 +34,7 @@ export class NutritionRecommendationGenerator {
         message: 'Optez pour des repas chauds et énergétiques.',
         alternatives: ['Soupes', 'Tisanes chaudes', 'Plats mijotés', 'Noix et fruits secs'],
         icon: '🔥',
-        priority: 'low',
-        riskLevel: 'safe'
+        priority: 'low'
       });
     }
 
@@ -49,8 +46,7 @@ export class NutritionRecommendationGenerator {
         message: 'Par temps pluvieux, misez sur des aliments riches en vitamine D.',
         alternatives: ['Poissons gras', 'Œufs', 'Champignons', 'Chocolat noir'],
         icon: '🌈',
-        priority: 'low',
-        riskLevel: 'safe'
+        priority: 'low'
       });
     }
 

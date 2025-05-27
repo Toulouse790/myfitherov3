@@ -38,8 +38,7 @@ export class SportAIExpert {
       title: '💡 Conseils adaptés',
       message: 'Recommandations personnalisées selon la météo.',
       icon: '🛡️',
-      priority: 'medium',
-      riskLevel: 'safe'
+      priority: 'medium'
     });
     
     return enrichedRecommendations;

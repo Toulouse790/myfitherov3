@@ -10,26 +10,28 @@ export class WeatherAnalyzer {
     const windSpeed = weather.wind?.speed || 0;
 
     let isIndoorRecommended = false;
-    let safetyLevel: 'safe' | 'caution' | 'warning' = 'safe';
+    let comfortLevel: 'excellent' | 'good' | 'moderate' = 'good';
 
     // Analyze conditions for indoor recommendation
     if (temp > 35 || temp < 0) {
       isIndoorRecommended = true;
-      safetyLevel = 'warning';
+      comfortLevel = 'moderate';
     } else if (temp > 30 || temp < 5 || windSpeed > 20) {
-      safetyLevel = 'caution';
+      comfortLevel = 'moderate';
+    } else if (temp >= 15 && temp <= 25 && humidity < 80) {
+      comfortLevel = 'excellent';
     }
 
     if (weatherCondition === 'Thunderstorm') {
       isIndoorRecommended = true;
-      safetyLevel = 'warning';
+      comfortLevel = 'moderate';
     } else if (weatherCondition === 'Rain') {
       isIndoorRecommended = true;
-      safetyLevel = 'caution';
+      comfortLevel = 'moderate';
     }
 
     if (humidity > 85) {
-      safetyLevel = safetyLevel === 'safe' ? 'caution' : safetyLevel;
+      comfortLevel = comfortLevel === 'excellent' ? 'good' : comfortLevel;
     }
 
     return {
@@ -38,7 +40,7 @@ export class WeatherAnalyzer {
       humidity,
       windSpeed,
       isIndoorRecommended,
-      safetyLevel
+      comfortLevel
     };
   }
 
