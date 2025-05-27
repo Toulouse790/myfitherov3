@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -7,77 +7,65 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%;
-    --foreground: 222 47% 11.2%;
+    --background: 250 250 250;
+    --foreground: 15 23 42;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 255 255 255;
+    --popover-foreground: 15 23 42;
 
-    --primary: 221.2 83% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 37 99 235;           /* Bleu énergie #2563eb */
+    --primary-foreground: 255 255 255;
 
-    --secondary: 142.1 76.2% 36.3%;
-    --secondary-foreground: 355.7 100% 97.3%;
+    --secondary: 241 245 249;
+    --secondary-foreground: 15 23 42;
 
-    --muted: 210 40% 93%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 248 250 252;
+    --muted-foreground: 100 116 139;
 
-    --accent: 24 100% 50%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 241 245 249;
+    --accent-foreground: 15 23 42;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 220 38 38;
+    --destructive-foreground: 255 255 255;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83% 53.3%;
+    --border: 226 232 240;
+    --input: 226 232 240;
+    --ring: 37 99 235;
 
     --radius: 1rem;
-    
-    /* Couleurs neon modernes */
-    --fitness-neon-blue: #00f5ff;
-    --fitness-neon-green: #39ff14;
-    --fitness-neon-purple: #bf00ff;
-    --fitness-neon-orange: #ff6600;
-    
-    /* Gradients 2025 */
-    --gradient-power: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    --gradient-energy: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    --gradient-fire: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    --background: 15 23 42;
+    --foreground: 248 250 252;
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 30 41 59;
+    --card-foreground: 248 250 252;
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 30 41 59;
+    --popover-foreground: 248 250 252;
 
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 59 130 246;
+    --primary-foreground: 15 23 42;
 
-    --secondary: 142.1 70.6% 45.3%;
-    --secondary-foreground: 144.9 80.4% 10%;
+    --secondary: 51 65 85;
+    --secondary-foreground: 248 250 252;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 51 65 85;
+    --muted-foreground: 148 163 184;
 
-    --accent: 21 90% 48%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 51 65 85;
+    --accent-foreground: 248 250 252;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 239 68 68;
+    --destructive-foreground: 15 23 42;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 51 65 85;
+    --input: 51 65 85;
+    --ring: 59 130 246;
   }
 }
 
@@ -87,88 +75,108 @@
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
-    font-family: 'Inter', sans-serif;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    font-variation-settings: 'opsz' 32;
   }
 
-  .neumorphic-card {
-    @apply bg-white rounded-2xl shadow-[5px_5px_15px_rgba(0,0,0,0.1),-5px_-5px_15px_rgba(255,255,255,0.8)];
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
   }
 
-  .neumorphic-card-dark {
-    @apply bg-gray-800 rounded-2xl shadow-[5px_5px_15px_rgba(0,0,0,0.5),-5px_-5px_15px_rgba(255,255,255,0.05)];
+  h1 { @apply text-3xl lg:text-4xl; }
+  h2 { @apply text-2xl lg:text-3xl; }
+  h3 { @apply text-xl lg:text-2xl; }
+  h4 { @apply text-lg lg:text-xl; }
+}
+
+/* Styles modernes pour les cards */
+@layer components {
+  .modern-card {
+    @apply bg-white rounded-xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300;
+  }
+
+  .modern-card-dark {
+    @apply bg-gray-800/50 border-gray-700/50 backdrop-blur-sm;
+  }
+
+  .gradient-card {
+    @apply relative overflow-hidden;
+  }
+
+  .gradient-card::before {
+    @apply absolute inset-0 opacity-5 bg-gradient-to-br from-current to-transparent;
+    content: '';
+  }
+
+  /* Couleurs thématiques */
+  .fitness-primary {
+    @apply text-fitness-primary border-fitness-primary/20 bg-fitness-primary/5;
+  }
+
+  .fitness-sport {
+    @apply text-fitness-sport border-fitness-sport/20 bg-fitness-sport/5;
+  }
+
+  .fitness-nutrition {
+    @apply text-fitness-nutrition border-fitness-nutrition/20 bg-fitness-nutrition/5;
+  }
+
+  .fitness-hydration {
+    @apply text-fitness-hydration border-fitness-hydration/20 bg-fitness-hydration/5;
+  }
+
+  .fitness-sleep {
+    @apply text-fitness-sleep border-fitness-sleep/20 bg-fitness-sleep/5;
+  }
+
+  /* Boutons thématiques */
+  .btn-sport {
+    @apply bg-gradient-sport hover:opacity-90 text-white border-0 shadow-lg;
+  }
+
+  .btn-nutrition {
+    @apply bg-gradient-nutrition hover:opacity-90 text-white border-0 shadow-lg;
+  }
+
+  .btn-hydration {
+    @apply bg-gradient-hydration hover:opacity-90 text-white border-0 shadow-lg;
+  }
+
+  .btn-sleep {
+    @apply bg-gradient-sleep hover:opacity-90 text-white border-0 shadow-lg;
   }
 }
 
-/* Glassmorphism effects */
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+/* Animations et effets visuels */
+.glass-effect {
+  @apply bg-white/80 backdrop-blur-md border border-white/20;
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+.gradient-text {
+  @apply bg-gradient-to-r from-fitness-primary to-fitness-nutrition bg-clip-text text-transparent;
 }
 
-/* Gradient animations */
-.gradient-flow {
-  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
-  background-size: 400% 400%;
-  animation: gradient-flow 15s ease infinite;
+.glow-effect {
+  @apply shadow-lg;
+  box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
 }
 
-@keyframes gradient-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+/* Responsive et accessibilité */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse-soft,
+  .animate-gradient-flow {
+    animation: none;
+  }
 }
 
-/* Pulse effect for live data */
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite alternate;
+/* Safe areas pour mobile */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 1rem);
 }
 
-@keyframes pulse-glow {
-  from { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); }
-  to { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.3); }
-}
-
-/* Floating animation */
-.float {
-  animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-/* Smooth hover grow */
-.hover-grow {
-  transition: transform 0.3s ease;
-}
-
-.hover-grow:hover {
-  transform: scale(1.05);
-}
-
-/* Classes utilitaires */
-.text-gradient {
-  background: var(--gradient-power);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.shadow-glow {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-}
-
-.border-glow {
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.1);
+.safe-area-pt {
+  padding-top: env(safe-area-inset-top, 1rem);
 }

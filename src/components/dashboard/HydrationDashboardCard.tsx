@@ -2,10 +2,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Droplet, Sun } from 'lucide-react';
+import { Droplet, Sun, Target } from 'lucide-react';
 import { useHydration } from '@/features/hydratation/hooks';
 import { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
+import { cn } from '@/lib/utils';
 
 export function HydrationDashboardCard() {
   const { stats, addHydration } = useHydration();
@@ -44,25 +45,44 @@ export function HydrationDashboardCard() {
   };
 
   return (
-    <Card className="hover:shadow-lg transition-all duration-200 active:scale-[0.98]">
+    <Card className="modern-card gradient-card fitness-hydration hover:glow-effect transition-all duration-300">
       <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2">
-          <Droplet className="h-5 w-5 text-blue-500" />
-          Hydratation
+        <CardTitle className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-hydration rounded-xl shadow-sm">
+            <Droplet className="h-5 w-5 text-white" />
+          </div>
+          <span className="text-fitness-hydration font-semibold">Hydratation</span>
         </CardTitle>
         <CardDescription>Votre progression du jour</CardDescription>
       </CardHeader>
       
       <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="font-medium">{getMessage()}</span>
-            <span className="font-bold text-blue-600">
-              {stats.dailyIntake} / {stats.dailyTarget} ml
-            </span>
+        <div className="space-y-3">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <span className="text-sm font-medium text-gray-700">{getMessage()}</span>
+              <div className="flex items-center gap-2">
+                <Target className="h-4 w-4 text-fitness-hydration" />
+                <span className="text-lg font-bold text-fitness-hydration">
+                  {stats.dailyIntake}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  / {stats.dailyTarget} ml
+                </span>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-2xl font-bold text-fitness-hydration">
+                {Math.round(percentage)}%
+              </div>
+              <div className="text-xs text-muted-foreground">complété</div>
+            </div>
           </div>
           
-          <Progress value={percentage} className="h-3" />
+          <Progress 
+            value={percentage} 
+            className="h-4 bg-fitness-hydration/10"
+          />
         </div>
         
         {/* Boutons tactiles optimisés */}
@@ -70,28 +90,28 @@ export function HydrationDashboardCard() {
           <Button 
             onClick={() => quickAddWater(200)} 
             size="lg"
-            className="h-12 bg-blue-500 hover:bg-blue-600 active:scale-95 transition-all duration-150 font-semibold"
+            className="h-14 btn-hydration font-semibold flex-col gap-1 active:scale-95 transition-all duration-150"
           >
-            <Droplet className="h-5 w-5 mr-2" />
-            +200ml
+            <Droplet className="h-5 w-5" />
+            <span>+200ml</span>
           </Button>
           <Button 
             onClick={() => quickAddWater(500)} 
             size="lg"
-            className="h-12 bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all duration-150 font-semibold"
+            className="h-14 btn-hydration font-semibold flex-col gap-1 active:scale-95 transition-all duration-150"
           >
-            <Droplet className="h-5 w-5 mr-2" />
-            +500ml
+            <Droplet className="h-5 w-5" />
+            <span>+500ml</span>
           </Button>
         </div>
         
         {percentage < 40 && (
-          <div className="text-center p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-100">
-            <Sun className="h-6 w-6 text-blue-500 mx-auto mb-2" />
-            <p className="text-sm text-blue-700 font-medium mb-1">
+          <div className="text-center p-4 bg-gradient-to-r from-fitness-hydration/5 to-fitness-hydration/10 rounded-xl border border-fitness-hydration/20">
+            <Sun className="h-6 w-6 text-fitness-hydration mx-auto mb-2" />
+            <p className="text-sm text-fitness-hydration font-medium mb-1">
               Pensez à vous hydrater régulièrement
             </p>
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-fitness-hydration/80">
               Votre corps vous remerciera !
             </p>
           </div>

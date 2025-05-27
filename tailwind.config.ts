@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
+					DEFAULT: '#2563eb', // Bleu énergie
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
@@ -63,18 +63,21 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Nouvelle palette moderne
 				fitness: {
-					blue: '#1E40AF',
-					green: '#059669',
-					orange: '#EA580C',
-					purple: '#7E22CE',
-					teal: '#0D9488'
+					primary: '#2563eb',    // Bleu énergie
+					sport: '#dc2626',      // Rouge passion
+					nutrition: '#16a34a',  // Vert nature
+					hydration: '#0891b2',  // Bleu cyan
+					sleep: '#7c3aed'       // Violet nuit
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: '1rem',        // Cards avec border-radius plus moderne
+				md: '0.75rem',
+				sm: '0.5rem',
+				xl: '1.25rem',
+				'2xl': '1.5rem'
 			},
 			keyframes: {
 				'accordion-down': {
@@ -100,6 +103,11 @@ export default {
 				'pulse-highlight': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8', backgroundColor: 'var(--highlight-bg)' }
+				},
+				'gradient-flow': {
+					'0%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' },
+					'100%': { backgroundPosition: '0% 50%' }
 				}
 			},
 			animation: {
@@ -108,7 +116,15 @@ export default {
 				'pulse-soft': 'pulse-soft 3s infinite ease-in-out',
 				'float': 'float 6s infinite ease-in-out',
 				'slide-in-from-bottom-5': 'slide-in-from-bottom-5 0.3s ease-out',
-				'pulse-highlight': 'pulse-highlight 2s ease-in-out'
+				'pulse-highlight': 'pulse-highlight 2s ease-in-out',
+				'gradient-flow': 'gradient-flow 3s ease infinite'
+			},
+			backgroundImage: {
+				'gradient-primary': 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+				'gradient-sport': 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+				'gradient-nutrition': 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)',
+				'gradient-hydration': 'linear-gradient(135deg, #0891b2 0%, #0e7490 100%)',
+				'gradient-sleep': 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
 			}
 		}
 	},
