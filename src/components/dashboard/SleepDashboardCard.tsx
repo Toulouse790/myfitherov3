@@ -17,7 +17,7 @@ export function SleepDashboardCard({ stats }: SleepDashboardCardProps) {
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
-      <span key={i} className={i < rating ? "text-yellow-500" : "text-gray-300"}>
+      <span key={i} className={i < rating ? "text-blue-500" : "text-gray-300"}>
         ⭐
       </span>
     ));
@@ -48,3 +48,4 @@ export function SleepDashboardCard({ stats }: SleepDashboardCardProps) {
     </Card>
   );
 }
+

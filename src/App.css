@@ -42,7 +42,7 @@
   color: #888;
 }
 
-/* Glassmorphism effects - sans jaune */
+/* Glassmorphism effects - palette fitness moderne */
 .glass-card {
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
@@ -56,7 +56,7 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Gradient animations - palette fitness moderne */
+/* Gradient animations - palette fitness moderne sans jaune */
 .gradient-flow {
   background: linear-gradient(-45deg, #2563eb, #dc2626, #16a34a, #0891b2);
   background-size: 400% 400%;
@@ -69,7 +69,7 @@
   100% { background-position: 0% 50%; }
 }
 
-/* Pulse effect for live data */
+/* Pulse effect for live data - bleu primaire */
 .pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite alternate;
 }
@@ -97,3 +97,4 @@
 .hover-grow:hover {
   transform: scale(1.05);
 }
+
