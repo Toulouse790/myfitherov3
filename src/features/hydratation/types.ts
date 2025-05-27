@@ -1,5 +1,5 @@
 
-// Types pour le module Hydratation
+// Types pour le module Hydratation - Version simplifiée et bienveillante
 export interface HydrationEntry {
   id: string;
   user_id: string;
@@ -31,7 +31,22 @@ export interface BiometricsProfile {
   height: number;
   gender: 'male' | 'female' | 'other';
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
-  medicalConditions?: string[];
+  preferences?: string[];
+}
+
+// Interface simplifiée pour les recommandations de bien-être
+export interface WellnessRecommendation {
+  suggestion: string;
+  confidence: number;
+  tips: string[];
+}
+
+// Interface pour les conseils d'hydratation positifs
+export interface HydrationAdvice {
+  message: string;
+  motivation: string;
+  nextSteps: string[];
+  encouragement?: string;
 }
 
 // Types pour l'interface avec l'IA Hydratation
@@ -46,4 +61,11 @@ export interface HydrationCreateGoal {
   user_id: string;
   daily_target_ml: number;
   is_active: boolean;
+}
+
+// Interface simple pour le suivi des habitudes
+export interface HydrationHabit {
+  type: 'morning' | 'afternoon' | 'evening';
+  completed: boolean;
+  streak: number;
 }
