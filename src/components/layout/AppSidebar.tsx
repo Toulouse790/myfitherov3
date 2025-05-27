@@ -27,6 +27,7 @@ import {
   Home,
   Dumbbell,
   Apple,
+  Scan,
   Moon,
   Trophy,
   MessageSquare,
@@ -100,6 +101,14 @@ export function AppSidebar({ children }: AppSidebarProps) {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
+                    <a href="/nutrition-hub">
+                      <Scan className="h-4 w-4" />
+                      <span>Nutrition Hub</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
                     <a href="/sleep">
                       <Moon className="h-4 w-4" />
                       <span>Sommeil</span>
@@ -162,3 +171,5 @@ export function AppSidebar({ children }: AppSidebarProps) {
     </Sidebar>
   )
 }
+
+export default AppSidebar;

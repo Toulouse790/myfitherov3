@@ -7,6 +7,7 @@ import WorkoutDetail from '@/pages/WorkoutDetail';
 import WorkoutSession from '@/pages/WorkoutSession';
 import SportTracker from '@/pages/SportTracker';
 import Nutrition from '@/pages/Nutrition';
+import NutritionHub from '@/pages/NutritionHub';
 import NutritionDetail from '@/pages/NutritionDetail';
 import Sleep from '@/pages/Sleep';
 import Achievements from '@/pages/Achievements';
@@ -52,6 +53,10 @@ export const router = createBrowserRouter([
   {
     path: "/nutrition",
     element: <Nutrition />,
+  },
+  {
+    path: "/nutrition-hub",
+    element: <NutritionHub />,
   },
   {
     path: "/nutrition/:id",
