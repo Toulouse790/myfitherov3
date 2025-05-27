@@ -3,7 +3,7 @@ import React, { Suspense, useEffect } from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import { AppRoutes } from '@/routes';
+import AppRoutes from '@/routes';
 import { PerformanceOptimizer } from '@/components/ui/PerformanceOptimizer';
 import { offlineManager } from '@/services/OfflineManager';
 import { bundleOptimizer } from '@/services/BundleOptimizer';
