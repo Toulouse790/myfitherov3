@@ -41,6 +41,11 @@ interface AppSidebarProps {
 export function AppSidebar({ children }: AppSidebarProps) {
   const { user, signOut } = useAuth();
 
+  // Extract user display name and avatar from user metadata or email
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
+  const avatarUrl = user?.user_metadata?.avatar_url;
+  const userInitials = displayName.charAt(0).toUpperCase();
+
   return (
     <Sidebar>
       <Sheet>
@@ -127,8 +132,8 @@ export function AppSidebar({ children }: AppSidebarProps) {
                   <SidebarMenuButton asChild>
                     <a href="/profile">
                       <Avatar className="mr-2 h-4 w-4">
-                        <AvatarImage src={user?.avatar_url} alt={user?.full_name || "Profile"} />
-                        <AvatarFallback>{user?.full_name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+                        <AvatarImage src={avatarUrl} alt={displayName} />
+                        <AvatarFallback>{userInitials}</AvatarFallback>
                       </Avatar>
                       <span>Profile</span>
                     </a>
