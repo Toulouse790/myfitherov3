@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Nouvelle palette moderne
+				// Nouvelle palette moderne SANS JAUNE
 				fitness: {
 					primary: '#2563eb',    // Bleu énergie
 					sport: '#dc2626',      // Rouge passion
