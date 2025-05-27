@@ -2,12 +2,23 @@
 import { Outlet } from 'react-router-dom';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 import { AppSidebar } from './AppSidebar';
+import { useAuth } from '@/hooks/useAuth';
 
 interface MainLayoutProps {
   children?: React.ReactNode;
 }
 
 export default function MainLayout({ children }: MainLayoutProps) {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full">

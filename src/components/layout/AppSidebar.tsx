@@ -40,7 +40,22 @@ interface AppSidebarProps {
 }
 
 export function AppSidebar({ children }: AppSidebarProps) {
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading } = useAuth();
+
+  // Si l'auth est en cours de chargement, on affiche un état de chargement
+  if (loading) {
+    return (
+      <Sidebar>
+        <div className="p-4">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+          </div>
+        </div>
+        {children}
+      </Sidebar>
+    );
+  }
 
   // Extract user display name and avatar from user metadata or email
   const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User';
@@ -134,36 +149,40 @@ export function AppSidebar({ children }: AppSidebarProps) {
               </SidebarMenu>
             </SidebarGroup>
 
-            <SidebarGroup>
-              <SidebarGroupLabel>Mon compte</SidebarGroupLabel>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href="/profile">
-                      <Avatar className="mr-2 h-4 w-4">
-                        <AvatarImage src={avatarUrl} alt={displayName} />
-                        <AvatarFallback>{userInitials}</AvatarFallback>
-                      </Avatar>
-                      <span>Profile</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild>
-                    <a href="/settings">
-                      <Settings className="h-4 w-4" />
-                      <span>Paramètres</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroup>
+            {user && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Mon compte</SidebarGroupLabel>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <a href="/profile">
+                        <Avatar className="mr-2 h-4 w-4">
+                          <AvatarImage src={avatarUrl} alt={displayName} />
+                          <AvatarFallback>{userInitials}</AvatarFallback>
+                        </Avatar>
+                        <span>Profile</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <a href="/settings">
+                        <Settings className="h-4 w-4" />
+                        <span>Paramètres</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+            )}
           </SidebarContent>
 
           <SidebarFooter>
-            <Button variant="outline" size="sm" className="w-full" onClick={() => signOut()}>
-              Se déconnecter
-            </Button>
+            {user && (
+              <Button variant="outline" size="sm" className="w-full" onClick={() => signOut()}>
+                Se déconnecter
+              </Button>
+            )}
           </SidebarFooter>
         </SheetContent>
       </Sheet>

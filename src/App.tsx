@@ -3,6 +3,7 @@ import React, { Suspense, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import AppRoutes from '@/routes';
+import { AuthProvider } from '@/hooks/useAuth';
 import { PerformanceOptimizer } from '@/components/ui/PerformanceOptimizer';
 import { offlineManager } from '@/services/OfflineManager';
 import { bundleOptimizer } from '@/services/BundleOptimizer';
@@ -60,19 +61,21 @@ function App() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <Suspense fallback={<OptimizedLoader />}>
-        <PerformanceOptimizer />
-        <AppRoutes />
-        <Toaster 
-          position="top-center" 
-          expand={false}
-          richColors
-          closeButton
-          duration={3000}
-        />
-      </Suspense>
-    </QueryClientProvider>
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <Suspense fallback={<OptimizedLoader />}>
+          <PerformanceOptimizer />
+          <AppRoutes />
+          <Toaster 
+            position="top-center" 
+            expand={false}
+            richColors
+            closeButton
+            duration={3000}
+          />
+        </Suspense>
+      </QueryClientProvider>
+    </AuthProvider>
   );
 }
 
