@@ -1,12 +1,10 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Droplet, Sun, Target } from 'lucide-react';
+import { Droplet } from 'lucide-react';
 import { useHydration } from '@/features/hydratation/hooks';
-import { useState } from 'react';
 import { toast } from '@/components/ui/sonner';
-import { cn } from '@/lib/utils';
 
 export function HydrationDashboardCard() {
   const { stats, addHydration } = useHydration();
@@ -19,103 +17,59 @@ export function HydrationDashboardCard() {
     if (success) {
       // Feedback tactile et visuel immédiat
       if (navigator.vibrate) {
-        navigator.vibrate(50); // Vibration légère
+        navigator.vibrate(30);
       }
       
-      if (percentage >= 100) {
-        toast.success(`🎯 Objectif dépassé ! +${amount}ml`, {
-          description: 'Vous êtes au top de votre forme !',
-          duration: 3000
-        });
-      } else {
-        toast.success(`💧 +${amount}ml ajoutés`, {
-          description: `Plus que ${Math.round((remaining - amount) / 100) * 100}ml pour votre objectif`,
-          duration: 2000
-        });
-      }
+      toast.success(`💧 +${amount}ml ajoutés`, {
+        description: remaining <= amount ? 'Objectif atteint !' : `Plus que ${Math.round((remaining - amount) / 100) * 100}ml`,
+        duration: 2000
+      });
     }
   };
 
-  const getMessage = () => {
-    if (percentage >= 100) return "🎉 Objectif atteint ! Bravo !";
-    if (percentage >= 80) return "🔥 Presque au but, continuez !";
-    if (percentage >= 60) return "💪 Bon rythme, restez motivé !";
-    if (percentage >= 40) return "⭐ En bonne voie, continuez !";
-    return `💧 Plus que ${Math.round(remaining/1000*10)/10}L à boire aujourd'hui`;
-  };
-
   return (
-    <Card className="modern-card gradient-card fitness-hydration hover:glow-effect transition-all duration-300">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-3">
-          <div className="p-2 bg-gradient-hydration rounded-xl shadow-sm">
-            <Droplet className="h-5 w-5 text-white" />
-          </div>
-          <span className="text-fitness-hydration font-semibold">Hydratation</span>
-        </CardTitle>
-        <CardDescription>Votre progression du jour</CardDescription>
+    <Card className="hover:shadow-md transition-all border-blue-200 bg-blue-50/30">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-600">Hydratation</CardTitle>
+        <div className="p-2 bg-blue-50 rounded-lg">
+          <Droplet className="h-4 w-4 text-blue-600" />
+        </div>
       </CardHeader>
       
-      <CardContent className="space-y-4">
-        <div className="space-y-3">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <span className="text-sm font-medium text-gray-700">{getMessage()}</span>
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-fitness-hydration" />
-                <span className="text-lg font-bold text-fitness-hydration">
-                  {stats.dailyIntake}
-                </span>
-                <span className="text-sm text-muted-foreground">
-                  / {stats.dailyTarget} ml
-                </span>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-fitness-hydration">
-                {Math.round(percentage)}%
-              </div>
-              <div className="text-xs text-muted-foreground">complété</div>
-            </div>
+      <CardContent className="space-y-3">
+        <div className="space-y-2">
+          <div className="text-2xl font-bold text-gray-900">{stats.dailyIntake}</div>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>
+              {remaining > 0 
+                ? `${(remaining/1000).toFixed(1)}L restant` 
+                : 'Objectif atteint !'
+              }
+            </span>
+            <span>{stats.dailyTarget} ml</span>
           </div>
           
-          <Progress 
-            value={percentage} 
-            className="h-4 bg-fitness-hydration/10"
-          />
+          <Progress value={percentage} className="h-2 bg-blue-100" />
         </div>
         
-        {/* Boutons tactiles optimisés */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2">
           <Button 
             onClick={() => quickAddWater(200)} 
-            size="lg"
-            className="h-14 btn-hydration font-semibold flex-col gap-1 active:scale-95 transition-all duration-150"
+            variant="outline" 
+            size="sm"
+            className="text-xs h-8"
           >
-            <Droplet className="h-5 w-5" />
-            <span>+200ml</span>
+            +200ml
           </Button>
           <Button 
             onClick={() => quickAddWater(500)} 
-            size="lg"
-            className="h-14 btn-hydration font-semibold flex-col gap-1 active:scale-95 transition-all duration-150"
+            variant="outline" 
+            size="sm"
+            className="text-xs h-8"
           >
-            <Droplet className="h-5 w-5" />
-            <span>+500ml</span>
+            +500ml
           </Button>
         </div>
-        
-        {percentage < 40 && (
-          <div className="text-center p-4 bg-gradient-to-r from-fitness-hydration/5 to-fitness-hydration/10 rounded-xl border border-fitness-hydration/20">
-            <Sun className="h-6 w-6 text-fitness-hydration mx-auto mb-2" />
-            <p className="text-sm text-fitness-hydration font-medium mb-1">
-              Pensez à vous hydrater régulièrement
-            </p>
-            <p className="text-xs text-fitness-hydration/80">
-              Votre corps vous remerciera !
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
