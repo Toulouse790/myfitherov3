@@ -1,11 +1,11 @@
 
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Index from '@/pages/Index';
 import Dashboard from '@/pages/Dashboard';
 import Workout from '@/pages/Workout';
 import WorkoutDetail from '@/pages/WorkoutDetail';
 import WorkoutSession from '@/pages/WorkoutSession';
-import SportTracker from '@/pages/SportTracker'; // Nouvelle import
+import SportTracker from '@/pages/SportTracker';
 import Nutrition from '@/pages/Nutrition';
 import NutritionDetail from '@/pages/NutritionDetail';
 import Sleep from '@/pages/Sleep';
@@ -46,7 +46,7 @@ export const router = createBrowserRouter([
     element: <WorkoutSession />,
   },
   {
-    path: "/sport-tracker", // Nouvelle route
+    path: "/sport-tracker",
     element: <SportTracker />,
   },
   {
@@ -102,3 +102,9 @@ export const router = createBrowserRouter([
     element: <NotFound />,
   }
 ]);
+
+const AppRoutes = () => {
+  return <RouterProvider router={router} />;
+};
+
+export default AppRoutes;

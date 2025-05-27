@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { clock, activity, dumbbell } from 'lucide-react';
+import { Clock, Activity, Dumbbell } from 'lucide-react';
 import { useWorkoutHistory } from '@/features/sport/tracking/hooks';
 import { WorkoutTracking } from '@/features/sport/tracking/types';
 
@@ -74,7 +74,7 @@ const WorkoutHistory = () => {
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">
-            <dumbbell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <Dumbbell className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">Aucune séance enregistrée</h3>
             <p className="text-muted-foreground">
               Démarrez votre première séance pour voir vos progrès !
@@ -124,7 +124,7 @@ const WorkoutHistory = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <clock className="h-4 w-4 text-muted-foreground" />
+                    <Clock className="h-4 w-4 text-muted-foreground" />
                     <span>{workout.duration} min</span>
                   </div>
                 </TableCell>
@@ -135,7 +135,7 @@ const WorkoutHistory = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <activity className="h-4 w-4 text-muted-foreground" />
+                    <Activity className="h-4 w-4 text-muted-foreground" />
                     <span>{workout.caloriesBurned}</span>
                   </div>
                 </TableCell>
