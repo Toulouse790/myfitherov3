@@ -8,5 +8,5 @@ export * from './services';
 export { HydrationDashboardCard } from '@/components/dashboard/HydrationDashboardCard';
 export { SimpleHydrationCard } from '@/components/dashboard/SimpleHydrationCard';
 
-// Exportation de l'IA simple
-export { SimpleHydrationAI } from './ai-integration';
+// Exportation de l'IA simple (hook)
+export { useHydrationAI } from './ai-integration';
