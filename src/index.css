@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
@@ -110,8 +111,38 @@
   h4 { @apply text-lg lg:text-xl; }
 }
 
-/* Styles modernes pour les cards */
+/* FORCE OVERRIDE - Suppression totale du jaune du sidebar */
 @layer components {
+  /* Override spécifique pour le sidebar */
+  [data-sidebar="sidebar"] {
+    background-color: rgb(255 255 255) !important;
+    background: rgb(255 255 255) !important;
+  }
+
+  .dark [data-sidebar="sidebar"] {
+    background-color: rgb(30 41 59) !important;
+    background: rgb(30 41 59) !important;
+  }
+
+  /* Override pour tous les éléments avec bg-sidebar */
+  .bg-sidebar {
+    background-color: rgb(255 255 255) !important;
+  }
+
+  .dark .bg-sidebar {
+    background-color: rgb(30 41 59) !important;
+  }
+
+  /* Override pour le provider du sidebar */
+  .has-\[data-variant\=inset\]\:bg-sidebar {
+    background-color: rgb(255 255 255) !important;
+  }
+
+  .dark .has-\[data-variant\=inset\]\:bg-sidebar {
+    background-color: rgb(30 41 59) !important;
+  }
+
+  /* Styles modernes pour les cards */
   .modern-card {
     @apply bg-white rounded-xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300;
   }
