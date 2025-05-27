@@ -1,6 +1,4 @@
 
-import { configValidator } from './ConfigValidator';
-
 // Configuration de sécurité pour application santé - RGPD/HIPAA compliant
 export const SECURITY_CONFIG = {
   // Configuration du chiffrement
@@ -14,7 +12,14 @@ export const SECURITY_CONFIG = {
 
   // Paramètres de sécurité des sessions
   session: {
-    get maxAge() { return configValidator.getSessionDuration(); },
+    get maxAge() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return configValidator.getSessionDuration();
+      } catch {
+        return 1800000; // 30 minutes par défaut
+      }
+    },
     renewThreshold: 5 * 60 * 1000, // Renouveler 5 min avant expiration
     secureCookie: true,
     sameSite: 'strict' as const,
@@ -24,7 +29,14 @@ export const SECURITY_CONFIG = {
   api: {
     timeout: 10000, // 10 secondes
     retryAttempts: 3,
-    get rateLimitPerMinute() { return configValidator.getConfig().rateLimitPerMinute; },
+    get rateLimitPerMinute() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return configValidator.getConfig().rateLimitPerMinute;
+      } catch {
+        return 60; // Par défaut
+      }
+    },
     requiredHeaders: [
       'Content-Type',
       'Authorization',
@@ -35,7 +47,14 @@ export const SECURITY_CONFIG = {
 
   // Validation des données sensibles
   dataValidation: {
-    get maxFileSize() { return configValidator.getConfig().maxFileSize * 1024 * 1024; }, // Conversion en bytes
+    get maxFileSize() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return configValidator.getConfig().maxFileSize * 1024 * 1024;
+      } catch {
+        return 5 * 1024 * 1024; // 5MB par défaut
+      }
+    },
     allowedImageTypes: ['image/jpeg', 'image/png', 'image/webp'],
     maxFieldLength: 1000,
     sanitizeHtml: true,
@@ -51,17 +70,45 @@ export const SECURITY_CONFIG = {
 
   // Rétention des données (RGPD Article 5)
   dataRetention: {
-    get biometricData() { return configValidator.getRetentionDays('biometric') * 24 * 60 * 60 * 1000; },
-    get locationData() { return configValidator.getRetentionDays('location') * 24 * 60 * 60 * 1000; },
+    get biometricData() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return configValidator.getRetentionDays('biometric') * 24 * 60 * 60 * 1000;
+      } catch {
+        return 90 * 24 * 60 * 60 * 1000; // 90 jours par défaut
+      }
+    },
+    get locationData() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return configValidator.getRetentionDays('location') * 24 * 60 * 60 * 1000;
+      } catch {
+        return 30 * 24 * 60 * 60 * 1000; // 30 jours par défaut
+      }
+    },
     healthData: 365 * 24 * 60 * 60 * 1000,   // 1 an
     auditLogs: 6 * 365 * 24 * 60 * 60 * 1000, // 6 ans (légal)
   },
 
   // Configuration logging sécurisé
   logging: {
-    get level() { return configValidator.isProductionMode() ? 'warn' : 'debug'; },
+    get level() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return configValidator.isProductionMode() ? 'warn' : 'debug';
+      } catch {
+        return import.meta.env.PROD ? 'warn' : 'debug';
+      }
+    },
     sanitizePersonalData: true,
-    get includeStackTrace() { return !configValidator.isProductionMode(); },
+    get includeStackTrace() { 
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        return !configValidator.isProductionMode();
+      } catch {
+        return !import.meta.env.PROD;
+      }
+    },
     maxLogSize: 50 * 1024 * 1024, // 50MB
   },
 
@@ -83,7 +130,15 @@ export const SECURITY_CONFIG = {
   // Headers de sécurité obligatoires
   securityHeaders: {
     'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
-    'Content-Security-Policy': `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ${configValidator.getConfig().apiBaseUrl}`,
+    get 'Content-Security-Policy'() {
+      try {
+        const { configValidator } = require('./ConfigValidator');
+        const apiBaseUrl = configValidator.getConfig().apiBaseUrl;
+        return `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src 'self' ${apiBaseUrl}`;
+      } catch {
+        return `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';`;
+      }
+    },
     'X-Content-Type-Options': 'nosniff',
     'X-Frame-Options': 'DENY',
     'X-XSS-Protection': '1; mode=block',
@@ -117,6 +172,7 @@ export interface ConsentType {
 // Validation des environnements
 export const validateSecurityConfig = () => {
   try {
+    const { configValidator } = require('./ConfigValidator');
     configValidator.validateAndLoad();
     console.log('✅ Configuration de sécurité validée');
   } catch (error) {

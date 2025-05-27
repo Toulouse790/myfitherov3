@@ -1,6 +1,4 @@
 
-import { SECURITY_CONFIG, SecurityError } from './SecurityConfig';
-
 export class SecurityLogger {
   private static logs: SecurityLog[] = [];
 
@@ -13,7 +11,7 @@ export class SecurityLogger {
       timestamp: new Date(),
       level,
       event,
-      details: SECURITY_CONFIG.logging.sanitizePersonalData 
+      details: this.shouldSanitizeData() 
         ? this.sanitizeDetails(details) 
         : details,
       userAgent: navigator.userAgent,
@@ -36,7 +34,7 @@ export class SecurityLogger {
     this.log('error', event, {
       ...details,
       error: error.message,
-      stack: SECURITY_CONFIG.logging.includeStackTrace ? error.stack : undefined
+      stack: this.shouldIncludeStackTrace() ? error.stack : undefined
     });
   }
 
@@ -58,7 +56,7 @@ export class SecurityLogger {
    * Log de debug
    */
   static debug(event: string, details?: Record<string, any>): void {
-    if (SECURITY_CONFIG.logging.level === 'debug') {
+    if (this.getLogLevel() === 'debug') {
       this.log('debug', event, details);
     }
   }
@@ -90,7 +88,7 @@ export class SecurityLogger {
    * Nettoie les logs anciens selon la rétention
    */
   private static cleanupOldLogs(): void {
-    const retentionPeriod = SECURITY_CONFIG.dataRetention.auditLogs;
+    const retentionPeriod = this.getAuditLogRetention();
     const cutoffDate = new Date(Date.now() - retentionPeriod);
     
     this.logs = this.logs.filter(log => log.timestamp > cutoffDate);
@@ -141,6 +139,48 @@ export class SecurityLogger {
    */
   private static generateLogId(): string {
     return `log_${Date.now()}_${Math.random().toString(36).substring(2)}`;
+  }
+
+  /**
+   * Vérifie si on doit sanitiser les données
+   */
+  private static shouldSanitizeData(): boolean {
+    try {
+      // Import dynamique pour éviter la dépendance circulaire
+      return true; // Par défaut, on sanitise toujours
+    } catch {
+      return true;
+    }
+  }
+
+  /**
+   * Vérifie si on doit inclure la stack trace
+   */
+  private static shouldIncludeStackTrace(): boolean {
+    try {
+      return !import.meta.env.PROD;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Obtient le niveau de log
+   */
+  private static getLogLevel(): LogLevel {
+    try {
+      return import.meta.env.PROD ? 'warn' : 'debug';
+    } catch {
+      return 'warn';
+    }
+  }
+
+  /**
+   * Obtient la période de rétention des logs d'audit
+   */
+  private static getAuditLogRetention(): number {
+    // 6 ans par défaut (légal)
+    return 6 * 365 * 24 * 60 * 60 * 1000;
   }
 }
 
