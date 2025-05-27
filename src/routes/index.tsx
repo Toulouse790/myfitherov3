@@ -10,6 +10,7 @@ import Nutrition from '@/pages/Nutrition';
 import NutritionHub from '@/pages/NutritionHub';
 import NutritionDetail from '@/pages/NutritionDetail';
 import Sleep from '@/pages/Sleep';
+import HydrationModule from '@/pages/HydrationModule';
 import Achievements from '@/pages/Achievements';
 import Profile from '@/pages/Profile';
 import Settings from '@/pages/Settings';
@@ -21,6 +22,7 @@ import SimpleAI from '@/pages/SimpleAI';
 import Privacy from '@/pages/Privacy';
 import AdminDashboard from '@/pages/AdminDashboard';
 import NotFound from '@/pages/NotFound';
+import { BottomNavLayout } from '@/components/layout/BottomNavLayout';
 
 export const router = createBrowserRouter([
   {
@@ -29,7 +31,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <Dashboard />,
+    element: (
+      <BottomNavLayout>
+        <Dashboard />
+      </BottomNavLayout>
+    ),
   },
   {
     path: "/workout",
@@ -49,11 +55,19 @@ export const router = createBrowserRouter([
   },
   {
     path: "/sport-tracker",
-    element: <SportTracker />,
+    element: (
+      <BottomNavLayout>
+        <SportTracker />
+      </BottomNavLayout>
+    ),
   },
   {
     path: "/nutrition",
-    element: <Nutrition />,
+    element: (
+      <BottomNavLayout>
+        <Nutrition />
+      </BottomNavLayout>
+    ),
   },
   {
     path: "/nutrition-hub",
@@ -64,8 +78,20 @@ export const router = createBrowserRouter([
     element: <NutritionDetail />,
   },
   {
+    path: "/hydration",
+    element: (
+      <BottomNavLayout>
+        <HydrationModule />
+      </BottomNavLayout>
+    ),
+  },
+  {
     path: "/sleep",
-    element: <Sleep />,
+    element: (
+      <BottomNavLayout>
+        <Sleep />
+      </BottomNavLayout>
+    ),
   },
   {
     path: "/achievements",

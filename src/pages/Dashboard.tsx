@@ -35,7 +35,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-50">
       <DashboardHeader />
 
-      <main className="max-w-4xl mx-auto px-4 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 space-y-6 pb-6">
         <SportDashboardCard stats={{ workout: todayStats.workout }} />
         
         <HydrationDashboardCard />
