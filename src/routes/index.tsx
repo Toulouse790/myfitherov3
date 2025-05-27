@@ -17,6 +17,7 @@ import Login from '@/pages/Login';
 import Signup from '@/pages/Signup';
 import Onboarding from '@/pages/Onboarding';
 import Coach from '@/pages/Coach';
+import SimpleAI from '@/pages/SimpleAI';
 import Privacy from '@/pages/Privacy';
 import AdminDashboard from '@/pages/AdminDashboard';
 import NotFound from '@/pages/NotFound';
@@ -93,6 +94,10 @@ export const router = createBrowserRouter([
   {
     path: "/coach",
     element: <Coach />,
+  },
+  {
+    path: "/simple-ai",
+    element: <SimpleAI />,
   },
   {
     path: "/privacy",
