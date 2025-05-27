@@ -16,7 +16,15 @@ export const useOptimizedPerformance = () => {
     isOnline: navigator.onLine,
     loadTime: 0
   });
-  const location = useLocation();
+  
+  // Utilisation conditionnelle de useLocation pour éviter l'erreur
+  let location;
+  try {
+    location = useLocation();
+  } catch (error) {
+    // Si on n'est pas dans un contexte Router, on utilise null
+    location = null;
+  }
 
   // Optimisation mémoire automatique
   const optimizeMemory = useCallback(() => {
@@ -57,7 +65,7 @@ export const useOptimizedPerformance = () => {
     // Mesure après que le DOM soit chargé
     const timer = setTimeout(measureNavigation, 100);
     return () => clearTimeout(timer);
-  }, [location.pathname, optimizeMemory]);
+  }, [location?.pathname, optimizeMemory]);
 
   // Surveille l'utilisation mémoire
   useEffect(() => {
