@@ -3,11 +3,9 @@ import { useQuery } from '@tanstack/react-query';
 import { WeatherService } from '@/services/WeatherService';
 import { SportAIExpert } from '@/ai/SportAIExpert';
 import { useUserStore } from '@/stores/useUserStore';
-import { useCrossDomainValidator } from './useCrossDomainValidator';
 
 export const useWeatherRecommendations = (type: 'sport' | 'nutrition' = 'sport') => {
   const { profile } = useUserStore();
-  const { userProfile } = useCrossDomainValidator();
   
   return useQuery({
     queryKey: ['weather-recommendations', type, profile?.id],
@@ -15,29 +13,29 @@ export const useWeatherRecommendations = (type: 'sport' | 'nutrition' = 'sport')
       const weatherService = new WeatherService();
       const sportAI = new SportAIExpert();
       
-      console.log(`🌤️ Récupération des recommandations ${type} avec validation croisée...`);
+      console.log(`🌤️ Récupération des recommandations ${type}...`);
       
       const weather = await weatherService.getCurrentWeather();
       
-      // Enrichissement du profil utilisateur pour validation croisée
+      // Profil utilisateur simplifié
       const enrichedProfile = {
         level: profile?.experience_level as 'débutant' | 'intermédiaire' | 'avancé' || 'débutant',
         preferences: profile?.preferences || [],
         goals: profile?.goals || [],
-        age: profile?.age || userProfile.age,
-        medicalConditions: profile?.medical_conditions || userProfile.medicalConditions,
-        currentMedications: profile?.current_medications || userProfile.currentMedications,
-        fitnessLevel: profile?.experience_level || userProfile.fitnessLevel
+        age: profile?.age || 30,
+        medicalConditions: profile?.medical_conditions || [],
+        currentMedications: profile?.current_medications || [],
+        fitnessLevel: profile?.experience_level || 'débutant'
       };
       
       if (type === 'sport') {
-        console.log('🏃‍♂️ Génération recommandations sport avec CrossDomainValidator...');
+        console.log('🏃‍♂️ Génération recommandations sport...');
         return {
           weather,
           recommendations: sportAI.generateWeatherRecommendations(weather, enrichedProfile)
         };
       } else {
-        console.log('🍎 Génération recommandations nutrition avec CrossDomainValidator...');
+        console.log('🍎 Génération recommandations nutrition...');
         return {
           weather,
           recommendations: sportAI.generateNutritionRecommendations(weather, enrichedProfile)

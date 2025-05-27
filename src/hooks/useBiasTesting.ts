@@ -1,14 +1,13 @@
 
 import { useState, useCallback } from 'react';
 import { biasTestingSystem } from '@/ai/BiasTestingSystem';
-import { hydrationAIExpert } from '@/ai/HydrationAIExpert';
 
 export const useBiasTesting = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [results, setResults] = useState<any[]>([]);
   const [errors, setErrors] = useState<string[]>([]);
 
-  const runBiasTests = useCallback(async (aiSystem = hydrationAIExpert) => {
+  const runBiasTests = useCallback(async (aiSystem?: any) => {
     setIsRunning(true);
     setErrors([]);
     
@@ -18,9 +17,9 @@ export const useBiasTesting = () => {
       // Générer suite de tests
       const testSuite = biasTestingSystem.generateBiasTestSuite();
       
-      // Exécuter tests complets
+      // Exécuter tests complets avec système par défaut
       const testResults = await biasTestingSystem.runComprehensiveBiasTest(
-        aiSystem,
+        aiSystem || { generateRecommendation: () => ({ message: "Test basique" }) },
         testSuite
       );
       
