@@ -10,36 +10,29 @@ export class MessageService extends BaseService {
    */
   static async saveMessage(message: Message): Promise<boolean> {
     try {
-      // Pour les messages utilisateur, mettre à jour le contenu de la conversation
-      if (message.sender === 'user') {
-        const { error } = await supabase
-          .from('ai_conversations')
-          .update({ 
-            content: message.content,
-            metadata: { ...message.metadata, type_demande: message.type_demande }
-          })
-          .eq('id', message.thread_id);
+      // Sauvegarder le message dans ai_messages
+      const { error } = await supabase
+        .from('ai_messages')
+        .insert({
+          conversation_id: message.thread_id,
+          role: message.sender,
+          content: message.content,
+          metadata: message.metadata || {}
+        });
           
-        if (error) {
-          console.error('Erreur sauvegarde message utilisateur:', error);
-          return false;
-        }
-      } 
-      // Pour les messages assistant, mettre à jour la réponse de la conversation
-      else if (message.sender === 'assistant') {
-        const { error } = await supabase
-          .from('ai_conversations')
-          .update({ 
-            response: message.content,
-            metadata: message.metadata
-          })
-          .eq('id', message.thread_id);
-          
-        if (error) {
-          console.error('Erreur sauvegarde message assistant:', error);
-          return false;
-        }
+      if (error) {
+        console.error('Erreur sauvegarde message:', error);
+        return false;
       }
+
+      // Mettre à jour la conversation
+      await supabase
+        .from('ai_conversations')
+        .update({ 
+          last_message_at: new Date().toISOString(),
+          total_messages: supabase.rpc('increment_total_messages', { conversation_id: message.thread_id })
+        })
+        .eq('id', message.thread_id);
 
       // Envoi optionnel à l'API externe
       if (API_CONFIG.ENABLE_EXTERNAL_API) {

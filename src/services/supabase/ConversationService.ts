@@ -10,7 +10,6 @@ export class ConversationService extends BaseService {
    */
   static async getUserConversations(userId: string): Promise<Conversation[]> {
     try {
-      // Vérifiez si la table "ai_conversations" existe dans votre base de données
       const { data, error } = await supabase
         .from('ai_conversations')
         .select('*')
@@ -26,7 +25,7 @@ export class ConversationService extends BaseService {
       const conversations: Conversation[] = data.map(conv => ({
         thread_id: conv.id,
         user_id: conv.user_id,
-        title: conv.content.substring(0, 30) + '...',
+        title: conv.title || (conv.summary ? conv.summary.substring(0, 30) + '...' : 'Conversation'),
         status: 'active',
         created_at: conv.created_at,
         updated_at: conv.created_at
@@ -45,14 +44,13 @@ export class ConversationService extends BaseService {
   private static getMockConversations(userId: string): Conversation[] {
     console.log(`Génération de conversations mock pour l'utilisateur ${userId}`);
     
-    // Pour l'instant, retourne des données mock
     const mockConversations: Conversation[] = [
       {
         thread_id: `thread_${Date.now()}_mock1`,
         user_id: userId,
         title: 'Conversation sur la nutrition',
         status: 'active',
-        created_at: new Date(Date.now() - 86400000).toISOString(), // Hier
+        created_at: new Date(Date.now() - 86400000).toISOString(),
         updated_at: new Date().toISOString()
       },
       {
@@ -60,7 +58,7 @@ export class ConversationService extends BaseService {
         user_id: userId,
         title: 'Programme d\'entraînement',
         status: 'active',
-        created_at: new Date(Date.now() - 172800000).toISOString(), // Avant-hier
+        created_at: new Date(Date.now() - 172800000).toISOString(),
         updated_at: new Date(Date.now() - 86400000).toISOString()
       }
     ];
@@ -73,12 +71,11 @@ export class ConversationService extends BaseService {
    */
   static async getConversationMessages(threadId: string): Promise<Message[]> {
     try {
-      // Dans notre cas, nous n'avons qu'une seule ligne dans ai_conversations qui contient
-      // à la fois la question (content) et la réponse (response)
       const { data, error } = await supabase
-        .from('ai_conversations')
+        .from('ai_messages')
         .select('*')
-        .eq('id', threadId);
+        .eq('conversation_id', threadId)
+        .order('created_at', { ascending: true });
 
       if (error) {
         console.error('Erreur récupération messages:', error);
@@ -86,26 +83,15 @@ export class ConversationService extends BaseService {
       }
 
       if (data && data.length > 0) {
-        const conversation = data[0];
-        // Créer deux messages à partir de la conversation: question et réponse
-        const messages: Message[] = [
-          {
-            message_id: `msg_user_${conversation.id}`,
-            thread_id: conversation.id,
-            user_id: conversation.user_id,
-            sender: 'user',
-            content: conversation.content,
-            created_at: conversation.created_at
-          },
-          {
-            message_id: `msg_assistant_${conversation.id}`,
-            thread_id: conversation.id,
-            user_id: conversation.user_id,
-            sender: 'assistant',
-            content: conversation.response,
-            created_at: conversation.created_at
-          }
-        ];
+        const messages: Message[] = data.map(msg => ({
+          message_id: msg.id,
+          thread_id: msg.conversation_id,
+          user_id: '', // Will be filled from conversation
+          sender: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          created_at: msg.created_at,
+          metadata: msg.metadata
+        }));
         return messages;
       }
 
@@ -122,7 +108,6 @@ export class ConversationService extends BaseService {
   private static getMockMessages(threadId: string): Message[] {
     console.log(`Génération de messages mock pour la conversation ${threadId}`);
     
-    // Pour l'instant, retourne des données mock
     const mockMessages: Message[] = [
       {
         message_id: `msg_${Date.now()}_mock1`,
@@ -130,7 +115,7 @@ export class ConversationService extends BaseService {
         user_id: 'user_mock',
         sender: 'user',
         content: 'Bonjour, pouvez-vous me donner des conseils pour améliorer ma nutrition?',
-        created_at: new Date(Date.now() - 3600000).toISOString() // Il y a 1 heure
+        created_at: new Date(Date.now() - 3600000).toISOString()
       },
       {
         message_id: `msg_${Date.now()}_mock2`,
@@ -138,7 +123,7 @@ export class ConversationService extends BaseService {
         user_id: 'user_mock',
         sender: 'assistant',
         content: 'Bien sûr! Pour améliorer votre nutrition, concentrez-vous sur des aliments entiers, non transformés, et variez votre alimentation. Avez-vous des objectifs spécifiques?',
-        created_at: new Date(Date.now() - 3500000).toISOString() // Il y a 58 minutes
+        created_at: new Date(Date.now() - 3500000).toISOString()
       }
     ];
     
@@ -150,15 +135,13 @@ export class ConversationService extends BaseService {
    */
   static async createConversation(conversation: Conversation): Promise<boolean> {
     try {
-      // Créer une entrée dans la table ai_conversations
       const { error } = await supabase
         .from('ai_conversations')
         .insert({
           id: conversation.thread_id,
           user_id: conversation.user_id,
-          content: conversation.title,
-          response: "Conversation initiée", // Réponse par défaut
-          metadata: { status: conversation.status }
+          title: conversation.title,
+          status: conversation.status
         });
 
       if (error) {

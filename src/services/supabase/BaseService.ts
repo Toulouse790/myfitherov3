@@ -22,10 +22,10 @@ export class BaseService {
         return false;
       }
       
-      // Tenter une requête simple sur une table disponible (profiles)
+      // Tenter une requête simple sur une table disponible (user_profiles)
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
+        .from('user_profiles')
+        .select('user_id')
         .limit(1);
         
       if (error) {

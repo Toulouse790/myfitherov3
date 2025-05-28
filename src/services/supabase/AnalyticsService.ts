@@ -20,11 +20,10 @@ export class AnalyticsService extends BaseService {
           model_name: agentName,
           response_time_ms: Math.round(durationSeconds * 1000),
           action_type: 'conversation',
-          // Ajout du context (Json) qui était manquant et causait l'erreur
-          context: JSON.stringify({
+          context: {
             source: 'web_app',
             timestamp: new Date().toISOString()
-          })
+          }
         });
 
       if (error) {

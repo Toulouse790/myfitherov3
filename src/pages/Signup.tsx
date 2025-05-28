@@ -2,12 +2,13 @@
 import React, { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, Navigate } from 'react-router-dom';
-import { UserPlus, Mail, Lock, User } from 'lucide-react';
+import { UserPlus, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import SocialLogin from '@/components/auth/SocialLogin';
 
 const Signup = () => {
   const { signUp, user, loading: authLoading } = useAuth();
@@ -17,6 +18,7 @@ const Signup = () => {
     firstName: '',
     lastName: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -98,12 +100,25 @@ const Signup = () => {
         </CardHeader>
         
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <SocialLogin />
+          
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                Ou avec votre email
+              </span>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">Prénom *</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                   <Input
                     id="firstName"
                     type="text"
@@ -119,7 +134,7 @@ const Signup = () => {
               <div className="space-y-2">
                 <Label htmlFor="lastName">Nom *</Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                   <Input
                     id="lastName"
                     type="text"
@@ -136,7 +151,7 @@ const Signup = () => {
             <div className="space-y-2">
               <Label htmlFor="email">Email *</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
                   id="email"
                   type="email"
@@ -152,22 +167,30 @@ const Signup = () => {
             <div className="space-y-2">
               <Label htmlFor="password">Mot de passe *</Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({...formData, password: e.target.value})}
-                  className="pl-10"
+                  className="pl-10 pr-10"
                   placeholder="••••••••"
                   required
                   minLength={6}
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </Button>
               </div>
               <p className="text-xs text-muted-foreground">Minimum 6 caractères</p>
             </div>
 
-            {/* Privacy Policy Acceptance */}
             <div className="space-y-3">
               <div className="flex items-start space-x-2">
                 <Checkbox
@@ -213,7 +236,7 @@ const Signup = () => {
                 'Création du compte...'
               ) : (
                 <>
-                  <UserPlus size={20} className="mr-2" />
+                  <UserPlus size={18} className="mr-2" />
                   Créer mon compte
                 </>
               )}

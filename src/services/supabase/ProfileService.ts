@@ -159,7 +159,6 @@ export class ProfileService extends BaseService {
           action_type: action,
           context: metadata,
           created_at: new Date().toISOString(),
-          // Ajout de champs optionnels si présents dans les métadonnées
           model_name: metadata.agent_utilise || 'onboarding_system',
           response_time_ms: metadata.duree_traitement ? Math.round(metadata.duree_traitement * 1000) : null,
           feedback: null // sera défini plus tard si nécessaire

@@ -372,6 +372,47 @@ export type Database = {
           },
         ]
       }
+      ai_training_data: {
+        Row: {
+          action_type: string
+          context: Json | null
+          created_at: string
+          feedback: string | null
+          id: string
+          model_name: string | null
+          response_time_ms: number | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type: string
+          context?: Json | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          model_name?: string | null
+          response_time_ms?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string
+          context?: Json | null
+          created_at?: string
+          feedback?: string | null
+          id?: string
+          model_name?: string | null
+          response_time_ms?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_training_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       daily_tracking: {
         Row: {
           body_fat_percentage: number | null
