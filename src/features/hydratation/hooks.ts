@@ -10,24 +10,27 @@ export const useHydration = () => {
   const { profile } = useUserStore();
   const [currentIntake, setCurrentIntake] = useState(0);
 
+  // Get the actual user_id from the user_profiles table structure
+  const userId = profile?.user_id || profile?.id;
+
   // Récupération des données d'historique d'hydratation
   const { data: entries = [], isLoading: isLoadingEntries, refetch: refetchEntries } = useQuery({
-    queryKey: ['hydration-entries'],
+    queryKey: ['hydration-entries', userId],
     queryFn: async () => {
-      if (!profile?.id) return [];
-      return hydrationService.getUserEntries(profile.id);
+      if (!userId) return [];
+      return hydrationService.getUserEntries(userId);
     },
-    enabled: !!profile?.id
+    enabled: !!userId
   });
 
   // Récupération des objectifs d'hydratation
   const { data: goal, isLoading: isLoadingGoal } = useQuery({
-    queryKey: ['hydration-goal'],
+    queryKey: ['hydration-goal', userId],
     queryFn: async () => {
-      if (!profile?.id) return null;
-      return hydrationService.getUserGoal(profile.id);
+      if (!userId) return null;
+      return hydrationService.getUserGoal(userId);
     },
-    enabled: !!profile?.id
+    enabled: !!userId
   });
 
   // Calcul des statistiques d'hydratation simples
@@ -56,11 +59,14 @@ export const useHydration = () => {
 
   // Ajouter une entrée d'hydratation - version simplifiée
   const addHydration = async (amount: number, drinkType: HydrationEntry['drink_type'] = 'water') => {
-    if (!profile?.id) return false;
+    if (!userId) {
+      toast.error('Utilisateur non connecté');
+      return false;
+    }
     
     try {
       const entry: HydrationCreateEntry = {
-        user_id: profile.id,
+        user_id: userId,
         amount_ml: amount,
         drink_type: drinkType,
         recorded_at: new Date().toISOString()
@@ -83,11 +89,14 @@ export const useHydration = () => {
 
   // Mettre à jour l'objectif - version simplifiée
   const updateGoal = async (target: number) => {
-    if (!profile?.id) return false;
+    if (!userId) {
+      toast.error('Utilisateur non connecté');
+      return false;
+    }
     
     try {
       const goal: HydrationCreateGoal = {
-        user_id: profile.id,
+        user_id: userId,
         daily_target_ml: target,
         is_active: true
       };

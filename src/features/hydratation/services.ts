@@ -73,12 +73,17 @@ class HydrationService {
    */
   async setUserGoal(goal: HydrationCreateGoal): Promise<void> {
     try {
-      // Utiliser upsert pour créer ou mettre à jour
+      // D'abord, désactiver les anciens objectifs
+      await supabase
+        .from('hydration_goals')
+        .update({ is_active: false })
+        .eq('user_id', goal.user_id)
+        .eq('is_active', true);
+
+      // Ensuite, créer le nouvel objectif
       const { error } = await supabase
         .from('hydration_goals')
-        .upsert(goal, {
-          onConflict: 'user_id'
-        });
+        .insert(goal);
         
       if (error) throw error;
     } catch (error) {
@@ -97,17 +102,11 @@ class HydrationService {
         .select('*')
         .eq('user_id', userId)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
         
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // Aucun objectif trouvé
-          return null;
-        }
-        throw error;
-      }
+      if (error) throw error;
       
-      return data as HydrationGoal;
+      return data as HydrationGoal | null;
     } catch (error) {
       console.error('Erreur récupération objectif hydratation:', error);
       return null;
