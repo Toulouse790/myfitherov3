@@ -47,7 +47,7 @@ export class ConversationService extends BaseService {
 
       // Envoi optionnel à l'API externe
       if (API_CONFIG.ENABLE_EXTERNAL_API) {
-        this.sendToExternalAPI({
+        super.sendToExternalAPI({
           type: 'conversation_created',
           data: {
             conversation_id: newConv.id,
@@ -60,6 +60,57 @@ export class ConversationService extends BaseService {
       return newConv.id;
     } catch (err) {
       console.error('Exception gestion conversation:', err);
+      return null;
+    }
+  }
+
+  /**
+   * Récupère toutes les conversations d'un utilisateur
+   */
+  static async getUserConversations(userId: string): Promise<any[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_conversations')
+        .select('*')
+        .eq('user_id', userId)
+        .order('last_message_at', { ascending: false });
+
+      if (error) {
+        console.error('Erreur récupération conversations:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (err) {
+      console.error('Exception récupération conversations:', err);
+      return [];
+    }
+  }
+
+  /**
+   * Crée une nouvelle conversation
+   */
+  static async createConversation(userId: string, title: string, agentId?: string): Promise<string | null> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_conversations')
+        .insert({
+          user_id: userId,
+          title: title,
+          agent_id: agentId,
+          last_message_at: new Date().toISOString()
+        })
+        .select('id')
+        .single();
+
+      if (error) {
+        console.error('Erreur création conversation:', error);
+        return null;
+      }
+
+      return data.id;
+    } catch (err) {
+      console.error('Exception création conversation:', err);
       return null;
     }
   }
@@ -80,11 +131,11 @@ export class ConversationService extends BaseService {
         return [];
       }
 
-      // Transformation des données avec gestion correcte du type metadata
+      // Transformation des données avec mapping correct des propriétés
       return (data || []).map(msg => ({
-        message_id: msg.message_id,
+        message_id: msg.id, // Utiliser 'id' au lieu de 'message_id'
         thread_id: msg.conversation_id,
-        user_id: msg.user_id,
+        user_id: msg.conversation_id, // Nous n'avons pas user_id directement, utilisons conversation_id
         sender: msg.role as 'user' | 'assistant',
         content: msg.content,
         created_at: msg.created_at,
@@ -96,6 +147,13 @@ export class ConversationService extends BaseService {
       console.error('Exception récupération messages:', err);
       return [];
     }
+  }
+
+  /**
+   * Alias pour getMessages pour compatibilité
+   */
+  static async getConversationMessages(conversationId: string): Promise<Message[]> {
+    return this.getMessages(conversationId);
   }
 
   /**
@@ -122,7 +180,7 @@ export class ConversationService extends BaseService {
 
       // Envoi optionnel à l'API externe
       if (API_CONFIG.ENABLE_EXTERNAL_API) {
-        this.sendToExternalAPI({
+        super.sendToExternalAPI({
           type: 'conversation_deleted',
           data: { conversation_id: conversationId }
         });

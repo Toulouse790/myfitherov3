@@ -1,5 +1,4 @@
 
-// Service pour la gestion des messages
 import { supabase } from '@/integrations/supabase/client';
 import { Message, SynthesePayload } from './types';
 import { BaseService, API_CONFIG } from './BaseService';
@@ -30,7 +29,7 @@ export class MessageService extends BaseService {
 
       // Envoi optionnel à l'API externe
       if (API_CONFIG.ENABLE_EXTERNAL_API) {
-        this.sendToExternalAPI({
+        super.sendToExternalAPI({
           type: 'message_saved',
           data: message
         });
@@ -48,23 +47,33 @@ export class MessageService extends BaseService {
    */
   private static async updateConversationMessageCount(conversationId: string): Promise<void> {
     try {
-      // Compter les messages manuellement pour éviter les erreurs de type
-      const { count } = await supabase
+      // Compter les messages avec une requête simple
+      const { data: messages, error: countError } = await supabase
         .from('ai_messages')
-        .select('*', { count: 'exact', head: true })
+        .select('id')
         .eq('conversation_id', conversationId);
 
+      if (countError) {
+        console.error('Erreur comptage messages:', countError);
+        return;
+      }
+
+      const messageCount = messages ? messages.length : 0;
+
       // Mettre à jour la conversation
-      await supabase
+      const { error: updateError } = await supabase
         .from('ai_conversations')
         .update({ 
           last_message_at: new Date().toISOString(),
-          total_messages: count || 0
+          total_messages: messageCount
         })
         .eq('id', conversationId);
+
+      if (updateError) {
+        console.error('Erreur mise à jour conversation:', updateError);
+      }
     } catch (err) {
       console.error('Erreur mise à jour compteur messages:', err);
-      // Ne pas faire échouer la sauvegarde du message pour cette erreur
     }
   }
 

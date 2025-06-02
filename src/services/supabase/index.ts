@@ -16,6 +16,9 @@ export const SupabaseService = {
   getUserConversations: ConversationService.getUserConversations,
   getConversationMessages: ConversationService.getConversationMessages,
   createConversation: ConversationService.createConversation,
+  getOrCreateConversation: ConversationService.getOrCreateConversation,
+  getMessages: ConversationService.getMessages,
+  deleteConversation: ConversationService.deleteConversation,
 
   // MessageService
   saveMessage: MessageService.saveMessage,
