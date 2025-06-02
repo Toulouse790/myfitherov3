@@ -240,12 +240,11 @@ export class AIIntegrationService {
         const existingConv = conversations.find(conv => conv.thread_id === threadId);
         
         if (!existingConv) {
-          await SupabaseService.createConversation({
-            thread_id: threadId,
-            user_id: userId,
-            title: sender === 'user' ? content.substring(0, 50) + '...' : 'Nouvelle conversation',
-            status: 'active'
-          });
+          // Fix: Use correct createConversation signature with userId, title, and optional agentId
+          await SupabaseService.createConversation(
+            userId,
+            sender === 'user' ? content.substring(0, 50) + '...' : 'Nouvelle conversation'
+          );
         }
 
         // Sauvegarder le message

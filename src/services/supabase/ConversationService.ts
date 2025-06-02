@@ -133,9 +133,9 @@ export class ConversationService extends BaseService {
 
       // Transformation des données avec mapping correct des propriétés
       return (data || []).map(msg => ({
-        message_id: msg.id, // Utiliser 'id' au lieu de 'message_id'
+        message_id: msg.id,
         thread_id: msg.conversation_id,
-        user_id: msg.conversation_id, // Nous n'avons pas user_id directement, utilisons conversation_id
+        user_id: msg.conversation_id, // Nous n'avons pas user_id directement
         sender: msg.role as 'user' | 'assistant',
         content: msg.content,
         created_at: msg.created_at,
