@@ -25,14 +25,8 @@ export class MessageService extends BaseService {
         return false;
       }
 
-      // Mettre à jour la conversation
-      await supabase
-        .from('ai_conversations')
-        .update({ 
-          last_message_at: new Date().toISOString(),
-          total_messages: supabase.rpc('increment_total_messages', { conversation_id: message.thread_id })
-        })
-        .eq('id', message.thread_id);
+      // Mettre à jour la conversation avec gestion d'erreur séparée
+      await this.updateConversationMessageCount(message.thread_id);
 
       // Envoi optionnel à l'API externe
       if (API_CONFIG.ENABLE_EXTERNAL_API) {
@@ -46,6 +40,31 @@ export class MessageService extends BaseService {
     } catch (err) {
       console.error('Exception sauvegarde message:', err);
       return false;
+    }
+  }
+
+  /**
+   * Met à jour le compteur de messages d'une conversation
+   */
+  private static async updateConversationMessageCount(conversationId: string): Promise<void> {
+    try {
+      // Compter les messages manuellement pour éviter les erreurs de type
+      const { count } = await supabase
+        .from('ai_messages')
+        .select('*', { count: 'exact', head: true })
+        .eq('conversation_id', conversationId);
+
+      // Mettre à jour la conversation
+      await supabase
+        .from('ai_conversations')
+        .update({ 
+          last_message_at: new Date().toISOString(),
+          total_messages: count || 0
+        })
+        .eq('id', conversationId);
+    } catch (err) {
+      console.error('Erreur mise à jour compteur messages:', err);
+      // Ne pas faire échouer la sauvegarde du message pour cette erreur
     }
   }
 

@@ -1,4 +1,15 @@
-/* OVERRIDE D'URGENCE - PREMIÈRE LIGNE DU FICHIER */
+
+/* OVERRIDE COMPLET ANTI-JAUNE - PREMIÈRE LIGNE */
+* {
+  /* Suppression de TOUTE référence au jaune dans l'app */
+  background-color: inherit !important;
+}
+
+*[style*="yellow"], *[class*="yellow"], *[style*="#fef3cd"], *[style*="#f59e0b"] {
+  background-color: rgb(255, 255, 255) !important;
+  color: rgb(15, 23, 42) !important;
+}
+
 .bg-sidebar {
   background-color: rgb(255, 255, 255) !important;
 }
@@ -50,8 +61,8 @@
 
     --radius: 1rem;
 
-    /* Variables pour le sidebar - OVERRIDE DU JAUNE */
-    --sidebar-background: 255 255 255; /* blanc */
+    /* Variables pour le sidebar - SUPPRESSION TOTALE DU JAUNE */
+    --sidebar-background: 255 255 255;
     --sidebar-foreground: 15 23 42;
     --sidebar-primary: 37 99 235;
     --sidebar-primary-foreground: 255 255 255;
@@ -90,8 +101,8 @@
     --input: 51 65 85;
     --ring: 59 130 246;
 
-    /* Variables pour le sidebar en mode sombre - OVERRIDE DU JAUNE */
-    --sidebar-background: 30 41 59; /* gris foncé */
+    /* Variables pour le sidebar en mode sombre - SUPPRESSION TOTALE DU JAUNE */
+    --sidebar-background: 30 41 59;
     --sidebar-foreground: 248 250 252;
     --sidebar-primary: 59 130 246;
     --sidebar-primary-foreground: 15 23 42;
@@ -124,8 +135,33 @@
   h4 { @apply text-lg lg:text-xl; }
 }
 
-/* FORCE OVERRIDE - Suppression totale du jaune du sidebar */
+/* OVERRIDE ANTI-JAUNE ULTRA AGRESSIF */
 @layer components {
+  /* Supprimer ABSOLUMENT tout jaune */
+  *[class*="bg-yellow"], 
+  *[class*="text-yellow"], 
+  *[class*="border-yellow"],
+  *[style*="yellow"],
+  *[style*="#fef3cd"],
+  *[style*="#f59e0b"],
+  *[style*="#eab308"] {
+    background-color: rgb(255 255 255) !important;
+    color: rgb(15 23 42) !important;
+    border-color: rgb(226 232 240) !important;
+  }
+
+  .dark *[class*="bg-yellow"], 
+  .dark *[class*="text-yellow"], 
+  .dark *[class*="border-yellow"],
+  .dark *[style*="yellow"],
+  .dark *[style*="#fef3cd"],
+  .dark *[style*="#f59e0b"],
+  .dark *[style*="#eab308"] {
+    background-color: rgb(30 41 59) !important;
+    color: rgb(248 250 252) !important;
+    border-color: rgb(51 65 85) !important;
+  }
+
   /* Override spécifique pour le sidebar */
   [data-sidebar="sidebar"] {
     background-color: rgb(255 255 255) !important;
@@ -143,15 +179,6 @@
   }
 
   .dark .bg-sidebar {
-    background-color: rgb(30 41 59) !important;
-  }
-
-  /* Override pour le provider du sidebar */
-  .has-\[data-variant\=inset\]\:bg-sidebar {
-    background-color: rgb(255 255 255) !important;
-  }
-
-  .dark .has-\[data-variant\=inset\]\:bg-sidebar {
     background-color: rgb(30 41 59) !important;
   }
 
@@ -177,7 +204,7 @@
     @apply hover:scale-105 transition-transform duration-300;
   }
 
-  /* Couleurs thématiques fitness - PAS DE JAUNE */
+  /* Couleurs thématiques fitness - AUCUN JAUNE */
   .fitness-primary {
     @apply text-fitness-primary border-fitness-primary/20 bg-fitness-primary/5;
   }
@@ -198,7 +225,7 @@
     @apply text-fitness-sleep border-fitness-sleep/20 bg-fitness-sleep/5;
   }
 
-  /* Boutons thématiques fitness - PAS DE JAUNE */
+  /* Boutons thématiques fitness - AUCUN JAUNE */
   .btn-sport {
     @apply bg-gradient-sport hover:opacity-90 text-white border-0 shadow-lg;
   }

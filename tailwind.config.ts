@@ -26,7 +26,7 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#2563eb', // Bleu énergie
+					DEFAULT: '#2563eb', // Bleu énergie - PAS DE JAUNE
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Nouvelle palette moderne SANS JAUNE
+				// Palette moderne SANS AUCUN JAUNE
 				fitness: {
 					primary: '#2563eb',    // Bleu énergie
 					sport: '#dc2626',      // Rouge passion
@@ -73,7 +73,7 @@ export default {
 				}
 			},
 			borderRadius: {
-				lg: '1rem',        // Cards avec border-radius plus moderne
+				lg: '1rem',
 				md: '0.75rem',
 				sm: '0.5rem',
 				xl: '1.25rem',
