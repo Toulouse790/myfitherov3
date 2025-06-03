@@ -8,7 +8,7 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Chercher une conversation existante
+      // Chercher une conversation existante avec type explicite
       const { data: existing, error: selectError } = await supabase
         .from('ai_conversations')
         .select('id')
@@ -27,7 +27,7 @@ export class ConversationService {
         return existing.id;
       }
 
-      // Créer une nouvelle conversation
+      // Créer une nouvelle conversation avec type explicite
       const { data: newConv, error: insertError } = await supabase
         .from('ai_conversations')
         .insert({
@@ -118,18 +118,24 @@ export class ConversationService {
         return [];
       }
 
-      // Transformation des données avec mapping correct des propriétés
-      return (data || []).map(msg => ({
-        message_id: msg.id,
-        thread_id: msg.conversation_id,
-        user_id: msg.conversation_id,
-        sender: msg.role as 'user' | 'assistant',
-        content: msg.content,
-        created_at: msg.created_at,
-        metadata: typeof msg.metadata === 'string' 
+      // Transformation simplifiée avec types explicites
+      const messages: Message[] = (data || []).map(msg => {
+        const metadata = typeof msg.metadata === 'string' 
           ? JSON.parse(msg.metadata) 
-          : (msg.metadata as Record<string, any>) || {}
-      }));
+          : (msg.metadata as Record<string, any>) || {};
+
+        return {
+          message_id: msg.id,
+          thread_id: msg.conversation_id,
+          user_id: msg.conversation_id,
+          sender: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          created_at: msg.created_at,
+          metadata: metadata
+        };
+      });
+
+      return messages;
     } catch (err) {
       console.error('Exception récupération messages:', err);
       return [];
