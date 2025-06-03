@@ -9,14 +9,15 @@ export class ConversationService {
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
       // Chercher une conversation existante avec type explicite
-      const { data: existing, error: selectError } = await supabase
+      const selectQuery = supabase
         .from('ai_conversations')
         .select('id')
         .eq('user_id', userId)
         .eq('agent_name', agentName)
         .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+        .limit(1);
+      
+      const { data: existing, error: selectError } = await selectQuery.maybeSingle();
 
       if (selectError) {
         console.error('Erreur recherche conversation:', selectError);
@@ -28,7 +29,7 @@ export class ConversationService {
       }
 
       // Créer une nouvelle conversation avec type explicite
-      const { data: newConv, error: insertError } = await supabase
+      const insertQuery = supabase
         .from('ai_conversations')
         .insert({
           user_id: userId,
@@ -36,8 +37,9 @@ export class ConversationService {
           title: `Conversation avec ${agentName}`,
           last_message_at: new Date().toISOString()
         })
-        .select('id')
-        .single();
+        .select('id');
+
+      const { data: newConv, error: insertError } = await insertQuery.single();
 
       if (insertError) {
         console.error('Erreur création conversation:', insertError);
@@ -56,11 +58,13 @@ export class ConversationService {
    */
   static async getUserConversations(userId: string): Promise<any[]> {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('ai_conversations')
         .select('*')
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Erreur récupération conversations:', error);
@@ -79,7 +83,7 @@ export class ConversationService {
    */
   static async createConversation(userId: string, title: string, agentId?: string): Promise<string | null> {
     try {
-      const { data, error } = await supabase
+      const insertQuery = supabase
         .from('ai_conversations')
         .insert({
           user_id: userId,
@@ -87,8 +91,9 @@ export class ConversationService {
           agent_id: agentId,
           last_message_at: new Date().toISOString()
         })
-        .select('id')
-        .single();
+        .select('id');
+
+      const { data, error } = await insertQuery.single();
 
       if (error) {
         console.error('Erreur création conversation:', error);
@@ -107,11 +112,13 @@ export class ConversationService {
    */
   static async getMessages(conversationId: string): Promise<Message[]> {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('ai_messages')
         .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Erreur récupération messages:', error);
