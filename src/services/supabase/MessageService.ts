@@ -1,9 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Message, SynthesePayload } from './types';
-import { BaseService, API_CONFIG } from './BaseService';
 
-export class MessageService extends BaseService {
+export class MessageService {
   /**
    * Sauvegarde un message dans une conversation
    */
@@ -26,14 +25,6 @@ export class MessageService extends BaseService {
 
       // Mettre à jour la conversation avec gestion d'erreur séparée
       await this.updateConversationMessageCount(message.thread_id);
-
-      // Envoi optionnel à l'API externe
-      if (API_CONFIG.ENABLE_EXTERNAL_API) {
-        super.sendToExternalAPI({
-          type: 'message_saved',
-          data: message
-        });
-      }
 
       return true;
     } catch (err) {

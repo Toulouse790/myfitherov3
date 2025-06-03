@@ -1,9 +1,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from './types';
-import { BaseService, API_CONFIG } from './BaseService';
 
-export class ConversationService extends BaseService {
+export class ConversationService {
   /**
    * Récupère ou crée une conversation pour un utilisateur
    */
@@ -43,18 +42,6 @@ export class ConversationService extends BaseService {
       if (insertError) {
         console.error('Erreur création conversation:', insertError);
         return null;
-      }
-
-      // Envoi optionnel à l'API externe
-      if (API_CONFIG.ENABLE_EXTERNAL_API) {
-        super.sendToExternalAPI({
-          type: 'conversation_created',
-          data: {
-            conversation_id: newConv.id,
-            user_id: userId,
-            agent_name: agentName
-          }
-        });
       }
 
       return newConv.id;
@@ -135,7 +122,7 @@ export class ConversationService extends BaseService {
       return (data || []).map(msg => ({
         message_id: msg.id,
         thread_id: msg.conversation_id,
-        user_id: msg.conversation_id, // Nous n'avons pas user_id directement
+        user_id: msg.conversation_id,
         sender: msg.role as 'user' | 'assistant',
         content: msg.content,
         created_at: msg.created_at,
@@ -176,14 +163,6 @@ export class ConversationService extends BaseService {
       if (error) {
         console.error('Erreur suppression conversation:', error);
         return false;
-      }
-
-      // Envoi optionnel à l'API externe
-      if (API_CONFIG.ENABLE_EXTERNAL_API) {
-        super.sendToExternalAPI({
-          type: 'conversation_deleted',
-          data: { conversation_id: conversationId }
-        });
       }
 
       return true;
