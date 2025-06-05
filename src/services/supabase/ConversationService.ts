@@ -8,16 +8,15 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Chercher une conversation existante avec type explicite
-      const selectQuery = supabase
+      // Chercher une conversation existante avec requête directe
+      const { data: existing, error: selectError } = await supabase
         .from('ai_conversations')
         .select('id')
         .eq('user_id', userId)
         .eq('agent_name', agentName)
         .order('created_at', { ascending: false })
-        .limit(1);
-      
-      const { data: existing, error: selectError } = await selectQuery.maybeSingle();
+        .limit(1)
+        .maybeSingle();
 
       if (selectError) {
         console.error('Erreur recherche conversation:', selectError);
@@ -28,8 +27,8 @@ export class ConversationService {
         return existing.id;
       }
 
-      // Créer une nouvelle conversation avec type explicite
-      const insertQuery = supabase
+      // Créer une nouvelle conversation avec requête directe
+      const { data: newConv, error: insertError } = await supabase
         .from('ai_conversations')
         .insert({
           user_id: userId,
@@ -37,9 +36,8 @@ export class ConversationService {
           title: `Conversation avec ${agentName}`,
           last_message_at: new Date().toISOString()
         })
-        .select('id');
-
-      const { data: newConv, error: insertError } = await insertQuery.single();
+        .select('id')
+        .single();
 
       if (insertError) {
         console.error('Erreur création conversation:', insertError);
@@ -58,13 +56,11 @@ export class ConversationService {
    */
   static async getUserConversations(userId: string): Promise<any[]> {
     try {
-      const query = supabase
+      const { data, error } = await supabase
         .from('ai_conversations')
         .select('*')
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Erreur récupération conversations:', error);
@@ -83,7 +79,7 @@ export class ConversationService {
    */
   static async createConversation(userId: string, title: string, agentId?: string): Promise<string | null> {
     try {
-      const insertQuery = supabase
+      const { data, error } = await supabase
         .from('ai_conversations')
         .insert({
           user_id: userId,
@@ -91,9 +87,8 @@ export class ConversationService {
           agent_id: agentId,
           last_message_at: new Date().toISOString()
         })
-        .select('id');
-
-      const { data, error } = await insertQuery.single();
+        .select('id')
+        .single();
 
       if (error) {
         console.error('Erreur création conversation:', error);
@@ -112,13 +107,11 @@ export class ConversationService {
    */
   static async getMessages(conversationId: string): Promise<Message[]> {
     try {
-      const query = supabase
+      const { data, error } = await supabase
         .from('ai_messages')
         .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
-
-      const { data, error } = await query;
 
       if (error) {
         console.error('Erreur récupération messages:', error);
