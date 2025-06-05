@@ -8,7 +8,7 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Chercher une conversation existante avec type simple
+      // Chercher une conversation existante avec requête simplifiée
       const { data: existingConversations, error: searchError } = await supabase
         .from('ai_conversations')
         .select('id')
@@ -26,7 +26,7 @@ export class ConversationService {
         return existingConversations[0].id;
       }
 
-      // Créer une nouvelle conversation
+      // Créer une nouvelle conversation avec requête simplifiée
       const { data: newConversation, error: createError } = await supabase
         .from('ai_conversations')
         .insert({
@@ -35,15 +35,14 @@ export class ConversationService {
           title: `Conversation avec ${agentName}`,
           last_message_at: new Date().toISOString()
         })
-        .select('id')
-        .single();
+        .select('id');
 
-      if (createError) {
+      if (createError || !newConversation || newConversation.length === 0) {
         console.error('Erreur création conversation:', createError);
         return null;
       }
 
-      return newConversation?.id || null;
+      return newConversation[0].id;
     } catch (err) {
       console.error('Exception gestion conversation:', err);
       return null;
@@ -86,15 +85,14 @@ export class ConversationService {
           agent_id: agentId,
           last_message_at: new Date().toISOString()
         })
-        .select('id')
-        .single();
+        .select('id');
 
-      if (error) {
+      if (error || !data || data.length === 0) {
         console.error('Erreur création conversation:', error);
         return null;
       }
 
-      return data?.id || null;
+      return data[0].id;
     } catch (err) {
       console.error('Exception création conversation:', err);
       return null;
