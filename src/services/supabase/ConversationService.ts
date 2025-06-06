@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from './types';
 
@@ -33,36 +32,43 @@ export class ConversationService {
   /**
    * Récupère ou crée une conversation pour un utilisateur avec un agent spécifique
    */
-  static async getOrCreateConversation(userId: string, agentSlugOrName: string): Promise<string | null> {
+  static async getOrCreateConversation(userId: string, agentSlugOrName?: string): Promise<string | null> {
     try {
-      // D'abord, chercher l'agent par slug ou nom
-      const { data: agentData, error: agentError } = await supabase
-        .from('ai_agents')
-        .select('id, name, slug')
-        .or(`slug.eq.${agentSlugOrName},name.ilike.%${agentSlugOrName}%`)
-        .eq('status', 'active')
-        .limit(1);
+      let agentId: string | undefined;
+      let agentName = 'Assistant';
 
-      if (agentError) {
-        console.error('Erreur recherche agent:', agentError);
-        return null;
+      // Si un agent est spécifié, essayer de le trouver
+      if (agentSlugOrName) {
+        const { data: agentData, error: agentError } = await supabase
+          .from('ai_agents')
+          .select('id, name, slug')
+          .or(`slug.eq.${agentSlugOrName},name.ilike.%${agentSlugOrName}%`)
+          .eq('status', 'active')
+          .limit(1);
+
+        if (agentError) {
+          console.error('Erreur recherche agent:', agentError);
+        } else if (agentData && agentData.length > 0) {
+          agentId = agentData[0].id;
+          agentName = agentData[0].name;
+        }
       }
 
-      const agent = agentData?.[0];
-      if (!agent) {
-        console.warn('Agent non trouvé:', agentSlugOrName);
-        return null;
-      }
-
-      // Chercher une conversation existante avec cet agent
-      const { data: existingData, error: searchError } = await supabase
+      // Chercher une conversation existante
+      let searchQuery = supabase
         .from('ai_conversations')
         .select('id')
         .eq('user_id', userId)
-        .eq('agent_id', agent.id)
         .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(1);
+
+      // Si un agent spécifique est trouvé, filtrer par agent
+      if (agentId) {
+        searchQuery = searchQuery.eq('agent_id', agentId);
+      }
+
+      const { data: existingData, error: searchError } = await searchQuery;
 
       if (searchError) {
         console.error('Erreur recherche conversation:', searchError);
@@ -78,8 +84,8 @@ export class ConversationService {
         .from('ai_conversations')
         .insert({
           user_id: userId,
-          agent_id: agent.id,
-          title: `Conversation avec ${agent.name}`,
+          agent_id: agentId,
+          title: `Conversation avec ${agentName}`,
           status: 'active',
           last_message_at: new Date().toISOString()
         })
