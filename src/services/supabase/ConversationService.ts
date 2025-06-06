@@ -2,52 +2,69 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from './types';
 
+// Types explicites pour éviter l'inférence complexe
+type ConversationRow = {
+  id: string;
+  user_id: string;
+  agent_name?: string;
+  title?: string;
+  created_at?: string;
+  last_message_at?: string;
+  agent_id?: string;
+};
+
+type MessageRow = {
+  id: string;
+  conversation_id: string;
+  role: string;
+  content: string;
+  created_at?: string;
+  metadata?: any;
+};
+
 export class ConversationService {
   /**
    * Récupère ou crée une conversation pour un utilisateur
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Requête séparée pour éviter les types complexes
-      const existingQuery = supabase
+      // Recherche existante
+      const existingResult = await supabase
         .from('ai_conversations')
-        .select('id');
-      
-      const { data: existingConversations, error: searchError } = await existingQuery
+        .select('id')
         .eq('user_id', userId)
         .eq('agent_name', agentName)
         .order('created_at', { ascending: false })
         .limit(1);
 
-      if (searchError) {
-        console.error('Erreur recherche conversation:', searchError);
+      if (existingResult.error) {
+        console.error('Erreur recherche conversation:', existingResult.error);
         return null;
       }
 
-      if (existingConversations && existingConversations.length > 0) {
-        return existingConversations[0].id;
+      if (existingResult.data && existingResult.data.length > 0) {
+        return existingResult.data[0].id;
       }
 
-      // Création avec requête séparée
-      const insertData = {
+      // Création nouvelle conversation
+      const newConversationData = {
         user_id: userId,
         agent_name: agentName,
         title: `Conversation avec ${agentName}`,
         last_message_at: new Date().toISOString()
       };
 
-      const insertQuery = supabase
+      const createResult = await supabase
         .from('ai_conversations')
-        .insert(insertData);
-      
-      const { data: newConversation, error: createError } = await insertQuery.select('id');
+        .insert(newConversationData)
+        .select('id');
 
-      if (createError || !newConversation || newConversation.length === 0) {
-        console.error('Erreur création conversation:', createError);
+      if (createResult.error || !createResult.data || createResult.data.length === 0) {
+        console.error('Erreur création conversation:', createResult.error);
         return null;
       }
 
-      return newConversation[0].id;
+      return createResult.data[0].id;
     } catch (err) {
       console.error('Exception gestion conversation:', err);
       return null;
@@ -57,22 +74,20 @@ export class ConversationService {
   /**
    * Récupère toutes les conversations d'un utilisateur
    */
-  static async getUserConversations(userId: string): Promise<any[]> {
+  static async getUserConversations(userId: string): Promise<ConversationRow[]> {
     try {
-      const query = supabase
+      const result = await supabase
         .from('ai_conversations')
-        .select('*');
-      
-      const { data, error } = await query
+        .select('*')
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
 
-      if (error) {
-        console.error('Erreur récupération conversations:', error);
+      if (result.error) {
+        console.error('Erreur récupération conversations:', result.error);
         return [];
       }
 
-      return data || [];
+      return result.data as ConversationRow[] || [];
     } catch (err) {
       console.error('Exception récupération conversations:', err);
       return [];
@@ -84,25 +99,24 @@ export class ConversationService {
    */
   static async createConversation(userId: string, title: string, agentId?: string): Promise<string | null> {
     try {
-      const insertData = {
+      const conversationData = {
         user_id: userId,
         title: title,
         agent_id: agentId,
         last_message_at: new Date().toISOString()
       };
 
-      const query = supabase
+      const result = await supabase
         .from('ai_conversations')
-        .insert(insertData);
+        .insert(conversationData)
+        .select('id');
 
-      const { data, error } = await query.select('id');
-
-      if (error || !data || data.length === 0) {
-        console.error('Erreur création conversation:', error);
+      if (result.error || !result.data || result.data.length === 0) {
+        console.error('Erreur création conversation:', result.error);
         return null;
       }
 
-      return data[0].id;
+      return result.data[0].id;
     } catch (err) {
       console.error('Exception création conversation:', err);
       return null;
@@ -114,21 +128,21 @@ export class ConversationService {
    */
   static async getMessages(conversationId: string): Promise<Message[]> {
     try {
-      const query = supabase
+      const result = await supabase
         .from('ai_messages')
-        .select('*');
-      
-      const { data, error } = await query
+        .select('*')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
-      if (error) {
-        console.error('Erreur récupération messages:', error);
+      if (result.error) {
+        console.error('Erreur récupération messages:', result.error);
         return [];
       }
 
-      // Transformation simple avec types explicites
-      const messages: Message[] = (data || []).map((msg: any) => {
+      const rawMessages = result.data as MessageRow[] || [];
+
+      // Transformation manuelle pour éviter les problèmes de types
+      const messages: Message[] = rawMessages.map((msg) => {
         let metadata: Record<string, any> = {};
         
         try {
@@ -172,25 +186,23 @@ export class ConversationService {
   static async deleteConversation(conversationId: string): Promise<boolean> {
     try {
       // Supprimer d'abord les messages
-      const deleteMessagesQuery = supabase
+      const deleteMessagesResult = await supabase
         .from('ai_messages')
-        .delete();
-      
-      const { error: messagesError } = await deleteMessagesQuery.eq('conversation_id', conversationId);
+        .delete()
+        .eq('conversation_id', conversationId);
 
-      if (messagesError) {
-        console.error('Erreur suppression messages:', messagesError);
+      if (deleteMessagesResult.error) {
+        console.error('Erreur suppression messages:', deleteMessagesResult.error);
       }
 
       // Puis la conversation
-      const deleteConversationQuery = supabase
+      const deleteConversationResult = await supabase
         .from('ai_conversations')
-        .delete();
-      
-      const { error: conversationError } = await deleteConversationQuery.eq('id', conversationId);
+        .delete()
+        .eq('id', conversationId);
 
-      if (conversationError) {
-        console.error('Erreur suppression conversation:', conversationError);
+      if (deleteConversationResult.error) {
+        console.error('Erreur suppression conversation:', deleteConversationResult.error);
         return false;
       }
 
