@@ -1,3 +1,4 @@
+
 import { ApiService } from './api';
 import { StorageService } from './storage';
 import { SupabaseService, User, Conversation, Message } from './supabase/index';
@@ -237,10 +238,10 @@ export class AIIntegrationService {
       try {
         // Créer la conversation si elle n'existe pas
         const conversations = await SupabaseService.getUserConversations(userId);
-        const existingConv = conversations.find(conv => conv.thread_id === threadId);
+        const existingConv = conversations.find(conv => conv.id === threadId);
         
         if (!existingConv) {
-          // Fix: Use correct createConversation signature with userId, title, and optional agentId
+          // Utiliser la signature correcte de createConversation avec userId et title
           await SupabaseService.createConversation(
             userId,
             sender === 'user' ? content.substring(0, 50) + '...' : 'Nouvelle conversation'
@@ -323,10 +324,10 @@ export class AIIntegrationService {
         const conversations: ConversationThread[] = [];
         
         for (const conv of supabaseConversations) {
-          const messages = await SupabaseService.getConversationMessages(conv.thread_id);
+          const messages = await SupabaseService.getConversationMessages(conv.id);
           
           conversations.push({
-            thread_id: conv.thread_id,
+            thread_id: conv.id, // Utiliser conv.id au lieu de conv.thread_id
             user_id: conv.user_id,
             messages: messages.map(msg => ({
               id: msg.message_id,
@@ -336,7 +337,7 @@ export class AIIntegrationService {
               type_demande: msg.type_demande
             })),
             created_at: new Date(conv.created_at || ''),
-            updated_at: new Date(conv.updated_at || '')
+            updated_at: new Date(conv.last_message_at || conv.created_at || '') // Utiliser last_message_at au lieu de updated_at
           });
         }
         
