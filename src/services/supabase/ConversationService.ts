@@ -2,15 +2,14 @@
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from './types';
 
-// Types simples et explicites pour éviter les problèmes TypeScript
+// Types simplifiés pour éviter les problèmes TypeScript
 interface SimpleConversation {
   id: string;
   user_id: string;
-  agent_name?: string;
+  agent_id?: string;
   title?: string;
   created_at?: string;
   last_message_at?: string;
-  agent_id?: string;
 }
 
 interface SimpleMessage {
@@ -28,12 +27,12 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Recherche d'une conversation existante avec query simple
+      // Note: agent_name n'existe pas dans la table, on utilise title à la place
       const { data: existingData, error: searchError } = await supabase
         .from('ai_conversations')
         .select('id')
         .eq('user_id', userId)
-        .eq('agent_name', agentName)
+        .ilike('title', `%${agentName}%`)
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -51,7 +50,6 @@ export class ConversationService {
         .from('ai_conversations')
         .insert({
           user_id: userId,
-          agent_name: agentName,
           title: `Conversation avec ${agentName}`,
           last_message_at: new Date().toISOString()
         })
@@ -76,7 +74,7 @@ export class ConversationService {
     try {
       const { data, error } = await supabase
         .from('ai_conversations')
-        .select('*')
+        .select('id, user_id, agent_id, title, created_at, last_message_at')
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
 
@@ -88,11 +86,10 @@ export class ConversationService {
       return (data || []).map(conv => ({
         id: conv.id,
         user_id: conv.user_id || '',
-        agent_name: conv.agent_name || undefined,
+        agent_id: conv.agent_id || undefined,
         title: conv.title || undefined,
         created_at: conv.created_at || undefined,
-        last_message_at: conv.last_message_at || undefined,
-        agent_id: conv.agent_id || undefined
+        last_message_at: conv.last_message_at || undefined
       }));
     } catch (err) {
       console.error('Exception récupération conversations:', err);
@@ -134,7 +131,7 @@ export class ConversationService {
     try {
       const { data, error } = await supabase
         .from('ai_messages')
-        .select('*')
+        .select('id, conversation_id, role, content, created_at, metadata')
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
