@@ -21,18 +21,46 @@ interface SimpleMessage {
   metadata?: any;
 }
 
+interface SimpleAgent {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  status: string;
+}
+
 export class ConversationService {
   /**
-   * Récupère ou crée une conversation pour un utilisateur
+   * Récupère ou crée une conversation pour un utilisateur avec un agent spécifique
    */
-  static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
+  static async getOrCreateConversation(userId: string, agentSlugOrName: string): Promise<string | null> {
     try {
-      // Note: agent_name n'existe pas dans la table, on utilise title à la place
+      // D'abord, chercher l'agent par slug ou nom
+      const { data: agentData, error: agentError } = await supabase
+        .from('ai_agents')
+        .select('id, name, slug')
+        .or(`slug.eq.${agentSlugOrName},name.ilike.%${agentSlugOrName}%`)
+        .eq('status', 'active')
+        .limit(1);
+
+      if (agentError) {
+        console.error('Erreur recherche agent:', agentError);
+        return null;
+      }
+
+      const agent = agentData?.[0];
+      if (!agent) {
+        console.warn('Agent non trouvé:', agentSlugOrName);
+        return null;
+      }
+
+      // Chercher une conversation existante avec cet agent
       const { data: existingData, error: searchError } = await supabase
         .from('ai_conversations')
         .select('id')
         .eq('user_id', userId)
-        .ilike('title', `%${agentName}%`)
+        .eq('agent_id', agent.id)
+        .eq('status', 'active')
         .order('created_at', { ascending: false })
         .limit(1);
 
@@ -50,7 +78,9 @@ export class ConversationService {
         .from('ai_conversations')
         .insert({
           user_id: userId,
-          title: `Conversation avec ${agentName}`,
+          agent_id: agent.id,
+          title: `Conversation avec ${agent.name}`,
+          status: 'active',
           last_message_at: new Date().toISOString()
         })
         .select('id');
@@ -98,16 +128,35 @@ export class ConversationService {
   }
 
   /**
-   * Crée une nouvelle conversation
+   * Crée une nouvelle conversation avec un agent
    */
-  static async createConversation(userId: string, title: string, agentId?: string): Promise<string | null> {
+  static async createConversation(userId: string, title: string, agentSlug?: string): Promise<string | null> {
     try {
+      let agentId: string | undefined;
+
+      // Si un slug d'agent est fourni, récupérer son ID
+      if (agentSlug) {
+        const { data: agentData, error: agentError } = await supabase
+          .from('ai_agents')
+          .select('id')
+          .eq('slug', agentSlug)
+          .eq('status', 'active')
+          .limit(1);
+
+        if (agentError) {
+          console.error('Erreur recherche agent:', agentError);
+        } else if (agentData && agentData.length > 0) {
+          agentId = agentData[0].id;
+        }
+      }
+
       const { data, error } = await supabase
         .from('ai_conversations')
         .insert({
           user_id: userId,
           title: title,
           agent_id: agentId,
+          status: 'active',
           last_message_at: new Date().toISOString()
         })
         .select('id');
@@ -174,6 +223,35 @@ export class ConversationService {
    */
   static async getConversationMessages(conversationId: string): Promise<Message[]> {
     return this.getMessages(conversationId);
+  }
+
+  /**
+   * Récupère les agents disponibles
+   */
+  static async getAvailableAgents(): Promise<SimpleAgent[]> {
+    try {
+      const { data, error } = await supabase
+        .from('ai_agents')
+        .select('id, name, slug, description, status')
+        .eq('status', 'active')
+        .order('name', { ascending: true });
+
+      if (error) {
+        console.error('Erreur récupération agents:', error);
+        return [];
+      }
+
+      return (data || []).map(agent => ({
+        id: agent.id,
+        name: agent.name,
+        slug: agent.slug,
+        description: agent.description || undefined,
+        status: agent.status
+      }));
+    } catch (err) {
+      console.error('Exception récupération agents:', err);
+      return [];
+    }
   }
 
   /**
