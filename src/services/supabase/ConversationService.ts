@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from './types';
 
@@ -8,13 +7,11 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Requête simplifiée pour éviter les types complexes
-      const searchQuery = supabase
+      // Recherche directe sans chaînage de méthodes
+      const { data: existingConversations, error: searchError } = await supabase
         .from('ai_conversations')
         .select('id')
-        .eq('user_id', userId);
-      
-      const { data: existingConversations, error: searchError } = await searchQuery
+        .eq('user_id', userId)
         .eq('agent_name', agentName)
         .order('created_at', { ascending: false })
         .limit(1);
