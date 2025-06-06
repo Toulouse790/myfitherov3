@@ -8,11 +8,13 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Chercher une conversation existante avec requête simplifiée
-      const { data: existingConversations, error: searchError } = await supabase
+      // Requête simplifiée pour éviter les types complexes
+      const searchQuery = supabase
         .from('ai_conversations')
         .select('id')
-        .eq('user_id', userId)
+        .eq('user_id', userId);
+      
+      const { data: existingConversations, error: searchError } = await searchQuery
         .eq('agent_name', agentName)
         .order('created_at', { ascending: false })
         .limit(1);
@@ -26,15 +28,17 @@ export class ConversationService {
         return existingConversations[0].id;
       }
 
-      // Créer une nouvelle conversation avec requête simplifiée
+      // Création avec requête séparée
+      const insertData = {
+        user_id: userId,
+        agent_name: agentName,
+        title: `Conversation avec ${agentName}`,
+        last_message_at: new Date().toISOString()
+      };
+
       const { data: newConversation, error: createError } = await supabase
         .from('ai_conversations')
-        .insert({
-          user_id: userId,
-          agent_name: agentName,
-          title: `Conversation avec ${agentName}`,
-          last_message_at: new Date().toISOString()
-        })
+        .insert(insertData)
         .select('id');
 
       if (createError || !newConversation || newConversation.length === 0) {
@@ -77,14 +81,16 @@ export class ConversationService {
    */
   static async createConversation(userId: string, title: string, agentId?: string): Promise<string | null> {
     try {
+      const insertData = {
+        user_id: userId,
+        title: title,
+        agent_id: agentId,
+        last_message_at: new Date().toISOString()
+      };
+
       const { data, error } = await supabase
         .from('ai_conversations')
-        .insert({
-          user_id: userId,
-          title: title,
-          agent_id: agentId,
-          last_message_at: new Date().toISOString()
-        })
+        .insert(insertData)
         .select('id');
 
       if (error || !data || data.length === 0) {
