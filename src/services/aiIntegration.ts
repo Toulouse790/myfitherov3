@@ -1,4 +1,3 @@
-
 import { ApiService } from './api';
 import { StorageService } from './storage';
 import { SupabaseService, User, Conversation, Message } from './supabase/index';
@@ -87,11 +86,15 @@ export class AIIntegrationService {
    * Obtient ou génère un ID utilisateur unique
    */
   static getUserId(): string {
+    console.log('🔍 AIIntegrationService.getUserId() appelé');
     let userId = StorageService.getItem<string>(this.USER_ID_KEY, '');
     
     if (!userId) {
       userId = `user_${Date.now()}_${this.generateUUID().split('-')[0]}`;
       StorageService.setItem(this.USER_ID_KEY, userId);
+      console.log('✨ Nouvel ID utilisateur généré:', userId);
+    } else {
+      console.log('👤 ID utilisateur existant trouvé:', userId);
     }
     
     return userId;
@@ -226,6 +229,7 @@ export class AIIntegrationService {
     sender: 'user' | 'assistant',
     typeDemande?: string
   ) {
+    console.log('💾 Sauvegarde message:', { threadId, sender, content: content.substring(0, 50) + '...' });
     const userId = this.getUserId();
     const messageId = `msg_${Date.now()}_${this.generateUUID().split('-')[0]}`;
     const timestamp = new Date();
@@ -236,16 +240,15 @@ export class AIIntegrationService {
     // 2. Sauvegarde Supabase (si activée et connexion disponible)
     if (this.isSyncEnabled()) {
       try {
+        console.log('🔄 Tentative de sauvegarde Supabase...');
         // Créer la conversation si elle n'existe pas
         const conversations = await SupabaseService.getUserConversations(userId);
         const existingConv = conversations.find(conv => conv.id === threadId);
         
         if (!existingConv) {
-          // Utiliser la signature correcte de createConversation avec userId et title
-          await SupabaseService.createConversation(
-            userId,
-            sender === 'user' ? content.substring(0, 50) + '...' : 'Nouvelle conversation'
-          );
+          console.log('➕ Création nouvelle conversation Supabase');
+          // Utiliser getOrCreateConversation au lieu de createConversation
+          await SupabaseService.getOrCreateConversation(userId);
         }
 
         // Sauvegarder le message
@@ -262,8 +265,10 @@ export class AIIntegrationService {
           }
         });
 
+        console.log('✅ Message sauvegardé avec succès en Supabase');
+
       } catch (error) {
-        console.warn('Erreur lors de la sauvegarde Supabase (mode dégradé):', error);
+        console.warn('⚠️ Erreur lors de la sauvegarde Supabase (mode dégradé):', error);
         // Continue en mode local seulement
       }
     }
@@ -315,10 +320,12 @@ export class AIIntegrationService {
    * Récupère les conversations (Supabase en priorité, local en fallback)
    */
   static async getConversations(): Promise<ConversationThread[]> {
+    console.log('📚 Récupération des conversations...');
     if (this.isSyncEnabled()) {
       try {
         const userId = this.getUserId();
         const supabaseConversations = await SupabaseService.getUserConversations(userId);
+        console.log('☁️ Conversations Supabase trouvées:', supabaseConversations.length);
         
         // Convertir les conversations Supabase au format local
         const conversations: ConversationThread[] = [];
@@ -327,7 +334,7 @@ export class AIIntegrationService {
           const messages = await SupabaseService.getConversationMessages(conv.id);
           
           conversations.push({
-            thread_id: conv.id, // Utiliser conv.id au lieu de conv.thread_id
+            thread_id: conv.id,
             user_id: conv.user_id,
             messages: messages.map(msg => ({
               id: msg.message_id,
@@ -337,18 +344,20 @@ export class AIIntegrationService {
               type_demande: msg.type_demande
             })),
             created_at: new Date(conv.created_at || ''),
-            updated_at: new Date(conv.last_message_at || conv.created_at || '') // Utiliser last_message_at au lieu de updated_at
+            updated_at: new Date(conv.last_message_at || conv.created_at || '')
           });
         }
         
         return conversations;
       } catch (error) {
-        console.warn('Erreur Supabase, utilisation du stockage local:', error);
+        console.warn('⚠️ Erreur Supabase, utilisation du stockage local:', error);
       }
     }
     
     // Fallback : conversations locales
-    return this.getConversationsLocal();
+    const localConversations = this.getConversationsLocal();
+    console.log('💾 Conversations locales trouvées:', localConversations.length);
+    return localConversations;
   }
 
   /**

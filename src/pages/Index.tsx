@@ -8,6 +8,7 @@ import { ArrowRight, Dumbbell, AppleIcon, Moon, MessageSquare, BarChart3, Medal 
 import { cn } from '@/lib/utils';
 
 const Index = () => {
+  console.log('🏠 Index page rendered');
   const navigate = useNavigate();
   
   // Modules avec la palette de couleurs fitness moderne

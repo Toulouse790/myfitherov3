@@ -36,7 +36,10 @@ const OptimizedLoader = () => (
 );
 
 function App() {
+  console.log('🚀 App component rendered');
+  
   useEffect(() => {
+    console.log('🔧 App useEffect triggered');
     // Initialisation des optimisations au démarrage
     const initOptimizations = async () => {
       console.log('🚀 Initialisation des optimisations...');
