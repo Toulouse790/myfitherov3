@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Message } from './types';
 
@@ -7,10 +8,12 @@ export class ConversationService {
    */
   static async getOrCreateConversation(userId: string, agentName: string): Promise<string | null> {
     try {
-      // Recherche directe sans chaînage de méthodes
-      const { data: existingConversations, error: searchError } = await supabase
+      // Requête séparée pour éviter les types complexes
+      const existingQuery = supabase
         .from('ai_conversations')
-        .select('id')
+        .select('id');
+      
+      const { data: existingConversations, error: searchError } = await existingQuery
         .eq('user_id', userId)
         .eq('agent_name', agentName)
         .order('created_at', { ascending: false })
@@ -33,10 +36,11 @@ export class ConversationService {
         last_message_at: new Date().toISOString()
       };
 
-      const { data: newConversation, error: createError } = await supabase
+      const insertQuery = supabase
         .from('ai_conversations')
-        .insert(insertData)
-        .select('id');
+        .insert(insertData);
+      
+      const { data: newConversation, error: createError } = await insertQuery.select('id');
 
       if (createError || !newConversation || newConversation.length === 0) {
         console.error('Erreur création conversation:', createError);
@@ -55,9 +59,11 @@ export class ConversationService {
    */
   static async getUserConversations(userId: string): Promise<any[]> {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('ai_conversations')
-        .select('*')
+        .select('*');
+      
+      const { data, error } = await query
         .eq('user_id', userId)
         .order('last_message_at', { ascending: false });
 
@@ -85,10 +91,11 @@ export class ConversationService {
         last_message_at: new Date().toISOString()
       };
 
-      const { data, error } = await supabase
+      const query = supabase
         .from('ai_conversations')
-        .insert(insertData)
-        .select('id');
+        .insert(insertData);
+
+      const { data, error } = await query.select('id');
 
       if (error || !data || data.length === 0) {
         console.error('Erreur création conversation:', error);
@@ -107,9 +114,11 @@ export class ConversationService {
    */
   static async getMessages(conversationId: string): Promise<Message[]> {
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from('ai_messages')
-        .select('*')
+        .select('*');
+      
+      const { data, error } = await query
         .eq('conversation_id', conversationId)
         .order('created_at', { ascending: true });
 
@@ -163,20 +172,22 @@ export class ConversationService {
   static async deleteConversation(conversationId: string): Promise<boolean> {
     try {
       // Supprimer d'abord les messages
-      const { error: messagesError } = await supabase
+      const deleteMessagesQuery = supabase
         .from('ai_messages')
-        .delete()
-        .eq('conversation_id', conversationId);
+        .delete();
+      
+      const { error: messagesError } = await deleteMessagesQuery.eq('conversation_id', conversationId);
 
       if (messagesError) {
         console.error('Erreur suppression messages:', messagesError);
       }
 
       // Puis la conversation
-      const { error: conversationError } = await supabase
+      const deleteConversationQuery = supabase
         .from('ai_conversations')
-        .delete()
-        .eq('id', conversationId);
+        .delete();
+      
+      const { error: conversationError } = await deleteConversationQuery.eq('id', conversationId);
 
       if (conversationError) {
         console.error('Erreur suppression conversation:', conversationError);
