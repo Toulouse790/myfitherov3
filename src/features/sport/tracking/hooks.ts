@@ -52,23 +52,67 @@ export const useCurrentWorkout = () => {
   return useQuery({
     queryKey: ['current-workout'],
     queryFn: () => SportTrackingService.getCurrentWorkout(),
-    refetchInterval: 5000, // Mise à jour toutes les 5 secondes
+    refetchInterval: 5000,
+    retry: false,
+    staleTime: 30000,
   });
 };
 
 export const useSportStats = () => {
   return useQuery({
     queryKey: ['sport-stats'],
-    queryFn: () => SportTrackingService.getUserStats(),
-    staleTime: 30000, // 30 secondes
+    queryFn: async () => {
+      try {
+        return await SportTrackingService.getUserStats();
+      } catch (error) {
+        console.warn('Erreur chargement stats sport:', error);
+        // Retourner des stats par défaut si erreur
+        return {
+          totalWorkouts: 0,
+          totalDuration: 0,
+          totalCalories: 0,
+          averageIntensity: 0,
+          favoriteWorkoutType: 'strength',
+          longestStreak: 0,
+          currentStreak: 0,
+          personalRecords: [],
+          weeklyGoals: {
+            targetWorkouts: 4,
+            targetCalories: 2000,
+            targetDuration: 240,
+            currentWorkouts: 0,
+            currentCalories: 0,
+            currentDuration: 0
+          },
+          monthlyProgress: {
+            month: 'Décembre 2024',
+            workoutsCompleted: 0,
+            caloriesBurned: 0,
+            totalDuration: 0,
+            averageIntensity: 0,
+            improvementAreas: []
+          }
+        } as SportStats;
+      }
+    },
+    staleTime: 30000,
+    retry: false,
   });
 };
 
 export const useWorkoutHistory = () => {
   return useQuery({
     queryKey: ['workout-history'],
-    queryFn: () => SportTrackingService.getAllWorkouts(),
-    staleTime: 60000, // 1 minute
+    queryFn: async () => {
+      try {
+        return await SportTrackingService.getAllWorkouts();
+      } catch (error) {
+        console.warn('Erreur chargement historique workouts:', error);
+        return [];
+      }
+    },
+    staleTime: 60000,
+    retry: false,
   });
 };
 
@@ -77,9 +121,17 @@ export const useSmartSuggestions = (recovery: RecoveryMetrics) => {
   
   return useQuery({
     queryKey: ['smart-suggestions', recovery.readinessScore],
-    queryFn: () => SportTrackingService.getSmartSuggestions(weatherData?.weather, recovery),
+    queryFn: async () => {
+      try {
+        return await SportTrackingService.getSmartSuggestions(weatherData?.weather, recovery);
+      } catch (error) {
+        console.warn('Erreur chargement suggestions:', error);
+        return ['Commencez par un échauffement de 10 minutes', 'Hydratez-vous régulièrement'];
+      }
+    },
     enabled: !!weatherData,
-    staleTime: 300000, // 5 minutes
+    staleTime: 300000,
+    retry: false,
   });
 };
 

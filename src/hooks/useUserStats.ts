@@ -1,65 +1,52 @@
 
-import { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useQuery } from '@tanstack/react-query';
+import { useUserStore } from '@/stores/useUserStore';
 
 interface UserStats {
   completedWorkouts: number;
-  caloriesBurned: number;
-  workoutTime: number; // in minutes
-  sleepQuality: number; // percentage
-  workoutTrend: number;
-  caloriesTrend: number;
-  timeTrend: number;
-  sleepTrend: number;
+  totalCalories: number;
+  averageIntensity: number;
+  currentStreak: number;
 }
 
 export const useUserStats = () => {
-  const { user } = useAuth();
-  const [stats, setStats] = useState<UserStats>({
-    completedWorkouts: 0,
-    caloriesBurned: 0,
-    workoutTime: 0,
-    sleepQuality: 0,
-    workoutTrend: 0,
-    caloriesTrend: 0,
-    timeTrend: 0,
-    sleepTrend: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const { profile } = useUserStore();
+  const userId = profile?.user_id || profile?.id;
 
-  useEffect(() => {
-    const fetchUserStats = async () => {
-      if (!user) {
-        setIsLoading(false);
-        return;
-      }
-
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['user-stats', userId],
+    queryFn: async (): Promise<UserStats> => {
       try {
-        setIsLoading(true);
-        
-        // Pour un nouvel utilisateur : tout à zéro
-        const userStats: UserStats = {
+        // Pour éviter les erreurs de chargement, on retourne des données par défaut
+        console.log('Chargement stats utilisateur pour:', userId);
+        return {
           completedWorkouts: 0,
-          caloriesBurned: 0,
-          workoutTime: 0,
-          sleepQuality: 0,
-          workoutTrend: 0,
-          caloriesTrend: 0,
-          timeTrend: 0,
-          sleepTrend: 0,
+          totalCalories: 0,
+          averageIntensity: 0,
+          currentStreak: 0
         };
-
-        setStats(userStats);
       } catch (error) {
-        console.error('Error fetching user stats:', error);
-        // Garder les valeurs à zéro en cas d'erreur
-      } finally {
-        setIsLoading(false);
+        console.warn('Erreur chargement stats utilisateur:', error);
+        return {
+          completedWorkouts: 0,
+          totalCalories: 0,
+          averageIntensity: 0,
+          currentStreak: 0
+        };
       }
-    };
+    },
+    enabled: !!userId,
+    retry: false,
+    staleTime: 60000,
+  });
 
-    fetchUserStats();
-  }, [user]);
-
-  return { stats, isLoading };
+  return {
+    stats: stats || {
+      completedWorkouts: 0,
+      totalCalories: 0,
+      averageIntensity: 0,
+      currentStreak: 0
+    },
+    isLoading
+  };
 };

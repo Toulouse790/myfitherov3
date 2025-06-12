@@ -13,24 +13,38 @@ export const useHydration = () => {
   // Get the actual user_id from the user_profiles table structure
   const userId = profile?.user_id || profile?.id;
 
-  // Récupération des données d'historique d'hydratation
+  // Récupération des données d'historique d'hydratation avec gestion d'erreur
   const { data: entries = [], isLoading: isLoadingEntries, refetch: refetchEntries } = useQuery({
     queryKey: ['hydration-entries', userId],
     queryFn: async () => {
       if (!userId) return [];
-      return hydrationService.getUserEntries(userId);
+      try {
+        return await hydrationService.getUserEntries(userId);
+      } catch (error) {
+        console.warn('Erreur chargement entries hydratation:', error);
+        return [];
+      }
     },
-    enabled: !!userId
+    enabled: !!userId,
+    retry: false,
+    staleTime: 60000,
   });
 
-  // Récupération des objectifs d'hydratation
+  // Récupération des objectifs d'hydratation avec gestion d'erreur
   const { data: goal, isLoading: isLoadingGoal } = useQuery({
     queryKey: ['hydration-goal', userId],
     queryFn: async () => {
       if (!userId) return null;
-      return hydrationService.getUserGoal(userId);
+      try {
+        return await hydrationService.getUserGoal(userId);
+      } catch (error) {
+        console.warn('Erreur chargement goal hydratation:', error);
+        return null;
+      }
     },
-    enabled: !!userId
+    enabled: !!userId,
+    retry: false,
+    staleTime: 60000,
   });
 
   // Calcul des statistiques d'hydratation simples
