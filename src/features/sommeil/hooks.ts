@@ -6,26 +6,32 @@ import { useUserStore } from '@/stores/useUserStore';
 export const useSleepSessions = (userId: string, dateRange: { start: string; end: string }) => {
   return useQuery({
     queryKey: ['sleep-sessions', userId, dateRange],
-    queryFn: async (): Promise<SleepSession[]> => {
-      // Retourner directement des données mockées pour éviter la roue qui tourne
-      return [];
+    queryFn: (): Promise<SleepSession[]> => {
+      // Retourner immédiatement des données vides pour arrêter la roue qui tourne
+      return Promise.resolve([]);
     },
+    enabled: false, // Désactiver complètement la query
     retry: false,
-    staleTime: 60000,
-    enabled: !!userId,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };
 
 export const useSleepGoal = (userId: string) => {
   return useQuery({
     queryKey: ['sleep-goal', userId],
-    queryFn: async (): Promise<SleepGoal | null> => {
-      // Retourner directement null pour éviter la roue qui tourne
-      return null;
+    queryFn: (): Promise<SleepGoal | null> => {
+      // Retourner immédiatement null pour arrêter la roue qui tourne
+      return Promise.resolve(null);
     },
+    enabled: false, // Désactiver complètement la query
     retry: false,
-    staleTime: 60000,
-    enabled: !!userId,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };
 
@@ -35,17 +41,20 @@ export const useSleepStats = (userId: string, period: string = 'week') => {
 
   return useQuery({
     queryKey: ['sleep-stats', actualUserId, period],
-    queryFn: async (): Promise<SleepStats> => {
-      // Retourner directement des stats par défaut pour éviter la roue qui tourne
-      return {
+    queryFn: (): Promise<SleepStats> => {
+      // Retourner immédiatement des stats par défaut pour arrêter la roue qui tourne
+      return Promise.resolve({
         average_duration_minutes: 480,
         average_sleep_score: 85,
         sleep_efficiency_percentage: 90,
         consistency_score: 75
-      };
+      });
     },
+    enabled: false, // Désactiver complètement la query
     retry: false,
-    staleTime: 60000,
-    enabled: !!actualUserId,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };

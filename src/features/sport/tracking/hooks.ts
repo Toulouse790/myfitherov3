@@ -1,6 +1,5 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SportTrackingService } from './services';
 import { WorkoutTracking, SportStats, RecoveryMetrics } from './types';
 import { useWeatherRecommendations } from '@/hooks/useWeatherRecommendations';
 import { useUserStore } from '@/stores/useUserStore';
@@ -70,12 +69,15 @@ export const useCurrentWorkout = () => {
   return useQuery({
     queryKey: ['current-workout'],
     queryFn: () => {
-      // Retourner directement null pour éviter la roue qui tourne
+      // Retourner immédiatement null pour arrêter la roue qui tourne
       return Promise.resolve(null);
     },
-    refetchInterval: false,
+    enabled: false, // Désactiver complètement la query
     retry: false,
-    staleTime: 30000,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };
 
@@ -85,9 +87,9 @@ export const useSportStats = () => {
 
   return useQuery({
     queryKey: ['sport-stats', userId],
-    queryFn: async () => {
-      // Retourner directement des stats par défaut pour éviter la roue qui tourne
-      return {
+    queryFn: (): Promise<SportStats> => {
+      // Retourner immédiatement des stats par défaut pour arrêter la roue qui tourne
+      return Promise.resolve({
         totalWorkouts: 0,
         totalDuration: 0,
         totalCalories: 0,
@@ -112,23 +114,30 @@ export const useSportStats = () => {
           averageIntensity: 0,
           improvementAreas: []
         }
-      } as SportStats;
+      });
     },
-    staleTime: 30000,
+    enabled: false, // Désactiver complètement la query
     retry: false,
-    enabled: !!userId,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };
 
 export const useWorkoutHistory = () => {
   return useQuery({
     queryKey: ['workout-history'],
-    queryFn: async () => {
-      // Retourner directement un tableau vide pour éviter la roue qui tourne
-      return [];
+    queryFn: () => {
+      // Retourner immédiatement un tableau vide pour arrêter la roue qui tourne
+      return Promise.resolve([]);
     },
-    staleTime: 60000,
+    enabled: false, // Désactiver complètement la query
     retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };
 
@@ -137,13 +146,16 @@ export const useSmartSuggestions = (recovery: RecoveryMetrics) => {
   
   return useQuery({
     queryKey: ['smart-suggestions', recovery.readinessScore],
-    queryFn: async () => {
-      // Retourner directement des suggestions par défaut pour éviter la roue qui tourne
-      return ['Commencez par un échauffement de 10 minutes', 'Hydratez-vous régulièrement'];
+    queryFn: () => {
+      // Retourner immédiatement des suggestions par défaut pour arrêter la roue qui tourne
+      return Promise.resolve(['Commencez par un échauffement de 10 minutes', 'Hydratez-vous régulièrement']);
     },
-    enabled: !!weatherData,
-    staleTime: 300000,
+    enabled: false, // Désactiver complètement la query
     retry: false,
+    refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    staleTime: Infinity,
   });
 };
 
