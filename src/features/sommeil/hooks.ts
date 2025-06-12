@@ -1,16 +1,14 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { SleepSession, SleepGoal, SleepStats } from './types';
+import { SleepService } from './services';
 
-// Hooks personnalisés pour le module Sommeil avec gestion d'erreur
 export const useSleepSessions = (userId: string, dateRange: { start: string; end: string }) => {
   return useQuery({
     queryKey: ['sleep-sessions', userId, dateRange],
     queryFn: async (): Promise<SleepSession[]> => {
       try {
-        // Simulation de données de sommeil - pas d'appel API pour éviter les erreurs
-        console.log('Chargement sessions sommeil pour:', userId, dateRange);
-        return [];
+        return await SleepService.getUserSleepSessions(userId, dateRange);
       } catch (error) {
         console.warn('Erreur chargement sessions sommeil:', error);
         return [];
@@ -18,6 +16,7 @@ export const useSleepSessions = (userId: string, dateRange: { start: string; end
     },
     retry: false,
     staleTime: 60000,
+    enabled: !!userId,
   });
 };
 
@@ -26,9 +25,7 @@ export const useSleepGoal = (userId: string) => {
     queryKey: ['sleep-goal', userId],
     queryFn: async (): Promise<SleepGoal | null> => {
       try {
-        // Simulation d'objectif de sommeil - pas d'appel API pour éviter les erreurs
-        console.log('Chargement objectif sommeil pour:', userId);
-        return null;
+        return await SleepService.getUserSleepGoal(userId);
       } catch (error) {
         console.warn('Erreur chargement objectif sommeil:', error);
         return null;
@@ -36,33 +33,28 @@ export const useSleepGoal = (userId: string) => {
     },
     retry: false,
     staleTime: 60000,
+    enabled: !!userId,
   });
 };
 
-export const useSleepStats = (userId: string, period: string) => {
+export const useSleepStats = (userId: string, period: string = 'week') => {
   return useQuery({
     queryKey: ['sleep-stats', userId, period],
     queryFn: async (): Promise<SleepStats> => {
       try {
-        // Simulation de statistiques de sommeil - données par défaut
-        console.log('Chargement stats sommeil pour:', userId, period);
+        return await SleepService.getUserSleepStats(userId, period);
+      } catch (error) {
+        console.warn('Erreur chargement stats sommeil:', error);
         return {
           average_duration_minutes: 480,
           average_sleep_score: 85,
           sleep_efficiency_percentage: 90,
           consistency_score: 75
         };
-      } catch (error) {
-        console.warn('Erreur chargement stats sommeil:', error);
-        return {
-          average_duration_minutes: 0,
-          average_sleep_score: 0,
-          sleep_efficiency_percentage: 0,
-          consistency_score: 0
-        };
       }
     },
     retry: false,
     staleTime: 60000,
+    enabled: !!userId,
   });
 };

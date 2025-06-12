@@ -12,6 +12,7 @@ export const useSportTracking = () => {
       SportTrackingService.startWorkout(workoutData),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['current-workout'] });
+      queryClient.invalidateQueries({ queryKey: ['sport-stats'] });
     }
   });
 
@@ -52,7 +53,7 @@ export const useCurrentWorkout = () => {
   return useQuery({
     queryKey: ['current-workout'],
     queryFn: () => SportTrackingService.getCurrentWorkout(),
-    refetchInterval: 5000,
+    refetchInterval: false, // Pas de refetch automatique
     retry: false,
     staleTime: 30000,
   });
@@ -66,7 +67,6 @@ export const useSportStats = () => {
         return await SportTrackingService.getUserStats();
       } catch (error) {
         console.warn('Erreur chargement stats sport:', error);
-        // Retourner des stats par défaut si erreur
         return {
           totalWorkouts: 0,
           totalDuration: 0,
