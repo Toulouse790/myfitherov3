@@ -1,4 +1,3 @@
-
 // Service pour la gestion des profils utilisateur
 import { supabase } from '@/integrations/supabase/client';
 import { BaseService } from './BaseService';
@@ -42,6 +41,8 @@ export class ProfileService extends BaseService {
    */
   static async updateUserProfile(userId: string, profileData: UserProfile): Promise<{ success: boolean; data?: any; error?: string }> {
     try {
+      console.log('🔄 ProfileService.updateUserProfile appelé pour userId:', userId);
+      
       const updateData = {
         user_id: userId,
         first_name: profileData.first_name,
@@ -62,16 +63,18 @@ export class ProfileService extends BaseService {
         .single();
 
       if (error) {
-        console.error('Erreur mise à jour profil:', error);
+        console.error('❌ Erreur mise à jour profil:', error);
         return { success: false, error: error.message };
       }
+
+      console.log('✅ Profil mis à jour avec succès:', data);
 
       // Envoyer les données à n8n après succès
       await this.sendToN8N({ user_id: userId, ...updateData });
 
       return { success: true, data };
     } catch (error) {
-      console.error('Erreur ProfileService:', error);
+      console.error('❌ Exception ProfileService:', error);
       return { success: false, error: error instanceof Error ? error.message : 'Erreur inconnue' };
     }
   }
@@ -89,18 +92,25 @@ export class ProfileService extends BaseService {
    */
   static async getUserProfile(userId: string): Promise<UserProfile | null> {
     try {
+      console.log('🔍 ProfileService.getUserProfile appelé pour userId:', userId);
+      
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle(); // CORRECTION: utiliser maybeSingle() au lieu de single()
 
       if (error) {
-        console.error("Erreur récupération profil :", error.message);
+        console.error("❌ Erreur récupération profil :", error.message);
         return null;
       }
 
-      if (!data) return null;
+      if (!data) {
+        console.log('ℹ️ Aucun profil trouvé pour cet utilisateur');
+        return null;
+      }
+
+      console.log('✅ Profil récupéré avec succès:', data);
 
       return {
         first_name: data.first_name || undefined,
@@ -115,7 +125,7 @@ export class ProfileService extends BaseService {
         accepted_terms: true // Assumé vrai si le profil existe
       };
     } catch (err) {
-      console.error('Exception getUserProfile:', err);
+      console.error('❌ Exception getUserProfile:', err);
       return null;
     }
   }

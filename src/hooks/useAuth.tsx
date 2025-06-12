@@ -26,72 +26,94 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const { setProfile, clearUser } = useUserStore();
 
+  const loadUserProfile = async (userId: string) => {
+    try {
+      console.log('🔄 Chargement du profil pour userId:', userId);
+      const profile = await ProfileService.getUserProfile(userId);
+      if (profile) {
+        console.log('✅ Profil chargé et mis en store:', profile);
+        setProfile({ user_id: userId, ...profile });
+      } else {
+        console.log('ℹ️ Aucun profil trouvé, utilisateur probablement nouveau');
+      }
+    } catch (error) {
+      console.error('❌ Erreur chargement profil:', error);
+      // Ne pas faire échouer l'authentification si le profil échoue
+    }
+  };
+
   useEffect(() => {
+    console.log('🔧 useAuth useEffect: Initialisation de l\'authentification');
+    
     // Récupérer la session actuelle
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Session initiale:', session);
+      console.log('📋 Session initiale récupérée:', session ? 'connecté' : 'non connecté');
       setSession(session);
       setUser(session?.user ?? null);
       
       // Charger le profil utilisateur si connecté
       if (session?.user) {
-        loadUserProfile(session.user.id);
+        loadUserProfile(session.user.id).finally(() => {
+          console.log('✅ Chargement initial terminé - setLoading(false)');
+          setLoading(false);
+        });
+      } else {
+        console.log('✅ Pas d\'utilisateur connecté - setLoading(false)');
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('Changement auth:', event, session);
+      console.log('🔄 Changement auth détecté:', event, session ? 'avec session' : 'sans session');
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        // Charger le profil après connexion
-        await loadUserProfile(session.user.id);
+        // Charger le profil après connexion avec gestion d'erreur appropriée
+        try {
+          await loadUserProfile(session.user.id);
+        } catch (error) {
+          console.error('❌ Erreur lors du chargement du profil dans onAuthStateChange:', error);
+          // Ne pas bloquer l'authentification si le profil échoue
+        }
       } else {
         // Nettoyer le store si déconnexion
+        console.log('🧹 Nettoyage du store utilisateur (déconnexion)');
         clearUser();
       }
       
+      // S'assurer que loading est toujours mis à false à la fin
+      console.log('✅ Changement auth traité - setLoading(false)');
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('🧹 Nettoyage de l\'abonnement auth');
+      subscription.unsubscribe();
+    };
   }, [setProfile, clearUser]);
 
-  const loadUserProfile = async (userId: string) => {
-    try {
-      const profile = await ProfileService.getUserProfile(userId);
-      if (profile) {
-        setProfile({ user_id: userId, ...profile });
-      }
-    } catch (error) {
-      console.error('Erreur chargement profil:', error);
-    }
-  };
-
   const signIn = async (email: string, password: string) => {
-    console.log('Tentative de connexion pour:', email);
+    console.log('🔐 Tentative de connexion pour:', email);
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) {
-      console.error('Erreur connexion:', error);
+      console.error('❌ Erreur connexion:', error);
       throw new Error(error.message);
     }
 
-    console.log('Connexion réussie:', data);
+    console.log('✅ Connexion réussie:', data);
     toast.success('Connexion réussie', {
       description: 'Bienvenue dans MyFitHero !'
     });
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
-    console.log('Tentative d\'inscription pour:', email, 'avec metadata:', metadata);
+    console.log('📝 Tentative d\'inscription pour:', email, 'avec metadata:', metadata);
     
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -102,11 +124,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     if (error) {
-      console.error('Erreur inscription:', error);
+      console.error('❌ Erreur inscription:', error);
       throw new Error(error.message);
     }
 
-    console.log('Inscription réussie:', data);
+    console.log('✅ Inscription réussie:', data);
     toast.success('Inscription réussie', {
       description: 'Votre compte a été créé avec succès !'
     });
