@@ -17,16 +17,16 @@ export const useUserStats = () => {
   const { data: stats, isLoading } = useQuery({
     queryKey: ['user-stats', userId],
     queryFn: async (): Promise<UserStats> => {
-      try {
-        if (!userId) {
-          return {
-            completedWorkouts: 0,
-            totalCalories: 0,
-            averageIntensity: 0,
-            currentStreak: 0
-          };
-        }
+      if (!userId) {
+        return {
+          completedWorkouts: 0,
+          totalCalories: 0,
+          averageIntensity: 0,
+          currentStreak: 0
+        };
+      }
 
+      try {
         // Récupérer les données depuis daily_tracking
         const { data, error } = await supabase
           .from('daily_tracking')
@@ -38,6 +38,13 @@ export const useUserStats = () => {
 
         if (error) {
           console.warn('Erreur récupération user stats:', error);
+          // Retourner des données par défaut en cas d'erreur
+          return {
+            completedWorkouts: 0,
+            totalCalories: 0,
+            averageIntensity: 0,
+            currentStreak: 0
+          };
         }
 
         const trackingData = data || [];
