@@ -1,11 +1,17 @@
 
-/* OVERRIDE COMPLET ANTI-JAUNE - PREMIÈRE LIGNE */
+/* SUPPRESSION TOTALE DU JAUNE - AMÉLIORATION LISIBILITÉ */
 * {
   /* Suppression de TOUTE référence au jaune dans l'app */
   background-color: inherit !important;
 }
 
-*[style*="yellow"], *[class*="yellow"], *[style*="#fef3cd"], *[style*="#f59e0b"] {
+/* Suppression agressive de toute couleur jaune */
+*[style*="yellow"], 
+*[class*="yellow"], 
+*[style*="#fef3cd"], 
+*[style*="#f59e0b"],
+*[style*="#eab308"],
+*[style*="#fbbf24"] {
   background-color: rgb(255, 255, 255) !important;
   color: rgb(15, 23, 42) !important;
 }
@@ -32,25 +38,25 @@
 @layer base {
   :root {
     --background: 250 250 250;
-    --foreground: 15 23 42;
+    --foreground: 15 23 42; /* Texte plus foncé pour meilleure lisibilité */
 
     --card: 255 255 255;
-    --card-foreground: 15 23 42;
+    --card-foreground: 15 23 42; /* Texte foncé sur fond blanc */
 
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
 
     --primary: 37 99 235;           /* Bleu énergie #2563eb */
-    --primary-foreground: 255 255 255;
+    --primary-foreground: 255 255 255; /* Blanc sur bleu */
 
     --secondary: 241 245 249;
-    --secondary-foreground: 15 23 42;
+    --secondary-foreground: 30 41 59; /* Texte plus foncé sur fond secondaire */
 
     --muted: 248 250 252;
-    --muted-foreground: 100 116 139;
+    --muted-foreground: 71 85 105; /* Gris plus foncé pour meilleure lisibilité */
 
     --accent: 241 245 249;
-    --accent-foreground: 15 23 42;
+    --accent-foreground: 15 23 42; /* Texte foncé sur accent */
 
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
@@ -61,35 +67,35 @@
 
     --radius: 1rem;
 
-    /* Variables pour le sidebar - SUPPRESSION TOTALE DU JAUNE */
+    /* Variables pour le sidebar - AUCUN JAUNE */
     --sidebar-background: 255 255 255;
-    --sidebar-foreground: 15 23 42;
+    --sidebar-foreground: 15 23 42; /* Texte foncé */
     --sidebar-primary: 37 99 235;
     --sidebar-primary-foreground: 255 255 255;
     --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 15 23 42;
+    --sidebar-accent-foreground: 15 23 42; /* Texte foncé */
     --sidebar-border: 226 232 240;
     --sidebar-ring: 37 99 235;
   }
 
   .dark {
     --background: 15 23 42;
-    --foreground: 248 250 252;
+    --foreground: 248 250 252; /* Texte clair en mode sombre */
 
     --card: 30 41 59;
-    --card-foreground: 248 250 252;
+    --card-foreground: 248 250 252; /* Texte clair sur fond sombre */
 
     --popover: 30 41 59;
-    --popover-foreground: 15 23 42;
+    --popover-foreground: 248 250 252;
 
     --primary: 59 130 246;
     --primary-foreground: 15 23 42;
 
     --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
+    --secondary-foreground: 248 250 252; /* Texte clair sur fond secondaire sombre */
 
     --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
+    --muted-foreground: 148 163 184; /* Gris plus clair en mode sombre */
 
     --accent: 51 65 85;
     --accent-foreground: 248 250 252;
@@ -101,9 +107,9 @@
     --input: 51 65 85;
     --ring: 59 130 246;
 
-    /* Variables pour le sidebar en mode sombre - SUPPRESSION TOTALE DU JAUNE */
+    /* Variables pour le sidebar en mode sombre - AUCUN JAUNE */
     --sidebar-background: 30 41 59;
-    --sidebar-foreground: 248 250 252;
+    --sidebar-foreground: 248 250 252; /* Texte clair */
     --sidebar-primary: 59 130 246;
     --sidebar-primary-foreground: 15 23 42;
     --sidebar-accent: 51 65 85;
@@ -123,28 +129,49 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
+    color: rgb(15, 23, 42); /* Force un texte foncé par défaut */
+  }
+
+  .dark body {
+    color: rgb(248, 250, 252); /* Texte clair en mode sombre */
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
+    color: inherit; /* Hérite de la couleur du parent */
   }
 
   h1 { @apply text-3xl lg:text-4xl; }
   h2 { @apply text-2xl lg:text-3xl; }
   h3 { @apply text-xl lg:text-2xl; }
   h4 { @apply text-lg lg:text-xl; }
+
+  /* Amélioration des couleurs de texte par défaut */
+  p, span, div {
+    color: inherit;
+  }
+
+  /* Texte sur fond clair */
+  .text-on-light {
+    color: rgb(15, 23, 42) !important;
+  }
+
+  /* Texte sur fond sombre */
+  .text-on-dark {
+    color: rgb(248, 250, 252) !important;
+  }
 }
 
-/* OVERRIDE ANTI-JAUNE ULTRA AGRESSIF */
 @layer components {
-  /* Supprimer ABSOLUMENT tout jaune */
+  /* Suppression TOTALE de toute couleur jaune */
   *[class*="bg-yellow"], 
   *[class*="text-yellow"], 
   *[class*="border-yellow"],
   *[style*="yellow"],
   *[style*="#fef3cd"],
   *[style*="#f59e0b"],
-  *[style*="#eab308"] {
+  *[style*="#eab308"],
+  *[style*="#fbbf24"] {
     background-color: rgb(255 255 255) !important;
     color: rgb(15 23 42) !important;
     border-color: rgb(226 232 240) !important;
@@ -156,7 +183,8 @@
   .dark *[style*="yellow"],
   .dark *[style*="#fef3cd"],
   .dark *[style*="#f59e0b"],
-  .dark *[style*="#eab308"] {
+  .dark *[style*="#eab308"],
+  .dark *[style*="#fbbf24"] {
     background-color: rgb(30 41 59) !important;
     color: rgb(248 250 252) !important;
     border-color: rgb(51 65 85) !important;
@@ -166,29 +194,35 @@
   [data-sidebar="sidebar"] {
     background-color: rgb(255 255 255) !important;
     background: rgb(255 255 255) !important;
+    color: rgb(15 23 42) !important;
   }
 
   .dark [data-sidebar="sidebar"] {
     background-color: rgb(30 41 59) !important;
     background: rgb(30 41 59) !important;
+    color: rgb(248 250 252) !important;
   }
 
   /* Override pour tous les éléments avec bg-sidebar */
   .bg-sidebar {
     background-color: rgb(255 255 255) !important;
+    color: rgb(15 23 42) !important;
   }
 
   .dark .bg-sidebar {
     background-color: rgb(30 41 59) !important;
+    color: rgb(248 250 252) !important;
   }
 
-  /* Styles modernes pour les cards */
+  /* Styles modernes pour les cards avec meilleur contraste */
   .modern-card {
     @apply bg-white rounded-xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300;
+    color: rgb(15, 23, 42);
   }
 
   .modern-card-dark {
     @apply bg-gray-800/50 border-gray-700/50 backdrop-blur-sm;
+    color: rgb(248, 250, 252);
   }
 
   .gradient-card {
@@ -204,7 +238,7 @@
     @apply hover:scale-105 transition-transform duration-300;
   }
 
-  /* Couleurs thématiques fitness - AUCUN JAUNE */
+  /* Couleurs thématiques fitness avec meilleur contraste - AUCUN JAUNE */
   .fitness-primary {
     @apply text-fitness-primary border-fitness-primary/20 bg-fitness-primary/5;
   }
@@ -225,7 +259,7 @@
     @apply text-fitness-sleep border-fitness-sleep/20 bg-fitness-sleep/5;
   }
 
-  /* Boutons thématiques fitness - AUCUN JAUNE */
+  /* Boutons thématiques fitness avec meilleur contraste - AUCUN JAUNE */
   .btn-sport {
     @apply bg-gradient-sport hover:opacity-90 text-white border-0 shadow-lg;
   }
@@ -241,9 +275,26 @@
   .btn-sleep {
     @apply bg-gradient-sleep hover:opacity-90 text-white border-0 shadow-lg;
   }
+
+  /* Classes utilitaires pour une meilleure lisibilité */
+  .text-readable {
+    color: rgb(15, 23, 42) !important;
+  }
+
+  .dark .text-readable {
+    color: rgb(248, 250, 252) !important;
+  }
+
+  .text-readable-muted {
+    color: rgb(71, 85, 105) !important;
+  }
+
+  .dark .text-readable-muted {
+    color: rgb(148, 163, 184) !important;
+  }
 }
 
-/* Animations et effets visuels */
+/* Animations et effets visuels améliorés */
 .glass-effect {
   @apply bg-white/80 backdrop-blur-md border border-white/20;
 }

@@ -26,8 +26,8 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: '#2563eb', // Bleu énergie - PAS DE JAUNE
-					foreground: 'hsl(var(--primary-foreground))'
+					DEFAULT: '#2563eb', // Bleu énergie - AUCUN JAUNE
+					foreground: '#ffffff' // Blanc pour un bon contraste
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -39,7 +39,7 @@ export default {
 				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
-					foreground: 'hsl(var(--muted-foreground))'
+					foreground: '#64748b' // Gris plus foncé pour meilleure lisibilité
 				},
 				accent: {
 					DEFAULT: 'hsl(var(--accent))',
@@ -63,7 +63,7 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// Palette moderne SANS AUCUN JAUNE
+				// Palette moderne SANS AUCUN JAUNE - couleurs améliorées
 				fitness: {
 					primary: '#2563eb',    // Bleu énergie
 					sport: '#dc2626',      // Rouge passion
