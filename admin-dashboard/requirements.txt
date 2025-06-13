@@ -1,0 +1,8 @@
+# requirements.txt
+streamlit
+supabase
+pandas
+plotly
+python-dotenv
+numpy
+requests
