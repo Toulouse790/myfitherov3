@@ -1,31 +1,26 @@
+/* === APP CSS OPTIMISÉ AVEC TAILWIND FITNESS === */
 
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  @apply w-full min-h-screen bg-background text-foreground;
 }
 
+/* === LOGOS ET BRANDING === */
 .logo {
-  height: 6em;
-  padding: 1.5em;
+  @apply h-24 p-6 transition-all duration-300;
   will-change: filter;
-  transition: filter 300ms;
 }
+
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em rgba(37, 99, 235, 0.7)); /* Bleu primaire */
 }
+
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em rgba(97, 218, 251, 0.7)); /* Cyan React */
 }
 
 @keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -34,67 +29,265 @@
   }
 }
 
-.card {
-  padding: 2em;
+/* === LAYOUTS PRINCIPAUX === */
+.fit-app-container {
+  @apply fit-main-container relative overflow-hidden;
 }
 
-.read-the-docs {
-  color: #888;
+.fit-content-area {
+  @apply flex-1 p-fit-card-padding space-y-fit-section-gap;
+  @apply max-w-7xl mx-auto w-full;
 }
 
-/* Glassmorphism effects - palette fitness moderne */
-.glass-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+.fit-header {
+  @apply sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80;
+  @apply backdrop-blur-md border-b border-gray-200 dark:border-gray-800;
+  @apply px-fit-card-padding py-4;
 }
 
-.glass-dark {
-  background: rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/* === CARDS SPÉCIALISÉES === */
+.fit-hero-card {
+  @apply relative overflow-hidden rounded-fit-modal p-8;
+  @apply bg-gradient-to-br from-fit-energy-500 via-fit-power-500 to-fit-motivation-500;
+  @apply text-white shadow-fit-stats;
 }
 
-/* Gradient animations - palette fitness moderne sans jaune */
-.gradient-flow {
-  background: linear-gradient(-45deg, #2563eb, #dc2626, #16a34a, #0891b2);
-  background-size: 400% 400%;
-  animation: gradient-flow 15s ease infinite;
+.fit-hero-card::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-br from-white/10 to-transparent;
 }
 
-@keyframes gradient-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.fit-hero-card * {
+  @apply relative z-10;
 }
 
-/* Pulse effect for live data - bleu primaire */
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite alternate;
+.fit-workout-card {
+  @apply fit-stat-card group hover:border-fit-energy-200;
+  @apply dark:hover:border-fit-energy-800 transition-all duration-300;
 }
 
-@keyframes pulse-glow {
-  from { box-shadow: 0 0 5px rgba(37, 99, 235, 0.5); }
-  to { box-shadow: 0 0 20px rgba(37, 99, 235, 0.8), 0 0 30px rgba(37, 99, 235, 0.3); }
+.fit-achievement-card {
+  @apply fit-stat-card bg-gradient-to-br from-fit-motivation-50 to-fit-achievement-light/10;
+  @apply border-fit-motivation-200 hover:shadow-fit-achievement;
 }
 
-/* Floating animation */
-.float {
-  animation: float 6s ease-in-out infinite;
+/* === NAVIGATION FITNESS === */
+.fit-bottom-nav {
+  @apply fixed bottom-0 left-0 right-0 z-50;
+  @apply bg-white/90 dark:bg-gray-900/90 backdrop-blur-md;
+  @apply border-t border-gray-200 dark:border-gray-800;
+  @apply safe-area-pb px-4 py-2;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+.fit-bottom-nav-grid {
+  @apply grid grid-cols-5 gap-2 max-w-md mx-auto;
 }
 
-/* Smooth hover grow */
-.hover-grow {
-  transition: transform 0.3s ease;
+.fit-nav-button {
+  @apply flex flex-col items-center justify-center;
+  @apply fit-touch-target rounded-lg transition-all duration-200;
+  @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+  @apply active:scale-95;
 }
 
-.hover-grow:hover {
-  transform: scale(1.05);
+.fit-nav-button.active {
+  @apply bg-fit-energy-50 text-fit-energy-600;
+  @apply dark:bg-fit-energy-900/30 dark:text-fit-energy-400;
 }
 
+.fit-nav-button.active .fit-nav-icon {
+  @apply animate-fit-pulse-strong;
+}
+
+/* === COMPOSANTS INTERACTIFS === */
+.fit-fab {
+  @apply fixed bottom-20 right-6 z-50;
+  @apply w-14 h-14 rounded-full shadow-fit-stats;
+  @apply bg-fit-energy-gradient text-white;
+  @apply flex items-center justify-center;
+  @apply hover:scale-110 active:scale-95;
+  @apply transition-all duration-300;
+  @apply animate-fit-heartbeat;
+}
+
+.fit-timer-display {
+  @apply text-fit-timer font-black text-center;
+  @apply text-fit-energy-600 dark:text-fit-energy-400;
+  @apply tabular-nums tracking-tight;
+}
+
+.fit-stats-number {
+  @apply text-fit-stats-large font-black;
+  @apply bg-gradient-to-br from-fit-energy-600 to-fit-power-600;
+  @apply bg-clip-text text-transparent;
+  @apply tabular-nums;
+}
+
+.fit-metric-value {
+  @apply text-fit-stats-medium font-bold;
+  @apply text-gray-900 dark:text-gray-100;
+  @apply tabular-nums;
+}
+
+.fit-metric-label {
+  @apply text-fit-label font-medium;
+  @apply text-gray-600 dark:text-gray-400;
+  @apply uppercase tracking-wide;
+}
+
+/* === FORMULAIRES FITNESS === */
+.fit-input-group {
+  @apply space-y-2;
+}
+
+.fit-input {
+  @apply w-full px-4 py-3 rounded-fit-button;
+  @apply border border-gray-300 dark:border-gray-600;
+  @apply bg-white dark:bg-gray-800;
+  @apply text-gray-900 dark:text-gray-100;
+  @apply placeholder-gray-500 dark:placeholder-gray-400;
+  @apply focus:border-fit-energy-500 focus:ring-2 focus:ring-fit-energy-200;
+  @apply transition-all duration-200;
+}
+
+.fit-input:focus {
+  @apply outline-none ring-fit-energy-500/20;
+}
+
+.fit-select {
+  @apply fit-input appearance-none cursor-pointer;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+/* === FEEDBACK VISUEL === */
+.fit-success-state {
+  @apply border-fit-success-border bg-fit-success-bg;
+  @apply animate-fit-success-bounce;
+}
+
+.fit-error-state {
+  @apply border-fit-error-border bg-fit-error-bg;
+  @apply animate-fit-error-shake;
+}
+
+.fit-loading-state {
+  @apply opacity-50 pointer-events-none;
+}
+
+.fit-loading-state::after {
+  content: '';
+  @apply absolute inset-0 bg-white/50 dark:bg-gray-900/50;
+  @apply flex items-center justify-center;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' stroke='currentColor' stroke-width='4' opacity='0.25'/%3E%3Cpath fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 2rem;
+  animation: spin 1s linear infinite;
+}
+
+/* === RESPONSIVE DESIGN === */
+@media (max-width: 640px) {
+  .fit-content-area {
+    @apply p-4 space-y-4;
+  }
+  
+  .fit-stats-grid {
+    @apply grid-cols-2 gap-3;
+  }
+  
+  .fit-hero-card {
+    @apply p-6 rounded-fit-card;
+  }
+  
+  .fit-timer-display {
+    @apply text-5xl;
+  }
+}
+
+@media (min-width: 1024px) {
+  .fit-content-area {
+    @apply p-8 space-y-8;
+  }
+  
+  .fit-stats-grid {
+    @apply grid-cols-4 gap-6;
+  }
+}
+
+/* === ANIMATIONS SPÉCIALES === */
+.fit-celebration {
+  @apply animate-fit-level-up;
+  transform-origin: center;
+}
+
+.fit-pulse-glow {
+  @apply animate-fit-achievement-glow;
+}
+
+.fit-streak-indicator {
+  @apply animate-fit-streak-fire;
+}
+
+/* === GLASSMORPHISM AVANCÉ === */
+.fit-glass-intense {
+  @apply bg-white/60 dark:bg-gray-900/60;
+  @apply backdrop-blur-xl border border-white/30 dark:border-gray-700/30;
+  @apply shadow-2xl;
+}
+
+.fit-glass-subtle {
+  @apply bg-white/80 dark:bg-gray-900/80;
+  @apply backdrop-blur-sm border border-white/20 dark:border-gray-800/20;
+  @apply shadow-lg;
+}
+
+/* === MODES D'AFFICHAGE === */
+.fit-mode-focus {
+  @apply bg-gray-900 text-white;
+}
+
+.fit-mode-focus .fit-stat-card {
+  @apply bg-gray-800 border-gray-700 text-white;
+}
+
+.fit-mode-outdoor {
+  @apply contrast-125 brightness-110;
+}
+
+.fit-mode-outdoor .fit-stat-card {
+  @apply shadow-2xl border-2;
+}
+
+/* === ACCESSIBILITÉ AVANCÉE === */
+@media (forced-colors: active) {
+  .fit-energy-gradient,
+  .fit-power-gradient,
+  .fit-growth-gradient,
+  .fit-hydration-gradient,
+  .fit-recovery-gradient {
+    background: ButtonText;
+    color: ButtonFace;
+  }
+}
+
+/* === PRINT OPTIMISÉ === */
+@media print {
+  .fit-app-container {
+    @apply bg-white text-black;
+  }
+  
+  .fit-stat-card {
+    @apply border border-black shadow-none;
+    page-break-inside: avoid;
+  }
+  
+  .fit-fab,
+  .fit-bottom-nav,
+  .fit-nav-button {
+    @apply hidden;
+  }
+}
