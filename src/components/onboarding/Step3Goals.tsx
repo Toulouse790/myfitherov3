@@ -1,65 +1,67 @@
 
 import React from 'react';
-import { FormData } from './types';
+import { UserData } from './types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface Step3GoalsProps {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  userData: UserData;
+  handleInputChange: (field: string, value: any) => void;
+  handleArrayChange: (field: string, item: string, checked: boolean) => void;
 }
 
-const Step3Goals = ({ formData, updateFormData }: Step3GoalsProps) => {
-  const fitnessGoals = [
-    'Perdre du poids',
-    'Prendre de la masse musculaire',
-    'Améliorer ma condition physique',
-    'Maintenir mon poids actuel',
-    'Améliorer ma force',
-    'Améliorer mon endurance'
+const Step3Goals = ({ userData, handleInputChange, handleArrayChange }: Step3GoalsProps) => {
+  const availableSports = [
+    'Musculation',
+    'Cardio',
+    'Course à pied',
+    'Natation',
+    'Cyclisme',
+    'Yoga',
+    'Pilates',
+    'Sports collectifs'
   ];
 
-  const handleGoalChange = (goal: string, checked: boolean) => {
-    const updatedGoals = checked 
-      ? [...formData.goals, goal]
-      : formData.goals.filter(g => g !== goal);
-    updateFormData({ goals: updatedGoals });
+  const handleSportChange = (sport: string, checked: boolean) => {
+    handleArrayChange('sports', sport, checked);
   };
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Objectifs fitness</CardTitle>
+        <CardTitle>Objectifs et sports</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="experienceLevel">Niveau d'expérience</Label>
-          <Select value={formData.experienceLevel} onValueChange={(value) => updateFormData({ experienceLevel: value })}>
-            <SelectTrigger id="experienceLevel">
-              <SelectValue placeholder="Sélectionnez votre niveau" />
+          <Label htmlFor="mainGoal">Objectif principal</Label>
+          <Select value={userData.mainGoal} onValueChange={(value) => handleInputChange('mainGoal', value)}>
+            <SelectTrigger id="mainGoal">
+              <SelectValue placeholder="Sélectionnez votre objectif principal" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="debutant">Débutant</SelectItem>
-              <SelectItem value="intermediaire">Intermédiaire</SelectItem>
-              <SelectItem value="avance">Avancé</SelectItem>
+              <SelectItem value="weight_loss">Perdre du poids</SelectItem>
+              <SelectItem value="muscle_gain">Prendre de la masse musculaire</SelectItem>
+              <SelectItem value="strength">Améliorer ma force</SelectItem>
+              <SelectItem value="endurance">Améliorer mon endurance</SelectItem>
+              <SelectItem value="maintenance">Maintenir ma forme actuelle</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-3">
-          <Label>Objectifs (sélectionnez plusieurs si nécessaire)</Label>
-          <div className="space-y-2">
-            {fitnessGoals.map((goal) => (
-              <div key={goal} className="flex items-center space-x-2">
+          <Label>Sports préférés (sélectionnez plusieurs si nécessaire)</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {availableSports.map((sport) => (
+              <div key={sport} className="flex items-center space-x-2">
                 <Checkbox
-                  id={`goal-${goal}`}
-                  checked={formData.goals.includes(goal)}
-                  onCheckedChange={(checked) => handleGoalChange(goal, checked as boolean)}
+                  id={`sport-${sport}`}
+                  checked={userData.sports.includes(sport)}
+                  onCheckedChange={(checked) => handleSportChange(sport, checked as boolean)}
                 />
-                <Label htmlFor={`goal-${goal}`} className="text-sm">
-                  {goal}
+                <Label htmlFor={`sport-${sport}`} className="text-sm">
+                  {sport}
                 </Label>
               </div>
             ))}

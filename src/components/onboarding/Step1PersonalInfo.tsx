@@ -1,17 +1,17 @@
 
 import React from 'react';
-import { FormData } from './types';
+import { UserData } from './types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Step1PersonalInfoProps {
-  formData: FormData;
-  updateFormData: (data: Partial<FormData>) => void;
+  userData: UserData;
+  handleInputChange: (field: string, value: any) => void;
 }
 
-const Step1PersonalInfo = ({ formData, updateFormData }: Step1PersonalInfoProps) => {
+const Step1PersonalInfo = ({ userData, handleInputChange }: Step1PersonalInfoProps) => {
   return (
     <Card>
       <CardHeader>
@@ -24,8 +24,8 @@ const Step1PersonalInfo = ({ formData, updateFormData }: Step1PersonalInfoProps)
             <Input
               id="firstName"
               name="firstName"
-              value={formData.firstName}
-              onChange={(e) => updateFormData({ firstName: e.target.value })}
+              value={userData.firstName}
+              onChange={(e) => handleInputChange('firstName', e.target.value)}
               placeholder="Votre prénom"
             />
           </div>
@@ -34,39 +34,60 @@ const Step1PersonalInfo = ({ formData, updateFormData }: Step1PersonalInfoProps)
             <Input
               id="lastName"
               name="lastName"
-              value={formData.lastName}
-              onChange={(e) => updateFormData({ lastName: e.target.value })}
+              value={userData.lastName}
+              onChange={(e) => handleInputChange('lastName', e.target.value)}
               placeholder="Votre nom"
             />
           </div>
         </div>
 
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={userData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            placeholder="votre@email.com"
+          />
+        </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="age">Âge</Label>
+            <Label htmlFor="birthdate">Date de naissance</Label>
             <Input
-              id="age"
-              name="age"
-              type="number"
-              value={formData.age}
-              onChange={(e) => updateFormData({ age: parseInt(e.target.value) || 0 })}
-              placeholder="25"
+              id="birthdate"
+              name="birthdate"
+              type="date"
+              value={userData.birthdate}
+              onChange={(e) => handleInputChange('birthdate', e.target.value)}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="gender">Genre</Label>
-            <Select value={formData.gender} onValueChange={(value) => updateFormData({ gender: value })}>
+            <Select value={userData.gender} onValueChange={(value) => handleInputChange('gender', value)}>
               <SelectTrigger id="gender">
                 <SelectValue placeholder="Sélectionnez votre genre" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="homme">Homme</SelectItem>
-                <SelectItem value="femme">Femme</SelectItem>
-                <SelectItem value="autre">Autre</SelectItem>
-                <SelectItem value="non-binaire">Non-binaire</SelectItem>
+                <SelectItem value="male">Homme</SelectItem>
+                <SelectItem value="female">Femme</SelectItem>
+                <SelectItem value="other">Autre</SelectItem>
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pseudo">Pseudo</Label>
+          <Input
+            id="pseudo"
+            name="pseudo"
+            value={userData.pseudo}
+            onChange={(e) => handleInputChange('pseudo', e.target.value)}
+            placeholder="Votre pseudo"
+          />
         </div>
       </CardContent>
     </Card>
