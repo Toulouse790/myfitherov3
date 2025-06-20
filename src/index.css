@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
@@ -6,87 +7,76 @@
 
 @layer base {
   :root {
-    /* === VARIABLES DE BASE === */
-    --background: 250 250 250;
-    --foreground: 15 23 42;
-    --card: 255 255 255;
-    --card-foreground: 15 23 42;
-    --popover: 255 255 255;
-    --popover-foreground: 15 23 42;
-    --primary: 29 78 216; /* fit-energy-600 */
-    --primary-foreground: 255 255 255;
-    --secondary: 241 245 249;
-    --secondary-foreground: 30 41 59;
-    --muted: 248 250 252;
-    --muted-foreground: 55 65 81; /* Contraste amélioré */
-    --accent: 241 245 249;
-    --accent-foreground: 15 23 42;
-    --destructive: 220 38 38;
-    --destructive-foreground: 255 255 255;
-    --border: 226 232 240;
-    --input: 226 232 240;
-    --ring: 29 78 216;
-    --radius: 1rem;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
 
-    /* === VARIABLES SIDEBAR === */
-    --sidebar-background: 255 255 255;
-    --sidebar-foreground: 15 23 42;
-    --sidebar-primary: 29 78 216;
-    --sidebar-primary-foreground: 255 255 255;
-    --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 15 23 42;
-    --sidebar-border: 226 232 240;
-    --sidebar-ring: 29 78 216;
-
-    /* === VARIABLES FITNESS PERSONNALISÉES === */
-    --fit-energy: 220 38 38;     /* Rouge énergie */
-    --fit-power: 234 88 12;      /* Orange puissance */
-    --fit-growth: 22 163 74;     /* Vert progression */
-    --fit-wellness: 5 150 105;   /* Vert bien-être */
-    --fit-hydration: 8 145 178;  /* Bleu hydratation */
-    --fit-recovery: 124 58 237;  /* Violet récupération */
-    --fit-motivation: 245 158 11; /* Orange motivation */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 15 23 42;
-    --foreground: 248 250 252;
-    --card: 30 41 59;
-    --card-foreground: 248 250 252;
-    --popover: 30 41 59;
-    --popover-foreground: 248 250 252;
-    --primary: 59 130 246;
-    --primary-foreground: 15 23 42;
-    --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252;
-    --muted: 51 65 85;
-    --muted-foreground: 148 163 184;
-    --accent: 51 65 85;
-    --accent-foreground: 248 250 252;
-    --destructive: 239 68 68;
-    --destructive-foreground: 15 23 42;
-    --border: 51 65 85;
-    --input: 51 65 85;
-    --ring: 59 130 246;
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
 
-    /* Variables sidebar mode sombre */
-    --sidebar-background: 30 41 59;
-    --sidebar-foreground: 248 250 252;
-    --sidebar-primary: 59 130 246;
-    --sidebar-primary-foreground: 15 23 42;
-    --sidebar-accent: 51 65 85;
-    --sidebar-accent-foreground: 248 250 252;
-    --sidebar-border: 51 65 85;
-    --sidebar-ring: 59 130 246;
-
-    /* Variables fitness mode sombre */
-    --fit-energy: 239 68 68;
-    --fit-power: 251 146 60;
-    --fit-growth: 34 197 94;
-    --fit-wellness: 20 184 166;
-    --fit-hydration: 56 189 248;
-    --fit-recovery: 168 85 247;
-    --fit-motivation: 251 191 36;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 240 5.9% 10%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   * {
@@ -94,360 +84,13 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-feature-settings: 'cv11', 'ss01';
-    font-variation-settings: 'opsz' 32;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  /* === TYPOGRAPHIE === */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
-  }
-
-  h1 { @apply text-3xl lg:text-4xl; }
-  h2 { @apply text-2xl lg:text-3xl; }
-  h3 { @apply text-xl lg:text-2xl; }
-  h4 { @apply text-lg lg:text-xl; }
-
-  /* === FOCUS VISIBLE POUR ACCESSIBILITÉ === */
-  *:focus-visible {
-    @apply outline-2 outline-offset-2 outline-fit-energy-500;
-  }
-
-  /* === SCROLLBARS PERSONNALISÉES === */
-  ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  ::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800;
-  }
-
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
-  }
-
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400 dark:bg-gray-500;
-  }
-}
-
-@layer components {
-  /* === COMPOSANTS FITNESS AVANCÉS === */
-
-  /* Cartes de métriques fitness */
-  .fit-metric-card {
-    @apply fit-stat-card group cursor-pointer relative overflow-hidden;
-    @apply hover:shadow-fit-card-hover hover:-translate-y-1;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .fit-metric-card::before {
-    content: '';
-    @apply absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0;
-    @apply group-hover:opacity-100 transition-opacity duration-300;
-  }
-
-  /* Boutons fitness contextuels */
-  .fit-btn-energy {
-    @apply fit-btn-primary;
-    background: linear-gradient(135deg, rgb(var(--fit-energy)) 0%, rgb(var(--fit-power)) 100%);
-  }
-
-  .fit-btn-growth {
-    @apply fit-btn-primary;
-    background: linear-gradient(135deg, rgb(var(--fit-growth)) 0%, rgb(var(--fit-wellness)) 100%);
-  }
-
-  .fit-btn-hydration {
-    @apply fit-btn-primary;
-    background: linear-gradient(135deg, rgb(var(--fit-hydration)) 0%, rgb(var(--fit-recovery)) 100%);
-  }
-
-  /* Indicateurs de progression */
-  .fit-progress-ring {
-    @apply relative inline-flex items-center justify-center;
-  }
-
-  .fit-progress-ring::before {
-    content: '';
-    @apply absolute inset-0 rounded-full border-4 border-gray-200 dark:border-gray-700;
-  }
-
-  .fit-progress-ring::after {
-    content: '';
-    @apply absolute inset-0 rounded-full border-4 border-transparent;
-    border-top-color: rgb(var(--fit-energy));
-    border-right-color: rgb(var(--fit-energy));
-    transform: rotate(calc(var(--progress, 0) * 3.6deg));
-    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  /* Badges de statut fitness */
-  .fit-status-active {
-    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
-    @apply bg-fit-energy-50 text-fit-energy-700 border border-fit-energy-200;
-  }
-
-  .fit-status-rest {
-    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
-    @apply bg-fit-recovery-50 text-fit-recovery-700 border border-fit-recovery-200;
-  }
-
-  .fit-status-progress {
-    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
-    @apply bg-fit-growth-50 text-fit-growth-700 border border-fit-growth-200;
-  }
-
-  /* Conteneurs fitness */
-  .fit-workout-container {
-    @apply space-y-fit-section-gap p-fit-card-padding;
-    @apply bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800;
-    @apply border border-gray-200 dark:border-gray-700 rounded-fit-card;
-  }
-
-  .fit-stats-grid {
-    @apply grid grid-cols-2 md:grid-cols-4 gap-fit-component-gap;
-  }
-
-  /* Animations de feedback */
-  .fit-celebrate {
-    @apply animate-fit-success-bounce;
-    transform-origin: center;
-  }
-
-  .fit-error-feedback {
-    @apply animate-fit-error-shake border-fit-error-500 bg-fit-error-50;
-  }
-
-  /* Glassmorphism moderne */
-  .fit-glass {
-    @apply bg-white/80 dark:bg-gray-900/80;
-    @apply backdrop-blur-fit-overlay border border-white/20 dark:border-gray-800/20;
-    @apply shadow-fit-card;
-  }
-
-  /* Conteneur principal responsive */
-  .fit-main-container {
-    @apply min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50;
-    @apply dark:from-gray-900 dark:via-gray-800 dark:to-gray-900;
-  }
-
-  /* Navigation fitness */
-  .fit-nav-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200;
-    @apply hover:bg-gray-100 dark:hover:bg-gray-800;
-    @apply focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800;
-    @apply fit-touch-target;
-  }
-
-  .fit-nav-item.active {
-    @apply bg-fit-energy-50 text-fit-energy-700 border-l-4 border-fit-energy-500;
-    @apply dark:bg-fit-energy-900/30 dark:text-fit-energy-400;
-  }
-
-  /* Loading states */
-  .fit-loading-skeleton {
-    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
-  }
-
-  .fit-loading-bars {
-    @apply flex items-end gap-1 h-8;
-  }
-
-  .fit-loading-bar {
-    @apply w-1 bg-fit-energy-500 rounded-full animate-fit-loading-bars;
-  }
-
-  .fit-loading-bar:nth-child(2) {
-    @apply animate-fit-loading-bars-delay-1;
-  }
-
-  .fit-loading-bar:nth-child(3) {
-    @apply animate-fit-loading-bars-delay-2;
-  }
-
-  /* États d'interaction */
-  .fit-interactive {
-    @apply transition-all duration-200 hover:scale-105 active:scale-95;
-    @apply hover:shadow-fit-card-hover;
-  }
-
-  /* Sidebar personnalisée */
-  .fit-sidebar {
-    @apply bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800;
-    @apply w-64 h-full flex flex-col;
-  }
-
-  .fit-sidebar-header {
-    @apply p-fit-card-padding border-b border-gray-200 dark:border-gray-800;
-  }
-
-  .fit-sidebar-content {
-    @apply flex-1 p-4 space-y-2 overflow-y-auto;
-  }
-
-  /* Messages d'état */
-  .fit-message {
-    @apply px-4 py-3 rounded-lg border flex items-start gap-3;
-  }
-
-  .fit-message-success {
-    @apply fit-message bg-fit-success-bg border-fit-success-border text-fit-success-DEFAULT;
-  }
-
-  .fit-message-warning {
-    @apply fit-message bg-fit-warning-bg border-fit-warning-border text-fit-warning-DEFAULT;
-  }
-
-  .fit-message-error {
-    @apply fit-message bg-fit-error-bg border-fit-error-border text-fit-error-DEFAULT;
-  }
-
-  .fit-message-info {
-    @apply fit-message bg-fit-info-bg border-fit-info-border text-fit-info-DEFAULT;
-  }
-
-  /* === STYLES SIDEBAR SÉCURISÉS === */
-  .bg-sidebar {
-    @apply bg-white dark:bg-gray-900;
-  }
-
-  [data-sidebar="sidebar"] {
-    @apply bg-white dark:bg-gray-900;
   }
 }
 
 @layer utilities {
-  /* === UTILITAIRES PERSONNALISÉS === */
-
-  /* Texte avec gradient */
-  .fit-text-gradient {
-    @apply bg-gradient-to-r from-fit-energy-500 to-fit-power-500 bg-clip-text text-transparent;
-  }
-
-  /* Effets de survol */
-  .fit-hover-lift {
-    @apply transition-transform duration-300 hover:-translate-y-2;
-  }
-
-  /* Animations respectueuses */
-  .fit-animate-safe {
-    @apply fit-respect-motion;
-  }
-
-  /* Contraste élevé */
-  .fit-contrast-safe {
-    @apply fit-high-contrast;
-  }
-
-  /* Zones tactiles */
-  .fit-touch-safe {
-    @apply fit-touch-target;
-  }
-
-  /* Responsive spacing */
-  .fit-space-responsive {
-    @apply space-y-4 md:space-y-6 lg:space-y-8;
-  }
-
-  /* Grid responsive fitness */
-  .fit-grid-responsive {
-    @apply grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
-  }
-
-  /* Container safe areas */
-  .fit-safe-area {
-    @apply px-4 py-safe-area-inset-top pb-safe-area-inset-bottom;
-  }
-
-  /* Scroll shadows */
-  .fit-scroll-shadow {
-    background: 
-      linear-gradient(to bottom, white 30%, transparent),
-      linear-gradient(to top, white 30%, transparent),
-      linear-gradient(to bottom, rgba(0,0,0,.2), transparent),
-      linear-gradient(to top, rgba(0,0,0,.2), transparent);
-    background-repeat: no-repeat;
-    background-color: white;
-    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
-    background-attachment: local, local, scroll, scroll;
-  }
-
-  .dark .fit-scroll-shadow {
-    background-color: rgb(31 41 55);
-    background: 
-      linear-gradient(to bottom, rgb(31 41 55) 30%, transparent),
-      linear-gradient(to top, rgb(31 41 55) 30%, transparent),
-      linear-gradient(to bottom, rgba(255,255,255,.1), transparent),
-      linear-gradient(to top, rgba(255,255,255,.1), transparent);
-    background-repeat: no-repeat;
-    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
-    background-attachment: local, local, scroll, scroll;
-  }
-}
-
-/* === SUPPORT DES PRÉFÉRENCES UTILISATEUR === */
-@media (prefers-reduced-motion: reduce) {
-  .fit-animate-safe,
-  .animate-fit-heartbeat,
-  .animate-fit-pulse-strong,
-  .animate-fit-achievement-glow,
-  .animate-fit-streak-fire {
-    animation: none !important;
-    transition: none !important;
-  }
-}
-
-@media (prefers-contrast: high) {
-  .fit-contrast-safe {
-    filter: contrast(1.3);
-    border-width: 2px;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  .fit-auto-dark {
-    color-scheme: dark;
-  }
-}
-
-/* === SAFE AREAS POUR MOBILE === */
-@supports (padding: env(safe-area-inset-top)) {
-  .safe-area-pt {
-    padding-top: env(safe-area-inset-top, 1rem);
-  }
-  
-  .safe-area-pb {
-    padding-bottom: env(safe-area-inset-bottom, 1rem);
-  }
-  
-  .safe-area-pl {
-    padding-left: env(safe-area-inset-left, 1rem);
-  }
-  
-  .safe-area-pr {
-    padding-right: env(safe-area-inset-right, 1rem);
-  }
-}
-
-/* === PRINT STYLES === */
-@media print {
-  .fit-no-print {
-    display: none !important;
-  }
-  
-  .fit-print-break {
-    page-break-after: always;
-  }
-  
-  .fit-stat-card {
-    box-shadow: none !important;
-    border: 1px solid #e5e7eb !important;
+  .text-balance {
+    text-wrap: balance;
   }
 }
