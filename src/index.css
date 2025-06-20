@@ -1,35 +1,4 @@
-
-/* SUPPRESSION TOTALE DU JAUNE - AMÉLIORATION LISIBILITÉ */
-* {
-  /* Suppression de TOUTE référence au jaune dans l'app */
-  background-color: inherit !important;
-}
-
-/* Suppression agressive de toute couleur jaune */
-*[style*="yellow"], 
-*[class*="yellow"], 
-*[style*="#fef3cd"], 
-*[style*="#f59e0b"],
-*[style*="#eab308"],
-*[style*="#fbbf24"] {
-  background-color: rgb(255, 255, 255) !important;
-  color: rgb(15, 23, 42) !important;
-}
-
-.bg-sidebar {
-  background-color: rgb(255, 255, 255) !important;
-}
-
-.dark .bg-sidebar {
-  background-color: rgb(30, 41, 59) !important;
-}
-
-/* Forcer le fond de SidebarProvider */
-[class*="sidebar-wrapper"] {
-  background-color: transparent !important;
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -37,108 +6,106 @@
 
 @layer base {
   :root {
+    /* === VARIABLES DE BASE === */
     --background: 250 250 250;
-    --foreground: 15 23 42; /* Texte plus foncé pour meilleure lisibilité */
-
+    --foreground: 15 23 42;
     --card: 255 255 255;
-    --card-foreground: 15 23 42; /* Texte foncé sur fond blanc */
-
+    --card-foreground: 15 23 42;
     --popover: 255 255 255;
     --popover-foreground: 15 23 42;
-
-    --primary: 37 99 235;           /* Bleu énergie #2563eb */
-    --primary-foreground: 255 255 255; /* Blanc sur bleu */
-
+    --primary: 29 78 216; /* fit-energy-600 */
+    --primary-foreground: 255 255 255;
     --secondary: 241 245 249;
-    --secondary-foreground: 30 41 59; /* Texte plus foncé sur fond secondaire */
-
+    --secondary-foreground: 30 41 59;
     --muted: 248 250 252;
-    --muted-foreground: 71 85 105; /* Gris plus foncé pour meilleure lisibilité */
-
+    --muted-foreground: 55 65 81; /* Contraste amélioré */
     --accent: 241 245 249;
-    --accent-foreground: 15 23 42; /* Texte foncé sur accent */
-
+    --accent-foreground: 15 23 42;
     --destructive: 220 38 38;
     --destructive-foreground: 255 255 255;
-
     --border: 226 232 240;
     --input: 226 232 240;
-    --ring: 37 99 235;
-
+    --ring: 29 78 216;
     --radius: 1rem;
 
-    /* Variables pour le sidebar - AUCUN JAUNE */
+    /* === VARIABLES SIDEBAR === */
     --sidebar-background: 255 255 255;
-    --sidebar-foreground: 15 23 42; /* Texte foncé */
-    --sidebar-primary: 37 99 235;
+    --sidebar-foreground: 15 23 42;
+    --sidebar-primary: 29 78 216;
     --sidebar-primary-foreground: 255 255 255;
     --sidebar-accent: 241 245 249;
-    --sidebar-accent-foreground: 15 23 42; /* Texte foncé */
+    --sidebar-accent-foreground: 15 23 42;
     --sidebar-border: 226 232 240;
-    --sidebar-ring: 37 99 235;
+    --sidebar-ring: 29 78 216;
+
+    /* === VARIABLES FITNESS PERSONNALISÉES === */
+    --fit-energy: 220 38 38;     /* Rouge énergie */
+    --fit-power: 234 88 12;      /* Orange puissance */
+    --fit-growth: 22 163 74;     /* Vert progression */
+    --fit-wellness: 5 150 105;   /* Vert bien-être */
+    --fit-hydration: 8 145 178;  /* Bleu hydratation */
+    --fit-recovery: 124 58 237;  /* Violet récupération */
+    --fit-motivation: 245 158 11; /* Orange motivation */
   }
 
   .dark {
     --background: 15 23 42;
-    --foreground: 248 250 252; /* Texte clair en mode sombre */
-
+    --foreground: 248 250 252;
     --card: 30 41 59;
-    --card-foreground: 248 250 252; /* Texte clair sur fond sombre */
-
+    --card-foreground: 248 250 252;
     --popover: 30 41 59;
     --popover-foreground: 248 250 252;
-
     --primary: 59 130 246;
     --primary-foreground: 15 23 42;
-
     --secondary: 51 65 85;
-    --secondary-foreground: 248 250 252; /* Texte clair sur fond secondaire sombre */
-
+    --secondary-foreground: 248 250 252;
     --muted: 51 65 85;
-    --muted-foreground: 148 163 184; /* Gris plus clair en mode sombre */
-
+    --muted-foreground: 148 163 184;
     --accent: 51 65 85;
     --accent-foreground: 248 250 252;
-
     --destructive: 239 68 68;
     --destructive-foreground: 15 23 42;
-
     --border: 51 65 85;
     --input: 51 65 85;
     --ring: 59 130 246;
 
-    /* Variables pour le sidebar en mode sombre - AUCUN JAUNE */
+    /* Variables sidebar mode sombre */
     --sidebar-background: 30 41 59;
-    --sidebar-foreground: 248 250 252; /* Texte clair */
+    --sidebar-foreground: 248 250 252;
     --sidebar-primary: 59 130 246;
     --sidebar-primary-foreground: 15 23 42;
     --sidebar-accent: 51 65 85;
     --sidebar-accent-foreground: 248 250 252;
     --sidebar-border: 51 65 85;
     --sidebar-ring: 59 130 246;
-  }
-}
 
-@layer base {
+    /* Variables fitness mode sombre */
+    --fit-energy: 239 68 68;
+    --fit-power: 251 146 60;
+    --fit-growth: 34 197 94;
+    --fit-wellness: 20 184 166;
+    --fit-hydration: 56 189 248;
+    --fit-recovery: 168 85 247;
+    --fit-motivation: 251 191 36;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-feature-settings: 'cv11', 'ss01';
     font-variation-settings: 'opsz' 32;
-    color: rgb(15, 23, 42); /* Force un texte foncé par défaut */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
-  .dark body {
-    color: rgb(248, 250, 252); /* Texte clair en mode sombre */
-  }
-
+  /* === TYPOGRAPHIE === */
   h1, h2, h3, h4, h5, h6 {
     @apply font-semibold tracking-tight;
-    color: inherit; /* Hérite de la couleur du parent */
   }
 
   h1 { @apply text-3xl lg:text-4xl; }
@@ -146,229 +113,332 @@
   h3 { @apply text-xl lg:text-2xl; }
   h4 { @apply text-lg lg:text-xl; }
 
-  /* Amélioration des couleurs de texte par défaut */
-  p, span, div {
-    color: inherit;
+  /* === FOCUS VISIBLE POUR ACCESSIBILITÉ === */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-fit-energy-500;
   }
 
-  /* Texte sur fond clair */
-  .text-on-light {
-    color: rgb(15, 23, 42) !important;
+  /* === SCROLLBARS PERSONNALISÉES === */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
   }
 
-  /* Texte sur fond sombre */
-  .text-on-dark {
-    color: rgb(248, 250, 252) !important;
+  ::-webkit-scrollbar-track {
+    @apply bg-gray-100 dark:bg-gray-800;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-gray-400 dark:bg-gray-500;
   }
 }
 
 @layer components {
-  /* Suppression TOTALE de toute couleur jaune */
-  *[class*="bg-yellow"], 
-  *[class*="text-yellow"], 
-  *[class*="border-yellow"],
-  *[style*="yellow"],
-  *[style*="#fef3cd"],
-  *[style*="#f59e0b"],
-  *[style*="#eab308"],
-  *[style*="#fbbf24"] {
-    background-color: rgb(255 255 255) !important;
-    color: rgb(15 23 42) !important;
-    border-color: rgb(226 232 240) !important;
+  /* === COMPOSANTS FITNESS AVANCÉS === */
+
+  /* Cartes de métriques fitness */
+  .fit-metric-card {
+    @apply fit-stat-card group cursor-pointer relative overflow-hidden;
+    @apply hover:shadow-fit-card-hover hover:-translate-y-1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .dark *[class*="bg-yellow"], 
-  .dark *[class*="text-yellow"], 
-  .dark *[class*="border-yellow"],
-  .dark *[style*="yellow"],
-  .dark *[style*="#fef3cd"],
-  .dark *[style*="#f59e0b"],
-  .dark *[style*="#eab308"],
-  .dark *[style*="#fbbf24"] {
-    background-color: rgb(30 41 59) !important;
-    color: rgb(248 250 252) !important;
-    border-color: rgb(51 65 85) !important;
-  }
-
-  /* Override spécifique pour le sidebar */
-  [data-sidebar="sidebar"] {
-    background-color: rgb(255 255 255) !important;
-    background: rgb(255 255 255) !important;
-    color: rgb(15 23 42) !important;
-  }
-
-  .dark [data-sidebar="sidebar"] {
-    background-color: rgb(30 41 59) !important;
-    background: rgb(30 41 59) !important;
-    color: rgb(248 250 252) !important;
-  }
-
-  /* Override pour tous les éléments avec bg-sidebar */
-  .bg-sidebar {
-    background-color: rgb(255 255 255) !important;
-    color: rgb(15 23 42) !important;
-  }
-
-  .dark .bg-sidebar {
-    background-color: rgb(30 41 59) !important;
-    color: rgb(248 250 252) !important;
-  }
-
-  /* Styles modernes pour les cards avec meilleur contraste */
-  .modern-card {
-    @apply bg-white rounded-xl border border-gray-200/60 shadow-sm hover:shadow-lg transition-all duration-300;
-    color: rgb(15, 23, 42);
-  }
-
-  .modern-card-dark {
-    @apply bg-gray-800/50 border-gray-700/50 backdrop-blur-sm;
-    color: rgb(248, 250, 252);
-  }
-
-  .gradient-card {
-    @apply relative overflow-hidden;
-  }
-
-  .gradient-card::before {
-    @apply absolute inset-0 opacity-5 bg-gradient-to-br from-current to-transparent;
+  .fit-metric-card::before {
     content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0;
+    @apply group-hover:opacity-100 transition-opacity duration-300;
   }
 
-  .hover-grow {
-    @apply hover:scale-105 transition-transform duration-300;
+  /* Boutons fitness contextuels */
+  .fit-btn-energy {
+    @apply fit-btn-primary;
+    background: linear-gradient(135deg, rgb(var(--fit-energy)) 0%, rgb(var(--fit-power)) 100%);
   }
 
-  /* Couleurs thématiques fitness avec meilleur contraste - AUCUN JAUNE */
-  .fitness-primary {
-    @apply text-fitness-primary border-fitness-primary/20 bg-fitness-primary/5;
+  .fit-btn-growth {
+    @apply fit-btn-primary;
+    background: linear-gradient(135deg, rgb(var(--fit-growth)) 0%, rgb(var(--fit-wellness)) 100%);
   }
 
-  .fitness-sport {
-    @apply text-fitness-sport border-fitness-sport/20 bg-fitness-sport/5;
+  .fit-btn-hydration {
+    @apply fit-btn-primary;
+    background: linear-gradient(135deg, rgb(var(--fit-hydration)) 0%, rgb(var(--fit-recovery)) 100%);
   }
 
-  .fitness-nutrition {
-    @apply text-fitness-nutrition border-fitness-nutrition/20 bg-fitness-nutrition/5;
+  /* Indicateurs de progression */
+  .fit-progress-ring {
+    @apply relative inline-flex items-center justify-center;
   }
 
-  .fitness-hydration {
-    @apply text-fitness-hydration border-fitness-hydration/20 bg-fitness-hydration/5;
+  .fit-progress-ring::before {
+    content: '';
+    @apply absolute inset-0 rounded-full border-4 border-gray-200 dark:border-gray-700;
   }
 
-  .fitness-sleep {
-    @apply text-fitness-sleep border-fitness-sleep/20 bg-fitness-sleep/5;
+  .fit-progress-ring::after {
+    content: '';
+    @apply absolute inset-0 rounded-full border-4 border-transparent;
+    border-top-color: rgb(var(--fit-energy));
+    border-right-color: rgb(var(--fit-energy));
+    transform: rotate(calc(var(--progress, 0) * 3.6deg));
+    transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Boutons thématiques fitness avec meilleur contraste - AUCUN JAUNE */
-  .btn-sport {
-    @apply bg-gradient-sport hover:opacity-90 text-white border-0 shadow-lg;
+  /* Badges de statut fitness */
+  .fit-status-active {
+    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
+    @apply bg-fit-energy-50 text-fit-energy-700 border border-fit-energy-200;
   }
 
-  .btn-nutrition {
-    @apply bg-gradient-nutrition hover:opacity-90 text-white border-0 shadow-lg;
+  .fit-status-rest {
+    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
+    @apply bg-fit-recovery-50 text-fit-recovery-700 border border-fit-recovery-200;
   }
 
-  .btn-hydration {
-    @apply bg-gradient-hydration hover:opacity-90 text-white border-0 shadow-lg;
+  .fit-status-progress {
+    @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
+    @apply bg-fit-growth-50 text-fit-growth-700 border border-fit-growth-200;
   }
 
-  .btn-sleep {
-    @apply bg-gradient-sleep hover:opacity-90 text-white border-0 shadow-lg;
+  /* Conteneurs fitness */
+  .fit-workout-container {
+    @apply space-y-fit-section-gap p-fit-card-padding;
+    @apply bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-gray-800;
+    @apply border border-gray-200 dark:border-gray-700 rounded-fit-card;
   }
 
-  /* Classes utilitaires pour une meilleure lisibilité */
-  .text-readable {
-    color: rgb(15, 23, 42) !important;
+  .fit-stats-grid {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-fit-component-gap;
   }
 
-  .dark .text-readable {
-    color: rgb(248, 250, 252) !important;
+  /* Animations de feedback */
+  .fit-celebrate {
+    @apply animate-fit-success-bounce;
+    transform-origin: center;
   }
 
-  .text-readable-muted {
-    color: rgb(71, 85, 105) !important;
+  .fit-error-feedback {
+    @apply animate-fit-error-shake border-fit-error-500 bg-fit-error-50;
   }
 
-  .dark .text-readable-muted {
-    color: rgb(148, 163, 184) !important;
+  /* Glassmorphism moderne */
+  .fit-glass {
+    @apply bg-white/80 dark:bg-gray-900/80;
+    @apply backdrop-blur-fit-overlay border border-white/20 dark:border-gray-800/20;
+    @apply shadow-fit-card;
+  }
+
+  /* Conteneur principal responsive */
+  .fit-main-container {
+    @apply min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50;
+    @apply dark:from-gray-900 dark:via-gray-800 dark:to-gray-900;
+  }
+
+  /* Navigation fitness */
+  .fit-nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-200;
+    @apply hover:bg-gray-100 dark:hover:bg-gray-800;
+    @apply focus-visible:bg-gray-100 dark:focus-visible:bg-gray-800;
+    @apply fit-touch-target;
+  }
+
+  .fit-nav-item.active {
+    @apply bg-fit-energy-50 text-fit-energy-700 border-l-4 border-fit-energy-500;
+    @apply dark:bg-fit-energy-900/30 dark:text-fit-energy-400;
+  }
+
+  /* Loading states */
+  .fit-loading-skeleton {
+    @apply bg-gray-200 dark:bg-gray-700 rounded animate-pulse;
+  }
+
+  .fit-loading-bars {
+    @apply flex items-end gap-1 h-8;
+  }
+
+  .fit-loading-bar {
+    @apply w-1 bg-fit-energy-500 rounded-full animate-fit-loading-bars;
+  }
+
+  .fit-loading-bar:nth-child(2) {
+    @apply animate-fit-loading-bars-delay-1;
+  }
+
+  .fit-loading-bar:nth-child(3) {
+    @apply animate-fit-loading-bars-delay-2;
+  }
+
+  /* États d'interaction */
+  .fit-interactive {
+    @apply transition-all duration-200 hover:scale-105 active:scale-95;
+    @apply hover:shadow-fit-card-hover;
+  }
+
+  /* Sidebar personnalisée */
+  .fit-sidebar {
+    @apply bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800;
+    @apply w-64 h-full flex flex-col;
+  }
+
+  .fit-sidebar-header {
+    @apply p-fit-card-padding border-b border-gray-200 dark:border-gray-800;
+  }
+
+  .fit-sidebar-content {
+    @apply flex-1 p-4 space-y-2 overflow-y-auto;
+  }
+
+  /* Messages d'état */
+  .fit-message {
+    @apply px-4 py-3 rounded-lg border flex items-start gap-3;
+  }
+
+  .fit-message-success {
+    @apply fit-message bg-fit-success-bg border-fit-success-border text-fit-success-DEFAULT;
+  }
+
+  .fit-message-warning {
+    @apply fit-message bg-fit-warning-bg border-fit-warning-border text-fit-warning-DEFAULT;
+  }
+
+  .fit-message-error {
+    @apply fit-message bg-fit-error-bg border-fit-error-border text-fit-error-DEFAULT;
+  }
+
+  .fit-message-info {
+    @apply fit-message bg-fit-info-bg border-fit-info-border text-fit-info-DEFAULT;
   }
 }
 
-/* Animations et effets visuels améliorés */
-.glass-effect {
-  @apply bg-white/80 backdrop-blur-md border border-white/20;
+@layer utilities {
+  /* === UTILITAIRES PERSONNALISÉS === */
+
+  /* Texte avec gradient */
+  .fit-text-gradient {
+    @apply bg-gradient-to-r from-fit-energy-500 to-fit-power-500 bg-clip-text text-transparent;
+  }
+
+  /* Effets de survol */
+  .fit-hover-lift {
+    @apply transition-transform duration-300 hover:-translate-y-2;
+  }
+
+  /* Animations respectueuses */
+  .fit-animate-safe {
+    @apply fit-respect-motion;
+  }
+
+  /* Contraste élevé */
+  .fit-contrast-safe {
+    @apply fit-high-contrast;
+  }
+
+  /* Zones tactiles */
+  .fit-touch-safe {
+    @apply fit-touch-target;
+  }
+
+  /* Responsive spacing */
+  .fit-space-responsive {
+    @apply space-y-4 md:space-y-6 lg:space-y-8;
+  }
+
+  /* Grid responsive fitness */
+  .fit-grid-responsive {
+    @apply grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+
+  /* Container safe areas */
+  .fit-safe-area {
+    @apply px-4 py-safe-area-inset-top pb-safe-area-inset-bottom;
+  }
+
+  /* Scroll shadows */
+  .fit-scroll-shadow {
+    background: 
+      linear-gradient(to bottom, white 30%, transparent),
+      linear-gradient(to top, white 30%, transparent),
+      linear-gradient(to bottom, rgba(0,0,0,.2), transparent),
+      linear-gradient(to top, rgba(0,0,0,.2), transparent);
+    background-repeat: no-repeat;
+    background-color: white;
+    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+    background-attachment: local, local, scroll, scroll;
+  }
+
+  .dark .fit-scroll-shadow {
+    background-color: rgb(31 41 55);
+    background: 
+      linear-gradient(to bottom, rgb(31 41 55) 30%, transparent),
+      linear-gradient(to top, rgb(31 41 55) 30%, transparent),
+      linear-gradient(to bottom, rgba(255,255,255,.1), transparent),
+      linear-gradient(to top, rgba(255,255,255,.1), transparent);
+    background-repeat: no-repeat;
+    background-size: 100% 40px, 100% 40px, 100% 14px, 100% 14px;
+    background-attachment: local, local, scroll, scroll;
+  }
 }
 
-.gradient-text {
-  @apply bg-gradient-to-r from-fitness-primary to-fitness-nutrition bg-clip-text text-transparent;
-}
-
-.glow-effect {
-  @apply shadow-lg;
-  box-shadow: 0 0 30px rgba(37, 99, 235, 0.15);
-}
-
-/* Animations modernes */
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes pulse-soft {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.8; }
-}
-
-@keyframes slide-in-from-bottom-5 {
-  from { transform: translateY(5%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes gradient-flow {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-.animate-fade-in {
-  animation: fade-in 0.6s ease-out forwards;
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 3s ease-in-out infinite;
-}
-
-.animate-slide-in-from-bottom-5 {
-  animation: slide-in-from-bottom-5 0.3s ease-out;
-}
-
-.animate-gradient-flow {
-  animation: gradient-flow 3s ease infinite;
-}
-
-/* Responsive et accessibilité */
+/* === SUPPORT DES PRÉFÉRENCES UTILISATEUR === */
 @media (prefers-reduced-motion: reduce) {
-  .animate-float,
-  .animate-pulse-soft,
-  .animate-gradient-flow {
-    animation: none;
+  .fit-animate-safe,
+  .animate-fit-heartbeat,
+  .animate-fit-pulse-strong,
+  .animate-fit-achievement-glow,
+  .animate-fit-streak-fire {
+    animation: none !important;
+    transition: none !important;
   }
 }
 
-/* Safe areas pour mobile */
-.safe-area-pb {
-  padding-bottom: env(safe-area-inset-bottom, 1rem);
+@media (prefers-contrast: high) {
+  .fit-contrast-safe {
+    filter: contrast(1.3);
+    border-width: 2px;
+  }
 }
 
-.safe-area-pt {
-  padding-top: env(safe-area-inset-top, 1rem);
+@media (prefers-color-scheme: dark) {
+  .fit-auto-dark {
+    color-scheme: dark;
+  }
+}
+
+/* === SAFE AREAS POUR MOBILE === */
+@supports (padding: env(safe-area-inset-top)) {
+  .safe-area-pt {
+    padding-top: env(safe-area-inset-top, 1rem);
+  }
+  
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 1rem);
+  }
+  
+  .safe-area-pl {
+    padding-left: env(safe-area-inset-left, 1rem);
+  }
+  
+  .safe-area-pr {
+    padding-right: env(safe-area-inset-right, 1rem);
+  }
+}
+
+/* === PRINT STYLES === */
+@media print {
+  .fit-no-print {
+    display: none !important;
+  }
+  
+  .fit-print-break {
+    page-break-after: always;
+  }
+  
+  .fit-stat-card {
+    box-shadow: none !important;
+    border: 1px solid #e5e7eb !important;
+  }
 }
