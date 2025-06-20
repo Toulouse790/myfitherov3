@@ -312,6 +312,15 @@
   .fit-message-info {
     @apply fit-message bg-fit-info-bg border-fit-info-border text-fit-info-DEFAULT;
   }
+
+  /* === STYLES SIDEBAR SÉCURISÉS === */
+  .bg-sidebar {
+    @apply bg-white dark:bg-gray-900;
+  }
+
+  [data-sidebar="sidebar"] {
+    @apply bg-white dark:bg-gray-900;
+  }
 }
 
 @layer utilities {
