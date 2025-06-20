@@ -52,7 +52,7 @@ export function BottomNavigation() {
   const location = useLocation();
 
   const handleNavigation = (path: string) => {
-    console.log('Navigation vers:', path);
+    console.log('🔄 Navigation vers:', path);
     navigate(path);
   };
 

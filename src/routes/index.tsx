@@ -62,6 +62,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/sport",
+    element: (
+      <BottomNavLayout>
+        <SportTracker />
+      </BottomNavLayout>
+    ),
+  },
+  {
     path: "/nutrition",
     element: (
       <BottomNavLayout>
