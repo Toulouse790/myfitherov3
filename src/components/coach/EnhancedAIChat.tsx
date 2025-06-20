@@ -28,7 +28,7 @@ const EnhancedAIChat: React.FC<EnhancedAIChatProps> = ({
   
   const { 
     messages, 
-    loading, 
+    isLoading, 
     error, 
     sendMessage, 
     clearError,
@@ -46,7 +46,7 @@ const EnhancedAIChat: React.FC<EnhancedAIChatProps> = ({
   }, []);
   
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || loading) return;
+    if (!inputValue.trim() || isLoading) return;
     
     try {
       const message = inputValue;
@@ -89,13 +89,13 @@ const EnhancedAIChat: React.FC<EnhancedAIChatProps> = ({
             key={message.id}
             className={cn(
               "flex",
-              message.sender === 'user' ? "justify-end" : "justify-start"
+              message.role === 'user' ? "justify-end" : "justify-start"
             )}
           >
             <div
               className={cn(
                 "max-w-[80%] rounded-lg px-4 py-2",
-                message.sender === 'user'
+                message.role === 'user'
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted"
               )}
@@ -107,7 +107,7 @@ const EnhancedAIChat: React.FC<EnhancedAIChatProps> = ({
             </div>
           </div>
         ))}
-        {loading && (
+        {isLoading && (
           <div className="flex justify-start">
             <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
               <div className="flex space-x-1">
@@ -149,7 +149,7 @@ const EnhancedAIChat: React.FC<EnhancedAIChatProps> = ({
               variant="outline"
               size="icon"
               onClick={regenerateLastResponse}
-              disabled={loading}
+              disabled={isLoading}
               aria-label="Regénérer la réponse"
             >
               <RotateCcw size={18} />
@@ -160,12 +160,12 @@ const EnhancedAIChat: React.FC<EnhancedAIChatProps> = ({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
-            disabled={loading}
+            disabled={isLoading}
             className="flex-1"
           />
           <Button 
             onClick={handleSendMessage} 
-            disabled={!inputValue.trim() || loading}
+            disabled={!inputValue.trim() || isLoading}
             aria-label="Envoyer"
           >
             <Send size={20} />
