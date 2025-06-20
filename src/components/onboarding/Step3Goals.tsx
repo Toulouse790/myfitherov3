@@ -1,90 +1,72 @@
 
 import React from 'react';
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { UserData } from './types';
+import { FormData } from './types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
-interface Step3Props {
-  userData: UserData;
-  handleInputChange: (field: string, value: any) => void;
-  handleArrayChange: (field: string, item: string, checked: boolean) => void;
+interface Step3GoalsProps {
+  formData: FormData;
+  updateFormData: (data: Partial<FormData>) => void;
 }
 
-const Step3Goals: React.FC<Step3Props> = ({ userData, handleInputChange, handleArrayChange }) => {
+const Step3Goals = ({ formData, updateFormData }: Step3GoalsProps) => {
+  const fitnessGoals = [
+    'Perdre du poids',
+    'Prendre de la masse musculaire',
+    'Améliorer ma condition physique',
+    'Maintenir mon poids actuel',
+    'Améliorer ma force',
+    'Améliorer mon endurance'
+  ];
+
+  const handleGoalChange = (goal: string, checked: boolean) => {
+    const updatedGoals = checked 
+      ? [...formData.goals, goal]
+      : formData.goals.filter(g => g !== goal);
+    updateFormData({ goals: updatedGoals });
+  };
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">Objectifs</h3>
-      
-      <div className="space-y-2">
-        <Label>Objectif principal</Label>
-        <RadioGroup 
-          value={userData.mainGoal}
-          onValueChange={(value) => handleInputChange('mainGoal', value)} 
-          className="grid grid-cols-2 gap-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="muscle" id="goal-muscle" />
-            <Label htmlFor="goal-muscle">Prise de masse musculaire</Label>
+    <Card>
+      <CardHeader>
+        <CardTitle>Objectifs fitness</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="experienceLevel">Niveau d'expérience</Label>
+          <Select value={formData.experienceLevel} onValueChange={(value) => updateFormData({ experienceLevel: value })}>
+            <SelectTrigger id="experienceLevel">
+              <SelectValue placeholder="Sélectionnez votre niveau" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="debutant">Débutant</SelectItem>
+              <SelectItem value="intermediaire">Intermédiaire</SelectItem>
+              <SelectItem value="avance">Avancé</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-3">
+          <Label>Objectifs (sélectionnez plusieurs si nécessaire)</Label>
+          <div className="space-y-2">
+            {fitnessGoals.map((goal) => (
+              <div key={goal} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`goal-${goal}`}
+                  checked={formData.goals.includes(goal)}
+                  onCheckedChange={(checked) => handleGoalChange(goal, checked as boolean)}
+                />
+                <Label htmlFor={`goal-${goal}`} className="text-sm">
+                  {goal}
+                </Label>
+              </div>
+            ))}
           </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="weight-loss" id="goal-weight-loss" />
-            <Label htmlFor="goal-weight-loss">Perte de poids</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="strength" id="goal-strength" />
-            <Label htmlFor="goal-strength">Gain de force</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="endurance" id="goal-endurance" />
-            <Label htmlFor="goal-endurance">Amélioration de l'endurance</Label>
-          </div>
-        </RadioGroup>
-      </div>
-      
-      <div className="space-y-2">
-        <Label>Sports pratiqués (facultatif)</Label>
-        <Tabs defaultValue="team">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="team">Sports collectifs</TabsTrigger>
-            <TabsTrigger value="individual">Sports individuels</TabsTrigger>
-          </TabsList>
-          <TabsContent value="team" className="space-y-2 pt-2">
-            <div className="grid grid-cols-2 gap-2">
-              {["Football", "Basketball", "Handball", "Rugby", "Volleyball", "Hockey"].map((sport) => (
-                <div key={sport} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={sport.toLowerCase()} 
-                    checked={userData.sports.includes(sport)}
-                    onCheckedChange={(checked) => 
-                      handleArrayChange('sports', sport, checked as boolean)
-                    }
-                  />
-                  <Label htmlFor={sport.toLowerCase()}>{sport}</Label>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-          <TabsContent value="individual" className="space-y-2 pt-2">
-            <div className="grid grid-cols-2 gap-2">
-              {["Course à pied", "Natation", "Cyclisme", "Tennis", "Athlétisme", "Arts martiaux"].map((sport) => (
-                <div key={sport} className="flex items-center space-x-2">
-                  <Checkbox 
-                    id={sport.toLowerCase().replace(/\s+/g, '-')}
-                    checked={userData.sports.includes(sport)}
-                    onCheckedChange={(checked) => 
-                      handleArrayChange('sports', sport, checked as boolean)
-                    }
-                  />
-                  <Label htmlFor={sport.toLowerCase().replace(/\s+/g, '-')}>{sport}</Label>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

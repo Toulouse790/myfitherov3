@@ -39,6 +39,335 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_io5xn_ai_agents: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          status: string
+          system_prompt: string
+          type: string
+          updated_at: string | null
+          version: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          status: string
+          system_prompt: string
+          type: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          status?: string
+          system_prompt?: string
+          type?: string
+          updated_at?: string | null
+          version?: number | null
+        }
+        Relationships: []
+      }
+      admin_io5xn_ai_dialogs: {
+        Row: {
+          agent_id: string
+          assistant_response: string
+          id: string
+          order_num: number
+          user_prompt: string
+        }
+        Insert: {
+          agent_id: string
+          assistant_response: string
+          id?: string
+          order_num: number
+          user_prompt: string
+        }
+        Update: {
+          agent_id?: string
+          assistant_response?: string
+          id?: string
+          order_num?: number
+          user_prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_io5xn_ai_dialogs_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "admin_io5xn_ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_io5xn_ai_interactions: {
+        Row: {
+          agent_type: string
+          ai_response: string
+          id: string
+          metadata: Json | null
+          processing_time: number | null
+          satisfaction_rating: number | null
+          thread_id: string | null
+          timestamp: string | null
+          user_email: string
+          user_query: string
+        }
+        Insert: {
+          agent_type: string
+          ai_response: string
+          id?: string
+          metadata?: Json | null
+          processing_time?: number | null
+          satisfaction_rating?: number | null
+          thread_id?: string | null
+          timestamp?: string | null
+          user_email: string
+          user_query: string
+        }
+        Update: {
+          agent_type?: string
+          ai_response?: string
+          id?: string
+          metadata?: Json | null
+          processing_time?: number | null
+          satisfaction_rating?: number | null
+          thread_id?: string | null
+          timestamp?: string | null
+          user_email?: string
+          user_query?: string
+        }
+        Relationships: []
+      }
+      admin_io5xn_analytics_reports: {
+        Row: {
+          charts: Json | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          filters: Json | null
+          id: string
+          name: string
+          scheduled_delivery: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          charts?: Json | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          filters?: Json | null
+          id?: string
+          name: string
+          scheduled_delivery?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          charts?: Json | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          filters?: Json | null
+          id?: string
+          name?: string
+          scheduled_delivery?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      admin_io5xn_auth_issues: {
+        Row: {
+          device_info: string | null
+          error_details: string | null
+          error_type: string
+          id: string
+          timestamp: string | null
+          user_email: string
+        }
+        Insert: {
+          device_info?: string | null
+          error_details?: string | null
+          error_type: string
+          id?: string
+          timestamp?: string | null
+          user_email: string
+        }
+        Update: {
+          device_info?: string | null
+          error_details?: string | null
+          error_type?: string
+          id?: string
+          timestamp?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
+      admin_io5xn_permissions: {
+        Row: {
+          description: string | null
+          id: string
+          name: string
+          scope: string
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          name: string
+          scope: string
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          name?: string
+          scope?: string
+        }
+        Relationships: []
+      }
+      admin_io5xn_sync_issues: {
+        Row: {
+          data: Json | null
+          error_details: string | null
+          id: string
+          operation: string
+          resolved: boolean | null
+          resolved_at: string | null
+          table_name: string
+          timestamp: string | null
+          user_email: string
+        }
+        Insert: {
+          data?: Json | null
+          error_details?: string | null
+          id?: string
+          operation: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          table_name: string
+          timestamp?: string | null
+          user_email: string
+        }
+        Update: {
+          data?: Json | null
+          error_details?: string | null
+          id?: string
+          operation?: string
+          resolved?: boolean | null
+          resolved_at?: string | null
+          table_name?: string
+          timestamp?: string | null
+          user_email?: string
+        }
+        Relationships: []
+      }
+      admin_io5xn_system_incidents: {
+        Row: {
+          affected_users: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          impact: string
+          resolved_at: string | null
+          service: string
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          affected_users?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact: string
+          resolved_at?: string | null
+          service: string
+          status: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          affected_users?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          impact?: string
+          resolved_at?: string | null
+          service?: string
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      admin_io5xn_user_permissions: {
+        Row: {
+          admin_user_id: string
+          permission_id: string
+        }
+        Insert: {
+          admin_user_id: string
+          permission_id: string
+        }
+        Update: {
+          admin_user_id?: string
+          permission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_io5xn_user_permissions_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "admin_io5xn_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_io5xn_user_permissions_permission_id_fkey"
+            columns: ["permission_id"]
+            isOneToOne: false
+            referencedRelation: "admin_io5xn_permissions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_io5xn_users: {
+        Row: {
+          created_at: string | null
+          email: string
+          first_name: string | null
+          id: string
+          last_login_at: string | null
+          last_name: string | null
+          role: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          first_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          last_name?: string | null
+          role: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_login_at?: string | null
+          last_name?: string | null
+          role?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ai_agents: {
         Row: {
           color: string | null
@@ -642,6 +971,152 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      myfitherov3_io5xn_daily_tracking: {
+        Row: {
+          calories_consumed: number | null
+          created_at: string
+          date: string
+          id: number
+          sleep_hours: number | null
+          steps: number | null
+          updated_at: string
+          user_id: string
+          water_intake: number | null
+          workouts_completed: number | null
+        }
+        Insert: {
+          calories_consumed?: number | null
+          created_at?: string
+          date: string
+          id?: number
+          sleep_hours?: number | null
+          steps?: number | null
+          updated_at?: string
+          user_id: string
+          water_intake?: number | null
+          workouts_completed?: number | null
+        }
+        Update: {
+          calories_consumed?: number | null
+          created_at?: string
+          date?: string
+          id?: number
+          sleep_hours?: number | null
+          steps?: number | null
+          updated_at?: string
+          user_id?: string
+          water_intake?: number | null
+          workouts_completed?: number | null
+        }
+        Relationships: []
+      }
+      myfitherov3_io5xn_exercises: {
+        Row: {
+          created_at: string
+          duration: number | null
+          id: string
+          name: string
+          notes: string | null
+          reps: number | null
+          sets: number | null
+          type: string | null
+          updated_at: string | null
+          user_id: string
+          weight: number | null
+          workout_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration?: number | null
+          id: string
+          name: string
+          notes?: string | null
+          reps?: number | null
+          sets?: number | null
+          type?: string | null
+          updated_at?: string | null
+          user_id: string
+          weight?: number | null
+          workout_id: string
+        }
+        Update: {
+          created_at?: string
+          duration?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          reps?: number | null
+          sets?: number | null
+          type?: string | null
+          updated_at?: string | null
+          user_id?: string
+          weight?: number | null
+          workout_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "myfitherov3_io5xn_exercises_workout_id_fkey"
+            columns: ["workout_id"]
+            isOneToOne: false
+            referencedRelation: "myfitherov3_io5xn_workouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      myfitherov3_io5xn_workouts: {
+        Row: {
+          calories_burned: number | null
+          created_at: string
+          current_duration: number | null
+          duration: number | null
+          end_time: string | null
+          id: string
+          intensity: string | null
+          pause_time: string | null
+          resume_time: string | null
+          start_time: string
+          status: string
+          title: string
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          calories_burned?: number | null
+          created_at?: string
+          current_duration?: number | null
+          duration?: number | null
+          end_time?: string | null
+          id: string
+          intensity?: string | null
+          pause_time?: string | null
+          resume_time?: string | null
+          start_time: string
+          status: string
+          title: string
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          calories_burned?: number | null
+          created_at?: string
+          current_duration?: number | null
+          duration?: number | null
+          end_time?: string | null
+          id?: string
+          intensity?: string | null
+          pause_time?: string | null
+          resume_time?: string | null
+          start_time?: string
+          status?: string
+          title?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       recommendations: {
         Row: {
