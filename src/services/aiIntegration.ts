@@ -15,6 +15,7 @@ export type Conversation = {
   title: string;
   created_at: string;
   updated_at: string;
+  messages: Message[];
 };
 
 // AI integration implementation
@@ -27,7 +28,8 @@ export class AIIntegrationService {
         user_id: userId,
         title,
         created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        messages: []
       };
       
       return conversation;
@@ -80,27 +82,34 @@ export class AIIntegrationService {
 
   static async getConversation(conversationId: string): Promise<Conversation | null> {
     // Since conversations table doesn't exist, return a mock conversation
+    const messages = await this.getConversationHistory(conversationId);
     return {
       id: conversationId,
       user_id: '',
       title: 'Conversation',
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
+      messages
     };
   }
 
-  static async getConversations(userId: string): Promise<Conversation[]> {
+  static async getConversations(userId?: string): Promise<Conversation[]> {
     // Mock implementation since conversations table doesn't exist
     return [];
   }
 
-  static async sendUserInteraction(data: any): Promise<any> {
-    console.log('User interaction:', data);
-    return { success: true };
+  static async sendUserInteraction(message: string, threadId?: string, type?: string): Promise<{ thread_id: string; response: string }> {
+    console.log('User interaction:', { message, threadId, type });
+    const finalThreadId = threadId || await this.generateThreadId();
+    return { 
+      thread_id: finalThreadId, 
+      response: 'Merci pour votre message. Je suis là pour vous aider avec vos objectifs de fitness.' 
+    };
   }
 
-  static async syncWithSupabase(): Promise<void> {
+  static async syncWithSupabase(): Promise<boolean> {
     console.log('Syncing with Supabase...');
+    return true;
   }
 }
 

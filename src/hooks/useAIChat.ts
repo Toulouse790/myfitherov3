@@ -12,10 +12,15 @@ export interface AIMessage {
 export const useAIChat = (conversationId?: string) => {
   const [messages, setMessages] = useState<AIMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(conversationId || null);
 
   const generateThreadId = useCallback(async () => {
     return await AIIntegrationService.generateThreadId();
+  }, []);
+
+  const clearError = useCallback(() => {
+    setError(null);
   }, []);
 
   const loadConversation = useCallback(async (id: string) => {
@@ -34,6 +39,7 @@ export const useAIChat = (conversationId?: string) => {
       }
     } catch (error) {
       console.error('Error loading conversation:', error);
+      setError('Erreur lors du chargement de la conversation');
     }
   }, []);
 
@@ -41,6 +47,7 @@ export const useAIChat = (conversationId?: string) => {
     if (!content.trim()) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       let conversationIdToUse = currentConversationId;
       
@@ -59,16 +66,12 @@ export const useAIChat = (conversationId?: string) => {
       
       setMessages(prev => [...prev, userMessage]);
 
-      await AIIntegrationService.sendUserInteraction({
-        conversationId: conversationIdToUse,
-        message: content,
-        role: 'user'
-      });
+      const response = await AIIntegrationService.sendUserInteraction(content, conversationIdToUse);
 
       // Mock AI response
       const aiResponse: AIMessage = {
         id: crypto.randomUUID(),
-        content: 'Merci pour votre message. Je suis là pour vous aider avec vos objectifs de fitness.',
+        content: response.response,
         role: 'assistant',
         timestamp: new Date()
       };
@@ -79,15 +82,38 @@ export const useAIChat = (conversationId?: string) => {
 
     } catch (error) {
       console.error('Error sending message:', error);
+      setError('Erreur lors de l\'envoi du message');
     } finally {
       setIsLoading(false);
     }
   }, [currentConversationId, generateThreadId]);
 
+  const regenerateLastResponse = useCallback(async () => {
+    if (messages.length < 2) return;
+    
+    setIsLoading(true);
+    try {
+      // Remove last assistant message and regenerate
+      const newMessages = messages.slice(0, -1);
+      setMessages(newMessages);
+      
+      const lastUserMessage = newMessages[newMessages.length - 1];
+      if (lastUserMessage && lastUserMessage.role === 'user') {
+        await sendMessage(lastUserMessage.content);
+      }
+    } catch (error) {
+      console.error('Error regenerating response:', error);
+      setError('Erreur lors de la régénération');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [messages, sendMessage]);
+
   const startNewConversation = useCallback(async () => {
     const newThreadId = await generateThreadId();
     setCurrentConversationId(newThreadId);
     setMessages([]);
+    setError(null);
   }, [generateThreadId]);
 
   const getConversationHistory = useCallback(async (id: string) => {
@@ -112,11 +138,14 @@ export const useAIChat = (conversationId?: string) => {
   return {
     messages,
     isLoading,
+    error,
     currentConversationId,
     sendMessage,
     loadConversation,
     startNewConversation,
     getConversationHistory,
-    getAllConversations
+    getAllConversations,
+    clearError,
+    regenerateLastResponse
   };
 };

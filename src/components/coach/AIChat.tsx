@@ -7,11 +7,11 @@ import { Send, Mic, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { useConversation } from '@/contexts/ConversationContext';
-import { useAIChat, ChatMessage } from '@/hooks/useAIChat';
+import { useAIChat, AIMessage } from '@/hooks/useAIChat';
 
 const AIChat: React.FC = () => {
   const { currentInput, setCurrentInput } = useConversation();
-  const { messages, loading, sendMessage } = useAIChat();
+  const { messages, isLoading, sendMessage } = useAIChat();
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
@@ -62,13 +62,13 @@ const AIChat: React.FC = () => {
             key={message.id}
             className={cn(
               "flex",
-              message.sender === 'user' ? "justify-end" : "justify-start"
+              message.role === 'user' ? "justify-end" : "justify-start"
             )}
           >
             <div
               className={cn(
                 "max-w-[80%] rounded-lg px-4 py-2",
-                message.sender === 'user'
+                message.role === 'user'
                   ? "bg-primary text-primary-foreground"
                   : "bg-muted"
               )}
@@ -80,7 +80,7 @@ const AIChat: React.FC = () => {
             </div>
           </div>
         ))}
-        {loading && (
+        {isLoading && (
           <div className="flex justify-start">
             <div className="max-w-[80%] rounded-lg px-4 py-2 bg-muted">
               <div className="flex space-x-1">
@@ -112,7 +112,7 @@ const AIChat: React.FC = () => {
           />
           <Button 
             onClick={handleSendMessage} 
-            disabled={!currentInput.trim() || loading}
+            disabled={!currentInput.trim() || isLoading}
             aria-label="Envoyer"
           >
             <Send size={20} />

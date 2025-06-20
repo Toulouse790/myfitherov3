@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,12 +5,12 @@ import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Activity, AlertTriangle, CheckCircle, RefreshCw, Users } from 'lucide-react';
 import { toast } from "@/components/ui/sonner";
-import { AIIntegrationService, ConversationThread } from '@/services/aiIntegration';
+import { AIIntegrationService, Conversation } from '@/services/aiIntegration';
 import { SupabaseService } from '@/services/supabase';
 
 const AISystemMonitor: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [conversations, setConversations] = useState<ConversationThread[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [supabaseStatus, setSupabaseStatus] = useState<boolean | null>(null);
   const [loadingSupabase, setLoadingSupabase] = useState(false);
   const [stats, setStats] = useState({
@@ -46,10 +45,10 @@ const AISystemMonitor: React.FC = () => {
     }
   };
 
-  const calculateStats = (conversationsData: ConversationThread[]) => {
+  const calculateStats = (conversationsData: Conversation[]) => {
     // Total de messages
     const totalMessages = conversationsData.reduce((acc, conv) => {
-      return acc + conv.messages.length;
+      return acc + (conv.messages?.length || 0);
     }, 0);
     
     // Calcul des statistiques

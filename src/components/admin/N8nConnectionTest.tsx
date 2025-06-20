@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,11 +22,7 @@ const N8nConnectionTest: React.FC = () => {
         description: 'Envoi d\'un message de test vers n8n...'
       });
 
-      const response = await AIIntegrationService.sendUserInteraction(
-        testMessage,
-        undefined, // Laisse générer un nouveau thread_id
-        'general'
-      );
+      const response = await AIIntegrationService.sendUserInteraction(testMessage);
 
       if (response.thread_id && response.response) {
         setLastTestResult('success');
