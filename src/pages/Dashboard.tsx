@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 const Dashboard = () => {
+  console.log('📊 Dashboard component rendered');
   const navigate = useNavigate();
   const { stats: userStats } = useUserStats();
 
@@ -52,7 +53,7 @@ const Dashboard = () => {
         <ResponsiveContainer maxWidth="2xl" padding="md">
           <main className="space-y-6 pb-6">
             
-            {/* Stats principales - Grid vraiment responsive */}
+            {/* Stats principales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <SportDashboardCard stats={{ workout: todayStats.workout }} />
               <div className="sm:col-span-1">

@@ -8,8 +8,8 @@ interface BottomNavLayoutProps {
 
 export function BottomNavLayout({ children }: BottomNavLayoutProps) {
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
-      <main className="flex-1 min-h-[calc(100vh-5rem)]">
+    <div className="min-h-screen bg-gray-50">
+      <main className="pb-20 min-h-screen">
         {children}
       </main>
       <BottomNavigation />
