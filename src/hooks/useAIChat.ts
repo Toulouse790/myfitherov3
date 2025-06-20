@@ -1,156 +1,122 @@
 
-import { useState, useCallback, useEffect } from 'react';
-import { AIIntegrationService, ConversationThread } from '@/services/aiIntegration';
+import { useState, useCallback } from 'react';
+import { AIIntegrationService, type Conversation, type Message } from '@/services/aiIntegration';
 
-export interface ChatMessage {
+export interface AIMessage {
   id: string;
   content: string;
-  sender: 'user' | 'assistant';
+  role: 'user' | 'assistant';
   timestamp: Date;
-  type_demande?: string;
 }
 
-export const useAIChat = (threadId?: string) => {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [currentThreadId, setCurrentThreadId] = useState<string>(
-    threadId || AIIntegrationService.generateThreadId()
-  );
+export const useAIChat = (conversationId?: string) => {
+  const [messages, setMessages] = useState<AIMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(conversationId || null);
 
-  // Charger la conversation existante au montage
-  useEffect(() => {
-    const loadConversation = async () => {
-      if (currentThreadId) {
-        const conversation = await AIIntegrationService.getConversation(currentThreadId);
-        if (conversation) {
-          setMessages(conversation.messages as ChatMessage[]);
-        }
+  const generateThreadId = useCallback(async () => {
+    return await AIIntegrationService.generateThreadId();
+  }, []);
+
+  const loadConversation = useCallback(async (id: string) => {
+    try {
+      const conversation = await AIIntegrationService.getConversation(id);
+      if (conversation) {
+        setCurrentConversationId(id);
+        const history = await AIIntegrationService.getConversationHistory(id);
+        const formattedMessages: AIMessage[] = history.map(msg => ({
+          id: msg.id || '',
+          content: msg.message || '',
+          role: (msg.type_demande as 'user' | 'assistant') || 'user',
+          timestamp: new Date(msg.horodatage || Date.now())
+        }));
+        setMessages(formattedMessages);
       }
-    };
-    
-    loadConversation();
-  }, [currentThreadId]);
+    } catch (error) {
+      console.error('Error loading conversation:', error);
+    }
+  }, []);
 
-  /**
-   * Envoie un message à l'IA
-   */
-  const sendMessage = useCallback(async (content: string, typeDemande?: string) => {
+  const sendMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
 
-    setLoading(true);
-    setError(null);
-
+    setIsLoading(true);
     try {
-      // Envoyer vers l'IA via le service d'intégration
-      const aiResponse = await AIIntegrationService.sendUserInteraction(
-        content.trim(),
-        currentThreadId,
-        typeDemande as any
-      );
-
-      // Récupérer les messages mis à jour
-      const conversation = await AIIntegrationService.getConversation(currentThreadId);
-      if (conversation) {
-        setMessages(conversation.messages as ChatMessage[]);
-      }
-
-      // Mettre à jour le thread ID si nécessaire
-      if (aiResponse.thread_id !== currentThreadId) {
-        setCurrentThreadId(aiResponse.thread_id);
-      }
-
-      return aiResponse;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Une erreur est survenue';
-      setError(errorMessage);
+      let conversationIdToUse = currentConversationId;
       
-      // Ajouter un message d'erreur localement (pas sauvegardé dans le thread)
-      const errorMsg: ChatMessage = {
-        id: `msg_${Date.now()}_error`,
-        content: `Désolé, une erreur s'est produite : ${errorMessage}`,
-        sender: 'assistant',
+      if (!conversationIdToUse) {
+        conversationIdToUse = await generateThreadId();
+        setCurrentConversationId(conversationIdToUse);
+      }
+
+      // Add user message
+      const userMessage: AIMessage = {
+        id: crypto.randomUUID(),
+        content,
+        role: 'user',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+
+      await AIIntegrationService.sendUserInteraction({
+        conversationId: conversationIdToUse,
+        message: content,
+        role: 'user'
+      });
+
+      // Mock AI response
+      const aiResponse: AIMessage = {
+        id: crypto.randomUUID(),
+        content: 'Merci pour votre message. Je suis là pour vous aider avec vos objectifs de fitness.',
+        role: 'assistant',
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, errorMsg]);
-      throw err;
+      setMessages(prev => [...prev, aiResponse]);
+
+      await AIIntegrationService.addMessage(conversationIdToUse, aiResponse.content, 'assistant');
+
+    } catch (error) {
+      console.error('Error sending message:', error);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
-  }, [currentThreadId]);
+  }, [currentConversationId, generateThreadId]);
 
-  /**
-   * Démarre une nouvelle conversation
-   */
-  const startNewConversation = useCallback(() => {
-    const newThreadId = AIIntegrationService.generateThreadId();
-    setCurrentThreadId(newThreadId);
+  const startNewConversation = useCallback(async () => {
+    const newThreadId = await generateThreadId();
+    setCurrentConversationId(newThreadId);
     setMessages([]);
-    setError(null);
-    
-    return newThreadId;
-  }, []);
+  }, [generateThreadId]);
 
-  /**
-   * Charge une conversation existante
-   */
-  const loadConversation = useCallback(async (threadId: string) => {
-    const conversation = await AIIntegrationService.getConversation(threadId);
-    if (conversation) {
-      setCurrentThreadId(threadId);
-      setMessages(conversation.messages as ChatMessage[]);
-      setError(null);
+  const getConversationHistory = useCallback(async (id: string) => {
+    try {
+      const conversation = await AIIntegrationService.getConversation(id);
+      return conversation;
+    } catch (error) {
+      console.error('Error getting conversation history:', error);
+      return null;
     }
   }, []);
 
-  /**
-   * Récupère toutes les conversations de l'utilisateur
-   */
-  const getAllConversations = useCallback(async (): Promise<ConversationThread[]> => {
-    return await AIIntegrationService.getConversations();
+  const getAllConversations = useCallback(async (userId: string) => {
+    try {
+      return await AIIntegrationService.getConversations(userId);
+    } catch (error) {
+      console.error('Error getting conversations:', error);
+      return [];
+    }
   }, []);
-
-  /**
-   * Efface l'erreur actuelle
-   */
-  const clearError = useCallback(() => {
-    setError(null);
-  }, []);
-
-  /**
-   * Régénère la dernière réponse de l'IA
-   */
-  const regenerateLastResponse = useCallback(async () => {
-    if (messages.length < 2) return;
-
-    const lastUserMessage = [...messages].reverse().find(msg => msg.sender === 'user');
-    if (!lastUserMessage) return;
-
-    // Supprimer la dernière réponse de l'IA
-    setMessages(prev => {
-      const newMessages = [...prev];
-      const lastIndex = newMessages.length - 1;
-      if (newMessages[lastIndex]?.sender === 'assistant') {
-        newMessages.pop();
-      }
-      return newMessages;
-    });
-
-    // Renvoyer le message
-    await sendMessage(lastUserMessage.content);
-  }, [messages, sendMessage]);
 
   return {
     messages,
-    loading,
-    error,
-    currentThreadId,
+    isLoading,
+    currentConversationId,
     sendMessage,
-    startNewConversation,
     loadConversation,
-    getAllConversations,
-    clearError,
-    regenerateLastResponse
+    startNewConversation,
+    getConversationHistory,
+    getAllConversations
   };
 };
